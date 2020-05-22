@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+</head>
+<script type="text/javascript">
+            let t = 0;
+            const ShortToast = async () => {
+                const temp = await $flex.ShortToast("Short Toast from web.");
+            }
+
+            const LongToast = async () => {
+                const temp = await $flex.LongToast("Long Toast from web.");
+            }
+
+            const Dialog = async () => {
+                const temp = await $flex.Dialog('제목', '본문입니다.');
+            }
+
+            const extendedDialog = async () => {
+                const temp = await $flex.extendedDialog();
+            }
+
+            const callNetwork = async () => {
+                const temp = await $flex.Network();
+            }
+
+            const callPermissions = async () => {
+                const temp = await $flex.connectFuncPermissions();
+            }
+
+            const callPermission = async () => {
+                const temp = await $flex.connectFuncPermission();
+            }
+
+            const callCamera = async () => {
+                const temp = await $flex.connectFuncCamera();
+            }
+
+            const callSharedPreferences = async () => {
+                const temp = await $flex.connectFuncSharedPreferences();
+            }
+
+             const callBiometricPrompt = async () => {
+                const temp = await $flex.connectFuncBiometricPrompt();
+            }
+
+            const callRootingCheck = async () => {
+                const temp = await $flex.connectFuncRootingCheck();
+            }
+
+            const callCurrentLocation = async () => {
+                const temp = await $flex.connectFuncLocation();
+
+                console.log(temp);
+                // console.log(temp["latitude"] + ", " + temp["longitude"]);
+            }
+
+
+            const callGallery = async () => {
+                const temp = await $flex.connectFuncGallery();
+            }
+
+            const callQRcode = async () => {
+                const temp = await $flex.connectFuncQR();
+            }
+
+            const callFCM = async () => {
+                const temp = await $flex.connectFuncFCM();
+            }
+
+            const callNotification = async () => {
+                const temp = await $flex.connectFuncNotification();
+            }
+
+
+
+            const callSms = async () => {
+                const temp = await $flex.connectFuncSMS();
+            }
+
+            /*
+                try {
+                    const z = await $flex.BioAuth();
+                    console.log('Return by Native with Location   : ' + z)
+                } catch {
+
+                }
+
+                $flex.BioAuth()
+                .then(result => {
+                    console.log('Return by Native with Location   : ' + result)
+                }).catch(err => {
+
+                });
+            */
+        </script>
+
+<body style="width: 100%; height: 300px;">
+<button onclick='ShortToast()' style="font-size: 40px; width: 100%; height: 150px;">짧은 Toast 띄우기</button>
+<button onclick='LongToast()' style="font-size: 40px; width: 100%; height: 150px;">긴 Toast 띄우기</button>
+<button onclick='Dialog()' style="font-size: 40px; width: 100%; height: 150px;">기본 Dialog 띄우기</button>
+<button onclick='extendedDialog()' style="font-size: 40px; width: 100%; height: 150px;">확장 Dialog 띄우기</button>
+<button onclick='callNetwork()' style="font-size: 40px; width: 100%; height: 150px;">네트워크 상태 체크</button>
+<button onclick='callPermissions()' style="font-size: 40px; width: 100%; height: 150px;">권한 한번에 요청</button>
+<button onclick='callPermission()' style="font-size: 40px; width: 100%; height: 150px;">카메라 권한 체크</button>
+<button onclick='callCamera()' style="font-size: 40px; width: 100%; height: 150px;">카메라 호출</button>
+<button onclick='callSharedPreferences()' style="font-size: 40px; width: 100%; height: 150px;">SharedPreferences</button>
+
+<div class="filebox">
+    <label style="font-size: 40px; width: 100%; height: 150px;" for="ex_file">첨부파일</label>
+    <input type="file" id="ex_file" style="font-size: 40px; width: 100%; height: 150px;">
+    <script type="text/javascript">
+            var fileValue = $("ex_file").val().split("\\");
+            var fileName = fileValue[fileValue.length - 1];
+
+            console.log(fileValue);
+            console.log(fileName);
+        </script>
+</div>
+
+<button onclick='callRootingCheck()' style="font-size: 40px; width: 100%; height: 150px;">루팅체크(su)</button>
+<button onclick='callBiometricPrompt()' style="font-size: 40px; width: 100%; height: 150px;">생체 인증</button>
+
+
+
+<button onclick='callGallery()' style="font-size: 40px; width: 100%; height: 150px;">갤러리 호출</button>
+<button onclick='callQRcode()' style="font-size: 40px; width: 100%; height: 150px;">QR code 호출</button>
+
+<button onclick='callFCM()' style="font-size: 40px; width: 100%; height: 150px;">FCM</button>
+<button onclick='callNotification()' style="font-size: 40px; width: 100%; height: 150px;">Notification</button>
+<button onclick='callCurrentLocation()' style="font-size: 40px; width: 100%; height: 150px;">현재 위치 불러오기</button>
+<button onclick='callSms()' style="font-size: 40px; width: 100%; height: 150px;">SMS</button>
+<h2>
+    <a href="intent://main?seq=67#Intent;
+                scheme=util_app;action=android.intent.action.VIEW;
+                category=android.intent.category.BROWSABLE;
+                package=com.example.simpleutilapp;end">Application Run</a>
+</h2>
+</body>
+
+</html>

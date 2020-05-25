@@ -5,13 +5,21 @@
     <meta charset="UTF-8">
 </head>
 <script type="text/javascript">
-            let t = 0;
+
             const ShortToast = async () => {
                 const temp = await $flex.ShortToast("Short Toast from web.");
             }
 
             const LongToast = async () => {
                 const temp = await $flex.LongToast("Long Toast from web.");
+            }
+
+            const ShortSnackbar = async () => {
+                const temp = await $flex.ShortSnackbar("Short Snackbar from web.");
+            }
+
+            const LongSnackbar = async () => {
+                const temp = await $flex.LongSnackbar("Long Snackbar from web.");
             }
 
             const Dialog = async () => {
@@ -34,8 +42,45 @@
                 const temp = await $flex.connectFuncPermission();
             }
 
-            const callCamera = async () => {
-                const temp = await $flex.connectFuncCamera();
+            const Camera = async () => {
+                const result = await $flex.Camera();
+                if(result != 'Cancel'){
+                    console.log(result);
+
+                    var imgTag = document.createElement("img")
+                    imgTag.src = 'data:image/png;base64,' + result;
+                    var imgDiv = document.getElementById('photos');
+                    imgDiv.appendChild(imgTag)
+                }else {
+                    console.log(result)
+                }
+            }
+
+            const SinglePhoto = async () => {
+                const result = await $flex.SinglePhoto();
+                if(result != 'Cancel'){
+                    var imgTag = document.createElement("img")
+                    imgTag.src = 'data:image/png;base64,' + result;
+                    var imgDiv = document.getElementById('photos');
+                    imgDiv.appendChild(imgTag)
+                }else {
+                    console.log(result)
+                }
+            }
+
+            const MultiplePhotos = async () => {
+                const result = await $flex.MultiplePhotos();
+                if(result != 'Cancel'){
+                    console.log('Return by Native with MultiplePhotos   : ' + result.length)
+                    for (var i=0; i<result.length; i++){
+                        var imgTag = document.createElement("img")
+                        imgTag.src = 'data:image/png;base64,' + result[i];
+                        var imgDiv = document.getElementById('photos');
+                        imgDiv.appendChild(imgTag)
+                    }
+                }else {
+                    console.log(result)
+                }
             }
 
             const callSharedPreferences = async () => {
@@ -58,9 +103,7 @@
             }
 
 
-            const callGallery = async () => {
-                const temp = await $flex.connectFuncGallery();
-            }
+
 
             const callQRcode = async () => {
                 const temp = await $flex.connectFuncQR();
@@ -100,14 +143,19 @@
 <body style="width: 100%; height: 300px;">
 <button onclick='ShortToast()' style="font-size: 40px; width: 100%; height: 150px;">짧은 Toast 띄우기</button>
 <button onclick='LongToast()' style="font-size: 40px; width: 100%; height: 150px;">긴 Toast 띄우기</button>
+<button onclick='ShortSnackbar()' style="font-size: 40px; width: 100%; height: 150px;">짧은 Snackbar 띄우기</button>
+<button onclick='LongSnackbar()' style="font-size: 40px; width: 100%; height: 150px;">긴 Snackbar 띄우기</button>
+
 <button onclick='Dialog()' style="font-size: 40px; width: 100%; height: 150px;">기본 Dialog 띄우기</button>
 <button onclick='extendedDialog()' style="font-size: 40px; width: 100%; height: 150px;">확장 Dialog 띄우기</button>
-<button onclick='callNetwork()' style="font-size: 40px; width: 100%; height: 150px;">네트워크 상태 체크</button>
+<button onclick='callNetwork()' style="font-size: 40px; width: 100%; height: 150px;">네트워크 연결 체크</button>
 <button onclick='callPermissions()' style="font-size: 40px; width: 100%; height: 150px;">권한 한번에 요청</button>
 <button onclick='callPermission()' style="font-size: 40px; width: 100%; height: 150px;">카메라 권한 체크</button>
-<button onclick='callCamera()' style="font-size: 40px; width: 100%; height: 150px;">카메라 호출</button>
+<button onclick='Camera()' style="font-size: 40px; width: 100%; height: 150px;">카메라 호출</button>
+<div id = "photos"></div>
+<button onclick='SinglePhoto()' style="font-size: 40px; width: 100%; height: 150px;">SinglePhoto</button>
+<button onclick='MultiplePhotos()' style="font-size: 40px; width: 100%; height: 150px;">MultiplePhotos</button>
 <button onclick='callSharedPreferences()' style="font-size: 40px; width: 100%; height: 150px;">SharedPreferences</button>
-
 <div class="filebox">
     <label style="font-size: 40px; width: 100%; height: 150px;" for="ex_file">첨부파일</label>
     <input type="file" id="ex_file" style="font-size: 40px; width: 100%; height: 150px;">
@@ -119,15 +167,9 @@
             console.log(fileName);
         </script>
 </div>
-
 <button onclick='callRootingCheck()' style="font-size: 40px; width: 100%; height: 150px;">루팅체크(su)</button>
 <button onclick='callBiometricPrompt()' style="font-size: 40px; width: 100%; height: 150px;">생체 인증</button>
-
-
-
-<button onclick='callGallery()' style="font-size: 40px; width: 100%; height: 150px;">갤러리 호출</button>
 <button onclick='callQRcode()' style="font-size: 40px; width: 100%; height: 150px;">QR code 호출</button>
-
 <button onclick='callFCM()' style="font-size: 40px; width: 100%; height: 150px;">FCM</button>
 <button onclick='callNotification()' style="font-size: 40px; width: 100%; height: 150px;">Notification</button>
 <button onclick='callCurrentLocation()' style="font-size: 40px; width: 100%; height: 150px;">현재 위치 불러오기</button>

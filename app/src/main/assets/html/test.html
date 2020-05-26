@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
@@ -30,8 +29,12 @@
                 const temp = await $flex.extendedDialog();
             }
 
-            const callNetwork = async () => {
+            const Network = async () => {
                 const temp = await $flex.Network();
+            }
+
+            const NetworkStatus = async () => {
+                const temp = await $flex.NetworkStatus();
             }
 
             const callPermissions = async () => {
@@ -54,6 +57,10 @@
                 }else {
                     console.log(result)
                 }
+            }
+
+            const QRCodeScan = async () => {
+                const result = await $flex.QRCodeScan();
             }
 
             const SinglePhoto = async () => {
@@ -91,36 +98,34 @@
                 const temp = await $flex.connectFuncBiometricPrompt();
             }
 
-            const callRootingCheck = async () => {
-                const temp = await $flex.connectFuncRootingCheck();
+            const Location = async () => {
+                const temp = await $flex.Location();
+
+                console.log(temp["latitude"] + ", " + temp["longitude"]);
             }
-
-            const callCurrentLocation = async () => {
-                const temp = await $flex.connectFuncLocation();
-
-                console.log(temp);
-                // console.log(temp["latitude"] + ", " + temp["longitude"]);
-            }
-
-
-
 
             const callQRcode = async () => {
                 const temp = await $flex.connectFuncQR();
-            }
-
-            const callFCM = async () => {
-                const temp = await $flex.connectFuncFCM();
             }
 
             const callNotification = async () => {
                 const temp = await $flex.connectFuncNotification();
             }
 
-
-
             const callSms = async () => {
                 const temp = await $flex.connectFuncSMS();
+            }
+
+            const Notification = async () => {
+                const result = await $flex.Notification();
+            }
+
+            const InstanceId = async () => {
+                const result = await $flex.InstanceId();
+            }
+
+            const GUID = async () => {
+                const result = await $flex.GUID();
             }
 
             /*
@@ -145,21 +150,33 @@
 <button onclick='LongToast()' style="font-size: 40px; width: 100%; height: 150px;">긴 Toast 띄우기</button>
 <button onclick='ShortSnackbar()' style="font-size: 40px; width: 100%; height: 150px;">짧은 Snackbar 띄우기</button>
 <button onclick='LongSnackbar()' style="font-size: 40px; width: 100%; height: 150px;">긴 Snackbar 띄우기</button>
-
 <button onclick='Dialog()' style="font-size: 40px; width: 100%; height: 150px;">기본 Dialog 띄우기</button>
 <button onclick='extendedDialog()' style="font-size: 40px; width: 100%; height: 150px;">확장 Dialog 띄우기</button>
-<button onclick='callNetwork()' style="font-size: 40px; width: 100%; height: 150px;">네트워크 연결 체크</button>
+<button onclick='Network()' style="font-size: 40px; width: 100%; height: 150px;">네트워크 연결 체크</button>
+<button onclick='NetworkStatus()' style="font-size: 40px; width: 100%; height: 150px;">네트워크 상태 체크</button>
 <button onclick='callPermissions()' style="font-size: 40px; width: 100%; height: 150px;">권한 한번에 요청</button>
 <button onclick='callPermission()' style="font-size: 40px; width: 100%; height: 150px;">카메라 권한 체크</button>
 <button onclick='Camera()' style="font-size: 40px; width: 100%; height: 150px;">카메라 호출</button>
+<button onclick='QRCodeScan()' style="font-size: 40px; width: 100%; height: 150px;">QR Code 스캔</button>
+<button onclick='Location()' style="font-size: 40px; width: 100%; height: 150px;">현재 위치 불러오기</button>
 <div id = "photos"></div>
 <button onclick='SinglePhoto()' style="font-size: 40px; width: 100%; height: 150px;">SinglePhoto</button>
 <button onclick='MultiplePhotos()' style="font-size: 40px; width: 100%; height: 150px;">MultiplePhotos</button>
+
+<a href="http://blogattach.naver.net/cc59d063732b28f4db375f6a54bdc9b21141bb5ee4/20180818_283_blogfile/xoxojw_1534092498397_mP1X60_zip/washitape_allcolor.zip">
+    <button style="font-size: 40px; width: 100%; height: 150px;">
+        파일 다운로드
+    </button>
+</a>
+
 <button onclick='callSharedPreferences()' style="font-size: 40px; width: 100%; height: 150px;">SharedPreferences</button>
 <div class="filebox">
     <label style="font-size: 40px; width: 100%; height: 150px;" for="ex_file">첨부파일</label>
     <input type="file" id="ex_file" style="font-size: 40px; width: 100%; height: 150px;">
     <script type="text/javascript">
+            var input = document.getElementById("ex_file").value;
+            console.log(input);
+
             var fileValue = $("ex_file").val().split("\\");
             var fileName = fileValue[fileValue.length - 1];
 
@@ -167,12 +184,8 @@
             console.log(fileName);
         </script>
 </div>
-<button onclick='callRootingCheck()' style="font-size: 40px; width: 100%; height: 150px;">루팅체크(su)</button>
 <button onclick='callBiometricPrompt()' style="font-size: 40px; width: 100%; height: 150px;">생체 인증</button>
 <button onclick='callQRcode()' style="font-size: 40px; width: 100%; height: 150px;">QR code 호출</button>
-<button onclick='callFCM()' style="font-size: 40px; width: 100%; height: 150px;">FCM</button>
-<button onclick='callNotification()' style="font-size: 40px; width: 100%; height: 150px;">Notification</button>
-<button onclick='callCurrentLocation()' style="font-size: 40px; width: 100%; height: 150px;">현재 위치 불러오기</button>
 <button onclick='callSms()' style="font-size: 40px; width: 100%; height: 150px;">SMS</button>
 <h2>
     <a href="intent://main?seq=67#Intent;
@@ -180,6 +193,9 @@
                 category=android.intent.category.BROWSABLE;
                 package=com.example.simpleutilapp;end">Application Run</a>
 </h2>
+<button onclick='Notification()' style="font-size: 40px; width: 100%; height: 150px;">Notification</button>
+<button onclick='InstanceId()' style="font-size: 40px; width: 100%; height: 150px;">Instance ID 얻기</button>
+<button onclick='GUID()' style="font-size: 40px; width: 100%; height: 150px;">GUID 얻기</button>
 </body>
 
 </html>

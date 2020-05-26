@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "716173319914",
+    "firebase_url": "https://hybridfcm-161a7.firebaseio.com",
+    "project_id": "hybridfcm-161a7",
+    "storage_bucket": "hybridfcm-161a7.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:716173319914:android:09cb04a35177d7ea51c193",
+        "android_client_info": {
+          "package_name": "com.example.hybridapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "716173319914-p8lhcccep13dmvs75ssokh1lfgkuq5js.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.hybridapp",
+            "certificate_hash": "17c986d67aaf155e0c990401b86776bf53672987"
+          }
+        },
+        {
+          "client_id": "716173319914-aj8qhbcucm788lfodtigieud3k8ctbvb.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDIOOr_UYuLVH8h5ZULz-NqiZIxTy0hUC0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "716173319914-aj8qhbcucm788lfodtigieud3k8ctbvb.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

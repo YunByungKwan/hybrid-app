@@ -1,10 +1,14 @@
 package com.example.hybridapp.util
 
 import android.app.AlertDialog
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
 import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.content.pm.Signature
 import android.graphics.Bitmap
 import android.graphics.ImageDecoder
 import android.net.ConnectivityManager
@@ -18,12 +22,21 @@ import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
+import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import com.example.hybridapp.App
 import com.example.hybridapp.BuildConfig
 import com.example.hybridapp.R
 import com.google.android.material.snackbar.Snackbar
+import com.google.firebase.iid.FirebaseInstanceId
+import com.google.zxing.integration.android.IntentIntegrator
 import java.io.ByteArrayOutputStream
+import java.nio.charset.StandardCharsets
+import java.security.MessageDigest
+import java.security.NoSuchAlgorithmException
+import java.util.*
+import kotlin.collections.ArrayList
 
 class Utils {
 
@@ -139,6 +152,23 @@ class Utils {
         ActivityCompat.requestPermissions(App.activity, permissions, requestCode)
     }
 
+    fun checkPermissions(permissions: Array<String>, requestCode: Int) {
+        funLOGE("checkPermissions")
+
+        val deniedPermissions = ArrayList<String>()
+
+        for(permission in permissions) {
+            if(!hasPermissionFor(permission)) {
+                deniedPermissions.add(permission)
+            }
+        }
+
+        if(deniedPermissions.isNotEmpty()) {
+            requestPermissions(deniedPermissions.toTypedArray(), requestCode)
+        }
+    }
+
+
     /** 권한 거부 시 다이얼로그 */
     fun showPermissionDeniedDialog() {
         val title: String = App.INSTANCE.getString(R.string.permission_denied_dialog_title)
@@ -168,6 +198,7 @@ class Utils {
      * getNetworkCapabilities() is added in API level 21(L)
      * hasTransport() is added in API level 21(L)
      */
+    /** 네트워크 연결 체크 */
     fun isNetworkConnected(): Boolean {
         funLOGE("isNetworkConnected")
 
@@ -198,6 +229,40 @@ class Utils {
         return true
     }
 
+    /**
+     * 네트워크 상태를 확인
+     *
+     * return :
+     * 0 : 연결되지 않음
+     * 1 : 데이터 연결됨
+     * 2 : 와이파이 연결됨
+     */
+    fun getNetworkStatus(): Int {
+        funLOGE("getNetworkStatus")
+
+        val connectivityManger
+                = App.activity.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            Log.e(Constants.TAG_NETWORK, "Build version is greater than Marshmallow.")
+
+            val activeNetwork = connectivityManger.activeNetwork ?: return 0
+            val networkCapabilities
+                    = connectivityManger.getNetworkCapabilities(activeNetwork) ?: return 0
+            return when {
+                networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) -> 1
+                networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) -> 2
+                else -> 0
+            }
+        } else {
+            Log.e(Constants.TAG_NETWORK, "Build version is smaller than Marshmallow.")
+
+            connectivityManger.activeNetworkInfo ?: return 0
+        }
+
+        return 0
+    }
+
     /** ######################################## Photo ########################################## */
 
     /** 카메라 인텐트 가져오기 */
@@ -205,6 +270,13 @@ class Utils {
         funLOGE("takeCameraIntent")
 
         return Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+    }
+
+    /** QR Code 스캔 */
+    fun takeQRCodeReader() {
+        val intentIntegrator = IntentIntegrator(App.activity)
+        intentIntegrator.setBeepEnabled(false)
+        intentIntegrator.initiateScan()
     }
 
     /** 갤러리 인텐트 가져오기 */
@@ -268,6 +340,178 @@ class Utils {
 
         return Base64.encodeToString(byteArray, Base64.NO_WRAP)
     }
+
+    /** ######################################## Audio ########################################## */
+
+    /** ###################################### Location ######################################### */
+    // MainActivity에 있음
+
+    /** ######################################### SMS ########################################### */
+
+    /**
+     * 문자 형식
+     * <#> 으로 시작해야 한다.
+     * 11자 해시 문자열로 끝나야 한다.
+     * 140 byte 이하여야 한다.
+     * Example>
+     *
+     * <#>
+     * 테스트입니다.
+     * amvosl3kf/u
+     */
+
+    fun getAppSignatures(context: Context): ArrayList<String> {
+        val appCodes: ArrayList<String> = ArrayList()
+
+        try {
+            val packageName: String = context.packageName
+            val packageManager: PackageManager = context.packageManager
+            val signatures: Array<Signature> =
+                packageManager.getPackageInfo(packageName, PackageManager.GET_SIGNATURES).signatures
+
+            for (signature in signatures) {
+                val hash = getHash(packageName, signature.toCharsString())
+                if (hash != null) {
+                    appCodes.add(String.format("%s", hash))
+                }
+                Log.e(Constants.TAG_UTILS,
+                    String.format("이 값을 SMS 뒤에 써서 보내주면 됩니다 : %s", hash)
+                )
+            }
+        } catch (e: PackageManager.NameNotFoundException) {
+            Log.e(Constants.TAG_UTILS, "Unable to find package to obtain hash. : $e")
+        }
+
+        return appCodes
+    }
+
+    /** 해쉬값 얻기 */
+    private fun getHash(packageName: String, signature: String): String? {
+        funLOGE("getHash")
+
+        val appInfo = "$packageName $signature"
+
+        try {
+            val messageDigest: MessageDigest = MessageDigest.getInstance("SHA-256")
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                messageDigest.update(appInfo.toByteArray(StandardCharsets.UTF_8))
+            }
+            var hashSignature: ByteArray = messageDigest.digest()
+
+            hashSignature = hashSignature.copyOfRange(0, 9)
+
+            var base64Hash = encode11DigitsBase64String(hashSignature)
+
+            Log.e(Constants.TAG_UTILS,
+                String.format("\nPackage : %s\nHash : %s", packageName, base64Hash))
+
+            return base64Hash
+        } catch (e: NoSuchAlgorithmException) {
+            Log.e(Constants.TAG_UTILS, "hash:NoSuchAlgorithm : $e")
+        }
+
+        return null
+    }
+
+    /** 11자리 Base64로 인코딩 */
+    private fun encode11DigitsBase64String(hashSignature: ByteArray): String {
+        return Base64.encodeToString(hashSignature,
+            Base64.NO_PADDING or Base64.NO_WRAP).substring(0, 11)
+    }
+
+    /** ##################################### Notification ###################################### */
+
+    /**
+     * This function is available on API level 26 and higher
+     * Badge: >= API level 26
+     * API level 26부터 모든 알림은 채널에 할당되어야 함. 그렇지 않으면 알림이 나타나지 않음
+     * API level 25 이하는 앱 단위로만 알림을 관리할 수 있음. 각 앱이 채널을 하나만 가짐
+     * API level 26 이상에서 알림의 중요도는 알림이 게시된 채널의 importance에 따라 결정됨
+     * API level 25 이하에서는 각 알림의 중요도는 알림의 priority에 따라 결정됨
+     */
+    fun createNotificationChannel(importance: Int, showBadge: Boolean,
+                                  name: String, descriptionText: String) {
+        funLOGE("createNotificationChannel")
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            Log.e(Constants.TAG_NOTIFICATION,
+                "Version is greater(or equals) than ${Build.VERSION_CODES.O}")
+
+            val channelId = "${App.activity.packageName}-$name"
+            val mChannel = NotificationChannel(channelId, name, importance)
+            mChannel.description = descriptionText
+            mChannel.setShowBadge(showBadge)
+
+            val notificationManager
+                    = App.activity.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            notificationManager.createNotificationChannel(mChannel)
+        } else {
+            Log.e(Constants.TAG_NOTIFICATION,
+                "SDK VERSION ${Build.VERSION.SDK_INT} doesn't need channel.")
+        }
+    }
+
+    fun createNotification(channelId: String, icon: Int, title: String,
+                           content: String, pendingIntent: PendingIntent) {
+        funLOGE("createNotification")
+
+        val builder = NotificationCompat.Builder(App.activity, channelId)
+        builder.setSmallIcon(icon)
+        builder.setContentTitle(title)
+        builder.setContentText(content)
+        builder.priority = NotificationCompat.PRIORITY_DEFAULT
+        builder.setAutoCancel(true)
+        builder.setContentIntent(pendingIntent)
+
+        val notificationManager
+                = NotificationManagerCompat.from(App.activity)
+        notificationManager.notify(Constants.NOTIFICATION_ID, builder.build())
+    }
+
+    /** ######################################### FCM ########################################### */
+    /**
+     * FCM: https://console.firebase.google.com/project/hybridfcm-161a7/notification
+     * Reference: https://blog.naver.com/ndb796/221553341369
+     */
+
+    /** ######################################### NFC ########################################### */
+
+
+
+    /** ##################################### Identifier ######################################## */
+
+    /** Instance ID 획득 */
+    fun getInstanceId(): String {
+        funLOGE("getInstanceId")
+
+        var instanceId = ""
+        FirebaseInstanceId.getInstance().instanceId
+            .addOnCompleteListener {task ->
+                if(task.isSuccessful) {
+                    val token = task.result?.token
+
+                    if(token != null) {
+                        instanceId = token
+                    } else {
+                        Log.e(Constants.TAG_IDENTIFIER, "token is null.")
+                    }
+                } else {
+                    Log.e(Constants.TAG_IDENTIFIER, "getInstanceId failed", task.exception)
+                }
+            }
+
+        return instanceId
+    }
+
+    /** GUID 획득 */
+    fun getGUID(): String {
+        funLOGE("getGUID")
+
+        return UUID.randomUUID().toString()
+    }
+
+    /** ########################################## ETC ########################################## */
 
     /** log.e wrapper function */
     private fun funLOGE(functionName: String) {

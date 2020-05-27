@@ -1,9 +1,6 @@
 package com.example.hybridapp.util
 
-import android.app.AlertDialog
-import android.app.NotificationChannel
-import android.app.NotificationManager
-import android.app.PendingIntent
+import android.app.*
 import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
@@ -17,18 +14,22 @@ import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
 import android.provider.Settings
+import android.telephony.SmsManager
 import android.util.Base64
 import android.util.Log
 import android.view.View
 import android.widget.Toast
+import androidx.biometric.BiometricPrompt
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
+import androidx.fragment.app.FragmentActivity
 import com.example.hybridapp.App
-import com.example.hybridapp.BuildConfig
 import com.example.hybridapp.R
+import com.google.android.gms.auth.api.phone.SmsRetriever
 import com.google.android.material.snackbar.Snackbar
+import com.google.firebase.BuildConfig
 import com.google.firebase.iid.FirebaseInstanceId
 import com.google.zxing.integration.android.IntentIntegrator
 import java.io.ByteArrayOutputStream
@@ -36,6 +37,7 @@ import java.nio.charset.StandardCharsets
 import java.security.MessageDigest
 import java.security.NoSuchAlgorithmException
 import java.util.*
+import java.util.concurrent.Executor
 import kotlin.collections.ArrayList
 
 class Utils {
@@ -346,6 +348,46 @@ class Utils {
     /** ###################################### Location ######################################### */
     // MainActivity에 있음
 
+    /** ################################# BiometricPrompt ####################################### */
+
+    fun showBiometricPrompt(fragmentActivity: FragmentActivity){
+        funLOGE("showBiometricPrompt")
+
+        var biometricPromptInfo = BiometricPrompt.PromptInfo.Builder()
+            .setTitle(App.INSTANCE.getString(R.string.biometricPrompt_title))
+            .setDescription(App.INSTANCE.getString(R.string.biometricPrompt_description))
+            .setSubtitle(App.INSTANCE.getString(R.string.biometricPrompt_sub_title))
+            .setNegativeButtonText(App.INSTANCE.getString(R.string.biometricPrompt_negative_button))
+            .build()
+
+        val authenticationCallback = getAuthenticationCallback()
+        val biometricPrompt = BiometricPrompt(fragmentActivity, Executor {  }, authenticationCallback)
+
+        biometricPrompt.authenticate(biometricPromptInfo)
+    }
+
+    private fun getAuthenticationCallback() = object : BiometricPrompt.AuthenticationCallback() {
+        override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
+            funLOGE("onAuthenticationError")
+
+            //super.onAuthenticationError(errorCode, errString)
+
+
+        }
+
+        override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
+            funLOGE("onAuthenticationSucceeded")
+
+            // super.onAuthenticationSucceeded(result)
+        }
+
+        override fun onAuthenticationFailed() {
+            funLOGE("onAuthenticationFailed")
+
+            //super.onAuthenticationFailed()
+        }
+    }
+
     /** ######################################### SMS ########################################### */
 
     /**
@@ -359,6 +401,29 @@ class Utils {
      * 테스트입니다.
      * amvosl3kf/u
      */
+
+    /** SMS 보내기 */
+    fun sendSMS(phoneNumber: String, message: String) {
+        val smsManager = SmsManager.getDefault()
+        smsManager
+            .sendTextMessage(phoneNumber, null, message, null, null)
+    }
+
+    /** SMS Retriever instance 생성 */
+    fun createSmsRetriever() {
+        funLOGE("createSmsRetriever")
+
+        val client = SmsRetriever.getClient(App.activity)
+
+        val task = client.startSmsRetriever()
+        task.addOnSuccessListener {
+            Log.e(Constants.TAG_UTILS, "createSmsRetriever() success")
+        }
+
+        task.addOnFailureListener {
+            Log.e(Constants.TAG_UTILS, "createSmsRetriever() fail")
+        }
+    }
 
     fun getAppSignatures(context: Context): ArrayList<String> {
         val appCodes: ArrayList<String> = ArrayList()
@@ -509,6 +574,107 @@ class Utils {
         funLOGE("getGUID")
 
         return UUID.randomUUID().toString()
+    }
+
+    /** ################################### SharedPreferences ################################### */
+
+    /** SharedPreferences에 데이터 저장 */
+    fun putDataToPreferences(fileName: String, key: String, value: Any?) {
+        funLOGE("putDataToPreferences")
+
+        val prefs = App.activity.getSharedPreferences(fileName, Context.MODE_PRIVATE)
+        val editor = prefs.edit()
+
+        when (value) {
+            is Boolean -> {
+                Log.e(Constants.TAG_UTILS, "Value is Boolean.")
+
+                editor.putBoolean(key, value).apply()
+            }
+            is Float -> {
+                Log.e(Constants.TAG_UTILS, "Value is Float.")
+
+                editor.putFloat(key, value).apply()
+            }
+            is Int -> {
+                Log.e(Constants.TAG_UTILS, "Value is Int.")
+
+                editor.putInt(key, value).apply()
+            }
+            is Long -> {
+                Log.e(Constants.TAG_UTILS, "Value is Long.")
+
+                editor.putLong(key, value).apply()
+            }
+            is String -> {
+                Log.e(Constants.TAG_UTILS, "Value is String.")
+
+                editor.putString(key, value).apply()
+            }
+            else -> {
+                Log.e(Constants.TAG_UTILS, "Value is Set<String>.")
+
+                editor.putStringSet(key, value as Set<String>).apply()
+            }
+        }
+    }
+
+    /** SharedPreferences에서 데이터 불러오기 */
+
+    fun getBooleanFromPreferences(fileName: String, key: String): Boolean {
+        funLOGE("getBooleanFromPreferences")
+
+        val prefs = App.activity.getSharedPreferences(fileName, Context.MODE_PRIVATE)
+
+        return prefs?.getBoolean(key, false) ?: false
+    }
+
+    fun getFloatFromPreferences(fileName: String, key: String): Float {
+        funLOGE("getFloatFromPreferences")
+
+        val prefs = App.activity.getSharedPreferences(fileName, Context.MODE_PRIVATE)
+
+        return prefs?.getFloat(key, 0F) ?: 0F
+
+    }
+
+    fun getIntFromPreferences(fileName: String, key: String): Int {
+        funLOGE("getIntFromPreferences")
+
+        val prefs = App.activity.getSharedPreferences(fileName, Context.MODE_PRIVATE)
+
+        return prefs?.getInt(key, 0) ?: 0
+    }
+
+    fun getLongFromPreferences(fileName: String, key: String): Long {
+        funLOGE("getLongFromPreferences")
+
+        val prefs = App.activity.getSharedPreferences(fileName, Context.MODE_PRIVATE)
+
+        return prefs?.getLong(key, 0) ?: 0
+    }
+
+    fun getStringFromPreferences(fileName: String, key: String): String {
+        funLOGE("getStringFromPreferences")
+
+        val prefs = App.activity.getSharedPreferences(fileName, Context.MODE_PRIVATE)
+
+        return if(prefs != null) prefs.getString(key, "")!! else ""
+    }
+
+    fun getStringSetFromPreferences(fileName: String, key: String) {
+        funLOGE("getStringSetFromPreferences")
+        TODO("구현 필요")
+    }
+
+    /** SharedPreferences에서 해당 키값 데이터 제거 */
+    fun removeDataFromPreferences(fileName: String, key: String) {
+        funLOGE("removeDataFromPreferences")
+
+        val prefs = App.activity.getSharedPreferences(fileName, Context.MODE_PRIVATE)
+        val editor = prefs.edit()
+
+        editor.remove(key).apply()
     }
 
     /** ########################################## ETC ########################################## */

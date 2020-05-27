@@ -46,7 +46,7 @@ dependencies {
     implementation 'com.android.support:multidex:1.0.3'
 
     // FlexInterface
-    implementation 'com.github.Kyun-J:FlexHybridApp-Android:0.2.2.1'
+    implementation 'app.dvkyun.flexhybridand:flexhybridand:0.3.0.1'
     implementation 'com.google.android.material:material:1.1.0'
 
     // Coroutines
@@ -61,10 +61,13 @@ dependencies {
     implementation('com.journeyapps:zxing-android-embedded:3.6.0') { transitive = false }
 
     // FCM
-    implementation 'com.google.firebase:firebase-analytics:17.4.1'
-    implementation 'com.google.firebase:firebase-messaging:20.1.7'
+    implementation 'com.google.firebase:firebase-analytics:17.4.2'
+    implementation 'com.google.firebase:firebase-messaging:20.2.0'
 
     // Google map api & location
     implementation 'com.google.android.gms:play-services-maps:17.0.0'
     implementation 'com.google.android.gms:play-services-location:17.0.0'
+
+    // Biometric
+    implementation 'androidx.biometric:biometric:1.0.1'
 }

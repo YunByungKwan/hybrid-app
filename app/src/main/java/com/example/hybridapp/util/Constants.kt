@@ -18,6 +18,10 @@ class Constants {
        const val PERM_CAMERA = Manifest.permission.CAMERA
        const val PERM_WRITE_EXTERNAL_STORAGE = Manifest.permission.WRITE_EXTERNAL_STORAGE
        const val PERM_READ_EXTERNAL_STORAGE = Manifest.permission.READ_EXTERNAL_STORAGE
+       const val PERM_ACCESS_FINE_LOCATION = Manifest.permission.ACCESS_FINE_LOCATION
+       const val PERM_ACCESS_COARSE_LOCATION = Manifest.permission.ACCESS_COARSE_LOCATION
+       const val PERM_ACCESS_BACKGROUND_LOCATION = Manifest.permission.ACCESS_BACKGROUND_LOCATION
+       const val PERM_SEND_SMS = Manifest.permission.SEND_SMS
 
        /** Class or Activity LOG TAG */
        const val TAG_UTILS = "Utils"
@@ -43,10 +47,12 @@ class Constants {
        const val REQUEST_FILE_UPLOAD = 10004
 
        /** PERMISSION REQUEST CODE */
-       const val REQUEST_PERMISSIONS_CAMERA = 1001
-       const val REQUEST_PERMISSIONS_SINGLE_PHOTO = 1002
-       const val REQUEST_PERMISSIONS_MULTIPLE_PHOTOS = 1003
-       const val REQUEST_PERMISSIONS_LOCATION = 1004
+       const val REQUEST_PERMISSIONS_ALL = 1001
+       const val REQUEST_PERMISSIONS_CAMERA = 1002
+       const val REQUEST_PERMISSIONS_SINGLE_PHOTO = 1003
+       const val REQUEST_PERMISSIONS_MULTIPLE_PHOTOS = 1004
+       const val REQUEST_PERMISSIONS_LOCATION = 1005
+       const val REQUEST_PERMISSIONS_SMS = 1006
 
        const val NOTIFICATION_ID = 101
    }

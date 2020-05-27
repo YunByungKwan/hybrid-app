@@ -1,10 +1,9 @@
 package com.example.hybridapp
 
-import android.app.NotificationManager
 import android.app.PendingIntent
+import android.content.DialogInterface
 import android.content.Intent
 import android.util.Log
-import android.view.View
 import androidx.core.app.NotificationManagerCompat
 import app.dvkyun.flexhybridand.FlexFuncInterface
 import com.example.hybridapp.util.Constants
@@ -18,100 +17,46 @@ class FlexInterface {
 
     private val utils = Utils()
 
+    /** Toast interface */
+
     @FlexFuncInterface
     fun ShortToast(array: JSONArray) {
         CoroutineScope(Dispatchers.Main).launch {
-            funLOGE("ShortToast")
+            funLOGE(App.INSTANCE.getString(R.string.type_short_toast))
 
-            utils.showShortToast(array.toString())
+            utils.showShortToast(array.get(0).toString())
         }
     }
 
     @FlexFuncInterface
     fun LongToast(array: JSONArray) {
         CoroutineScope(Dispatchers.Main).launch {
-            funLOGE("LongToast")
+            funLOGE(App.INSTANCE.getString(R.string.type_long_toast))
 
-            utils.showLongToast(array.toString())
+            utils.showLongToast(array.get(0).toString())
         }
     }
+
+    /** Snackbar interface */
 
     @FlexFuncInterface
     fun ShortSnackbar(array: JSONArray) {
         CoroutineScope(Dispatchers.Main).launch {
-            funLOGE("ShortToast")
+            funLOGE(App.INSTANCE.getString(R.string.type_short_snackbar))
 
-            utils.showShortSnackbar(App.activity.findViewById(R.id.linearLayout), array.toString())
+            utils.showShortSnackbar(App.activity.findViewById(R.id.linearLayout),
+                array.get(0).toString())
         }
     }
 
     @FlexFuncInterface
     fun LongSnackbar(array: JSONArray) {
         CoroutineScope(Dispatchers.Main).launch {
-            funLOGE("LongToast")
+            funLOGE(App.INSTANCE.getString(R.string.type_long_snackbar))
 
-            utils.showLongSnackbar(App.activity.findViewById(R.id.linearLayout), array.toString())
+            utils.showLongSnackbar(App.activity.findViewById(R.id.linearLayout),
+                array.get(0).toString())
         }
-    }
-
-    @FlexFuncInterface
-    fun Dialog(array: JSONArray) {
-        CoroutineScope(Dispatchers.Main).launch {
-            Log.e(TAG, "call Dialog() in $TAG")
-
-            val title = array.getString(0)
-            val contents = array.getString(1)
-
-            utils.showDialog(title, contents)
-        }
-    }
-
-    @FlexFuncInterface
-    fun extendedDialog(array: JSONArray) {
-        CoroutineScope(Dispatchers.Main).launch {
-            Log.e(TAG, "call extendedDialog() in $TAG")
-
-            utils.showDialog("제목", "다이얼로그 메시지입니다.", "긍정", "부정")
-        }
-    }
-
-    @FlexFuncInterface
-    fun Network(array: JSONArray) {
-        CoroutineScope(Dispatchers.Main).launch {
-            funLOGE("Network")
-
-            if(utils.isNetworkConnected()) {
-                utils.showShortToast("네트워크가 연결되어 있습니다.")
-            } else {
-                utils.showShortToast("네트워크가 연결되어 있지 않습니다.")
-            }
-        }
-    }
-
-    @FlexFuncInterface
-    fun NetworkStatus(array: JSONArray) {
-        CoroutineScope(Dispatchers.Main).launch {
-            funLOGE("NetworkStatus")
-
-            when (utils.getNetworkStatus()) {
-                0 -> {
-                    utils.showShortToast("네트워크가 연결되어 있지 않습니다.")
-                }
-                1 -> {
-                    utils.showShortToast("데이터에 연결되어 있습니다.")
-                }
-                2 -> {
-                    utils.showShortToast("와이파이에 연결되어 있습니다.")
-                }
-            }
-        }
-    }
-
-    @FlexFuncInterface
-    fun QRCodeScan(array: JSONArray) {
-        funLOGE("QRCodeScan")
-
-        utils.takeQRCodeReader()
     }
 
     @FlexFuncInterface
@@ -156,12 +101,29 @@ class FlexInterface {
         Log.e(Constants.TAG_INTERFACE, "GUID: $guid")
     }
 
+    @FlexFuncInterface
+    fun SaveSharedPreferences(array: JSONArray) {
+        funLOGE("SaveSharedPreferences")
+
+        val fileName = array.getString(0)
+        val key = array.getString(1)
+        val value = array.get(2)
+
+        utils.putDataToPreferences(fileName, key, value)
+    }
+
+    @FlexFuncInterface
+    fun removeSharedPreferences(array: JSONArray) {
+        funLOGE("removeSharedPreferences")
+
+        val fileName = array.getString(0)
+        val key = array.getString(1)
+
+        utils.removeDataFromPreferences(fileName, key)
+    }
+
     /** log.e wrapper function */
     private fun funLOGE(functionName: String) {
         Log.e(Constants.TAG_INTERFACE, "call $functionName() in ${Constants.TAG_INTERFACE}")
-    }
-
-    companion object {
-        private const val TAG = "FlexInterface"
     }
 }

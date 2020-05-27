@@ -1,9 +1,10 @@
-package com.example.hybridapp.util
+package com.example.hybridapp.util.sms
 
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.util.Log
+import com.example.hybridapp.util.Constants
 import com.google.android.gms.auth.api.phone.SmsRetriever
 import com.google.android.gms.common.api.CommonStatusCodes
 import com.google.android.gms.common.api.Status
@@ -20,8 +21,9 @@ class SMSReceiver: BroadcastReceiver() {
 
             when (status.statusCode) {
                 CommonStatusCodes.SUCCESS -> {
-                    val message = extras.get(SmsRetriever.EXTRA_SMS_MESSAGE) as String
                     Log.d(Constants.TAG_SMS_RECEIVER, "SmsReceiver : onReceiver(CommonStatusCodes.SUCCESS)")
+
+                    val message = extras.get(SmsRetriever.EXTRA_SMS_MESSAGE) as String
 
                     Log.e(Constants.TAG_SMS_RECEIVER, "Message: $message")
                 }

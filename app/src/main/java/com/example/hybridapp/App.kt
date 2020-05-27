@@ -4,7 +4,7 @@ import android.app.Activity
 import android.app.Application
 import android.content.Context
 import android.os.Bundle
-import com.example.hybridapp.util.SMSReceiver
+import com.example.hybridapp.util.sms.SMSReceiver
 
 class App : Application() {
 

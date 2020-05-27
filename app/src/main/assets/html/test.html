@@ -6,43 +6,42 @@
 <script type="text/javascript">
 
             const ShortToast = async () => {
-                const temp = await $flex.ShortToast("Short Toast from web.");
+                const result = await $flex.ShortToast("Short Toast from web.");
             }
 
             const LongToast = async () => {
-                const temp = await $flex.LongToast("Long Toast from web.");
+                const result = await $flex.LongToast("Long Toast from web.");
             }
 
             const ShortSnackbar = async () => {
-                const temp = await $flex.ShortSnackbar("Short Snackbar from web.");
+                const result = await $flex.ShortSnackbar("Short Snackbar from web.");
             }
 
             const LongSnackbar = async () => {
-                const temp = await $flex.LongSnackbar("Long Snackbar from web.");
+                const result = await $flex.LongSnackbar("Long Snackbar from web.");
             }
 
             const Dialog = async () => {
-                const temp = await $flex.Dialog('제목', '본문입니다.');
-            }
+                const result = await $flex.Dialog('다이얼로그', '기본 다이얼로그입니다.',
+                    'OK', 'CANCEL');
 
-            const extendedDialog = async () => {
-                const temp = await $flex.extendedDialog();
+                console.log(result);
             }
 
             const Network = async () => {
-                const temp = await $flex.Network();
+                const result = await $flex.Network();
+
+                console.log(result);
             }
 
             const NetworkStatus = async () => {
-                const temp = await $flex.NetworkStatus();
+                const result = await $flex.NetworkStatus();
+
+                console.log(result);
             }
 
-            const callPermissions = async () => {
-                const temp = await $flex.connectFuncPermissions();
-            }
-
-            const callPermission = async () => {
-                const temp = await $flex.connectFuncPermission();
+            const Permission = async () => {
+                const result = await $flex.Permission();
             }
 
             const Camera = async () => {
@@ -61,6 +60,8 @@
 
             const QRCodeScan = async () => {
                 const result = await $flex.QRCodeScan();
+
+                console.log('QR Code: ', result);
             }
 
             const SinglePhoto = async () => {
@@ -90,12 +91,8 @@
                 }
             }
 
-            const callSharedPreferences = async () => {
-                const temp = await $flex.connectFuncSharedPreferences();
-            }
-
-             const callBiometricPrompt = async () => {
-                const temp = await $flex.connectFuncBiometricPrompt();
+             const BioAuthentication = async () => {
+                const result = await $flex.BioAuthentication();
             }
 
             const Location = async () => {
@@ -112,8 +109,12 @@
                 const temp = await $flex.connectFuncNotification();
             }
 
-            const callSms = async () => {
-                const temp = await $flex.connectFuncSMS();
+            const SendSMS = async () => {
+                const result = await $flex.SendSMS();
+            }
+
+            const ReceiveSMS = async () => {
+                const result = await $flex.ReceiveSMS();
             }
 
             const Notification = async () => {
@@ -126,6 +127,20 @@
 
             const GUID = async () => {
                 const result = await $flex.GUID();
+            }
+
+            const SaveSharedPreferences = async () => {
+                const result = await $flex.SaveSharedPreferences('fileName','key', 'abcdefg');
+            }
+
+            const LoadSharedPreferences = async () => {
+                const result = await $flex.LoadSharedPreferences('fileName','key');
+
+                console.log('Value: ', result);
+            }
+
+            const removeSharedPreferences = async () => {
+                const result = await $flex.removeSharedPreferences('fileName', 'key');
             }
 
             /*
@@ -146,56 +161,106 @@
         </script>
 
 <body style="width: 100%; height: 300px;">
-<button onclick='ShortToast()' style="font-size: 40px; width: 100%; height: 150px;">짧은 Toast 띄우기</button>
-<button onclick='LongToast()' style="font-size: 40px; width: 100%; height: 150px;">긴 Toast 띄우기</button>
-<button onclick='ShortSnackbar()' style="font-size: 40px; width: 100%; height: 150px;">짧은 Snackbar 띄우기</button>
-<button onclick='LongSnackbar()' style="font-size: 40px; width: 100%; height: 150px;">긴 Snackbar 띄우기</button>
-<button onclick='Dialog()' style="font-size: 40px; width: 100%; height: 150px;">기본 Dialog 띄우기</button>
-<button onclick='extendedDialog()' style="font-size: 40px; width: 100%; height: 150px;">확장 Dialog 띄우기</button>
-<button onclick='Network()' style="font-size: 40px; width: 100%; height: 150px;">네트워크 연결 체크</button>
-<button onclick='NetworkStatus()' style="font-size: 40px; width: 100%; height: 150px;">네트워크 상태 체크</button>
-<button onclick='callPermissions()' style="font-size: 40px; width: 100%; height: 150px;">권한 한번에 요청</button>
-<button onclick='callPermission()' style="font-size: 40px; width: 100%; height: 150px;">카메라 권한 체크</button>
-<button onclick='Camera()' style="font-size: 40px; width: 100%; height: 150px;">카메라 호출</button>
-<button onclick='QRCodeScan()' style="font-size: 40px; width: 100%; height: 150px;">QR Code 스캔</button>
-<button onclick='Location()' style="font-size: 40px; width: 100%; height: 150px;">현재 위치 불러오기</button>
-<div id = "photos"></div>
-<button onclick='SinglePhoto()' style="font-size: 40px; width: 100%; height: 150px;">SinglePhoto</button>
-<button onclick='MultiplePhotos()' style="font-size: 40px; width: 100%; height: 150px;">MultiplePhotos</button>
 
-<a href="http://blogattach.naver.net/cc59d063732b28f4db375f6a54bdc9b21141bb5ee4/20180818_283_blogfile/xoxojw_1534092498397_mP1X60_zip/washitape_allcolor.zip">
-    <button style="font-size: 40px; width: 100%; height: 150px;">
-        파일 다운로드
-    </button>
-</a>
+    <!-- Dialog -->
+    <label style="font-size: 40px; width: 100%; height: 150px;">Dialog</label>
+    <button onclick='ShortToast()' style="font-size: 40px; width: 100%; height: 150px;">짧은 Toast 띄우기</button>
+    <button onclick='LongToast()' style="font-size: 40px; width: 100%; height: 150px;">긴 Toast 띄우기</button>
+    <button onclick='ShortSnackbar()' style="font-size: 40px; width: 100%; height: 150px;">짧은 Snackbar 띄우기</button>
+    <button onclick='LongSnackbar()' style="font-size: 40px; width: 100%; height: 150px;">긴 Snackbar 띄우기</button>
+    <button onclick='Dialog()' style="font-size: 40px; width: 100%; height: 150px;">Dialog 띄우기</button>
+    <p class="dialogResult" style="font-size: 40px">결과: </p>
 
-<button onclick='callSharedPreferences()' style="font-size: 40px; width: 100%; height: 150px;">SharedPreferences</button>
-<div class="filebox">
-    <label style="font-size: 40px; width: 100%; height: 150px;" for="ex_file">첨부파일</label>
-    <input type="file" id="ex_file" style="font-size: 40px; width: 100%; height: 150px;">
-    <script type="text/javascript">
-            var input = document.getElementById("ex_file").value;
-            console.log(input);
+    <!-- Network -->
+    <label style="font-size: 40px; width: 100%; height: 150px;">Network</label>
+    <button onclick='Network()' style="font-size: 40px; width: 100%; height: 150px;">네트워크 연결 체크</button>
+    <div id="networkResult" style="font-size: 40px">결과: </div>
 
-            var fileValue = $("ex_file").val().split("\\");
-            var fileName = fileValue[fileValue.length - 1];
+    <button onclick='NetworkStatus()' style="font-size: 40px; width: 100%; height: 150px;">네트워크 상태 체크</button>
+    <div id="networkStatusResult" style="font-size: 40px">결과: </div>
 
-            console.log(fileValue);
-            console.log(fileName);
-        </script>
-</div>
-<button onclick='callBiometricPrompt()' style="font-size: 40px; width: 100%; height: 150px;">생체 인증</button>
-<button onclick='callQRcode()' style="font-size: 40px; width: 100%; height: 150px;">QR code 호출</button>
-<button onclick='callSms()' style="font-size: 40px; width: 100%; height: 150px;">SMS</button>
-<h2>
-    <a href="intent://main?seq=67#Intent;
-                scheme=util_app;action=android.intent.action.VIEW;
-                category=android.intent.category.BROWSABLE;
-                package=com.example.simpleutilapp;end">Application Run</a>
-</h2>
-<button onclick='Notification()' style="font-size: 40px; width: 100%; height: 150px;">Notification</button>
-<button onclick='InstanceId()' style="font-size: 40px; width: 100%; height: 150px;">Instance ID 얻기</button>
-<button onclick='GUID()' style="font-size: 40px; width: 100%; height: 150px;">GUID 얻기</button>
+    <!-- Permission -->
+    <label style="font-size: 40px; width: 100%; height: 150px;">Permission</label>
+    <button onclick='Permission()' style="font-size: 40px; width: 100%; height: 150px;">권한 한번에 요청</button>
+
+    <!-- Camera -->
+    <label style="font-size: 40px; width: 100%; height: 150px;">Camera</label>
+    <button onclick='Camera()' style="font-size: 40px; width: 100%; height: 150px;">카메라 Intent 호출하기</button>
+    <button onclick='QRCodeScan()' style="font-size: 40px; width: 100%; height: 150px;">QR Code 스캔</button>
+
+    <!-- Gallery -->
+    <label style="font-size: 40px; width: 100%; height: 150px;">Gallery</label>
+    <button onclick='SinglePhoto()' style="font-size: 40px; width: 100%; height: 150px;">SinglePhoto</button>
+    <button onclick='MultiplePhotos()' style="font-size: 40px; width: 100%; height: 150px;">MultiplePhotos</button>
+    <div id = "photos"></div>
+
+    <!-- File Upload -->
+    <label style="font-size: 40px; width: 100%; height: 150px;">File upload</label>
+    <a href="http://www.alessioatzeni.com/wp-content/themes/az/_include/metrize/custom/metrize-icons/download/Metrize_Icons.zip">
+        <button style="font-size: 40px; width: 100%; height: 150px;">
+            파일 다운로드
+        </button>
+    </a>
+    <div class="filebox">
+        <label style="font-size: 40px; width: 100%; height: 150px;" for="ex_file">파일 업로드</label>
+        <input type="file" id="ex_file" style="font-size: 40px; width: 100%; height: 150px;">
+        <script type="text/javascript">
+                var fileValue = $("ex_file").val().split("\\");
+                var fileName = fileValue[fileValue.length - 1];
+
+                console.log('File value: ', fileValue);
+                console.log('File name: ', fileName);
+            </script>
+    </div>
+
+    <!-- Location -->
+    <label style="font-size: 40px; width: 100%; height: 150px;">Location</label>
+    <button onclick='Location()' style="font-size: 40px; width: 100%; height: 150px;">현재 위치 불러오기</button>
+    <div id="locationResult" style="font-size: 40px">결과: </div>
+
+    <!-- Network -->
+    <label style="font-size: 40px; width: 100%; height: 150px;">Bio Authentication</label>
+    <button onclick='BioAuthentication()' style="font-size: 40px; width: 100%; height: 150px;">생체 인증</button>
+
+    <!-- Network -->
+    <label style="font-size: 40px; width: 100%; height: 150px;">Identifier</label>
+    <button onclick='InstanceId()' style="font-size: 40px; width: 100%; height: 150px;">Instance ID 얻기</button>
+    <div id="instanceIdResult" style="font-size: 40px">결과: </div>
+    <button onclick='GUID()' style="font-size: 40px; width: 100%; height: 150px;">GUID 얻기</button>
+    <div id="guidResult" style="font-size: 40px">결과: </div>
+
+    <!-- Network -->
+    <label style="font-size: 40px; width: 100%; height: 150px;">PopUp(구현중)</label>
+
+    <!-- Network -->
+    <label style="font-size: 40px; width: 100%; height: 150px;">NFC(구현중)</label>
+
+    <!-- Network -->
+    <label style="font-size: 40px; width: 100%; height: 150px;">Audio(구현중)</label>
+
+    <!-- SMS -->
+    <label style="font-size: 40px; width: 100%; height: 150px;">SMS</label>
+    <button onclick='SendSMS()' style="font-size: 40px; width: 100%; height: 150px;">SMS 송신</button>
+    <button onclick='ReceiveSMS()' style="font-size: 40px; width: 100%; height: 150px;">SMS Retriever 생성</button>
+
+    <!-- 외부->내부 호출 -->
+    <label style="font-size: 40px; width: 100%; height: 150px;">외부->내부 호출(구현중)</label>
+    <button onclick='Notification()' style="font-size: 40px; width: 100%; height: 150px;">Notification</button>
+
+    <h2>
+        <a href="intent://main?seq=67#Intent;
+                    scheme=util_app;action=android.intent.action.VIEW;
+                    category=android.intent.category.BROWSABLE;
+                    package=com.example.simpleutilapp;end">Application Run</a>
+    </h2>
+
+    <!-- Local Storage -->
+    <label style="font-size: 40px; width: 100%; height: 150px;">Local Storage</label>
+    <button onclick='SaveSharedPreferences()' style="font-size: 40px; width: 100%; height: 150px;">SharedPreferences에 데이터 저장</button>
+    <button onclick='LoadSharedPreferences()' style="font-size: 40px; width: 100%; height: 150px;">SharedPreferences에 데이터 불러오기</button>
+    <button onclick='removeSharedPreferences()' style="font-size: 40px; width: 100%; height: 150px;">SharedPreferences에 데이터 삭제하기</button>
+    <div id="sharedPreferencesResult" style="font-size: 40px">결과: </div>
+
 </body>
 
 </html>

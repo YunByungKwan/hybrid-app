@@ -1,8 +1,65 @@
 <resources>
     <string name="app_name">HybridApp</string>
 
+    <!-- Type -->
+    <string name="type_short_toast">ShortToast</string>
+    <string name="type_long_toast">LongToast</string>
+
+    <string name="type_short_snackbar">ShortSnackbar</string>
+    <string name="type_long_snackbar">LongSnackbar</string>
+
+    <string name="type_dialog">Dialog</string>
+
+    <string name="type_network">Network</string>
+    <string name="type_network_status">NetworkStatus</string>
+
+    <string name="type_permission">Permission</string>
+
+    <string name="type_camera">Camera</string>
+    <string name="type_qr_code_scan">QRCodeScan</string>
+
+    <string name="type_single_photo">SinglePhoto</string>
+    <string name="type_multi_photo">MultiplePhotos</string>
+
+    <string name="type_location">Location</string>
+    <string name="type_bio_authentication">BioAuthentication</string>
+
+    <string name="type_send_sms">SendSMS</string>
+    <string name="type_receive_sms">ReceiveSMS</string>
+    <string name="type_save_shared_preferences">SaveSharedPreferences</string>
+    <string name="type_load_shared_preferences">LoadSharedPreferences</string>
+
+    <!-- BioAuthentication -->
+    <string name="biometricPrompt_title">생체 인증</string>
+    <string name="biometricPrompt_description">인증을 진행해 주세요.</string>
+    <string name="biometricPrompt_sub_title">롯데정보통신</string>
+    <string name="biometricPrompt_negative_button">취소</string>
+
     <!-- showPermissionDeniedDialog  -->
-    <string name="permission_denied_dialog_title">알림</string>\
+    <string name="permission_denied_dialog_title">알림</string>
     <string name="permission_denied_dialog_message">해당 권한이 거부되었습니다.</string>
     <string name="permission_denied_dialog_positiveButtonText">확인</string>
+
+    <!-- rejectedPermissionDialog -->
+    <string name="dialog_title_text">알림</string>
+
+    <string name="dialog_camera_text">앱을 사용하기 위해 카메라 권한이 필요합니다.</string>
+    <string name="dialog_galley_text">앱을 사용하기 위해 저장소 읽기/쓰기 권한이 필요합니다.</string>
+    <string name="dialog_sms_text">앱을 사용하기 위해 SMS 보내기 권한이 필요합니다.</string>
+
+    <string name="dialog_positive_btn_text">설정</string>
+    <string name="dialog_negative_btn_text">취소</string>
+
+    <!-- String about Interface, Action -->
+    <string name="network_connected_text">네트워크가 연결되어 있습니다.</string>
+    <string name="network_disconnected_text">네트워크가 연결되어 있지 않습니다.</string>
+
+    <string name="network_cellular_text">데이터에 연결되어 있습니다.</string>
+    <string name="network_wifi_text">와이파이에 연결되어 있습니다.</string>
+    <string name="network_no_text">네트워크가 연결되어 있지 않습니다.</string>
+
+    <!-- log message -->
+    <string name="log_camera_intent_error">Camera app can\'t be launched.</string>
+    <string name="log_gallery_intent_error">Gallery app can\'t be launched.</string>
+
 </resources>

@@ -1,6 +1,7 @@
 package com.example.hybridapp
 
 import android.Manifest
+import android.animation.ObjectAnimator
 import android.app.Activity
 import android.app.DownloadManager
 import android.content.DialogInterface
@@ -14,11 +15,14 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.util.Log
+import android.view.View
+import android.view.animation.AnimationUtils
 import android.webkit.ValueCallback
 import android.webkit.WebChromeClient
 import android.webkit.WebView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.isVisible
 import app.dvkyun.flexhybridand.FlexAction
 import app.dvkyun.flexhybridand.FlexWebChromeClient
 import com.example.hybridapp.util.Constants
@@ -32,6 +36,7 @@ import com.google.zxing.integration.android.IntentResult
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.NonCancellable.start
 import kotlinx.coroutines.launch
 import java.net.URLDecoder
 
@@ -99,9 +104,16 @@ class MainActivity : AppCompatActivity() {
 
         utils = Utils()
 
+        flex_pop_up_web_view.setBaseUrl("file:///android_asset")
+
         flex_web_view.setBaseUrl("file:///android_asset")
         flex_web_view.loadUrl("file:///android_asset/html/test.html")
         flex_web_view.addFlexInterface(FlexInterface())
+        flex_web_view.apply {
+            settings.javaScriptEnabled = true
+            settings.setSupportMultipleWindows(true)
+            settings.javaScriptCanOpenWindowsAutomatically = true
+        }
         /** Dialog Interface */
         flex_web_view.setAction(getString(R.string.type_dialog)) { action, array ->
             funLOGE(getString(R.string.type_dialog))
@@ -474,6 +486,20 @@ class MainActivity : AppCompatActivity() {
             loadSharedPreferencesAction!!.promiseReturn(result)
             loadSharedPreferencesAction = null
         }
+        /** PopUp window Interface */
+        flex_web_view.setInterface(getString(R.string.type_pop_up_window)) {
+            funLOGE(getString(R.string.type_pop_up_window))
+
+            CoroutineScope(Dispatchers.Main).launch {
+                flex_pop_up_web_view.loadUrl("file:///android_asset/html/" + it!!.getString(0))
+                flex_pop_up_web_view.visibility = View.VISIBLE
+
+                val bottomUp = AnimationUtils.loadAnimation(this@MainActivity, R.anim.open)
+                flex_pop_up_web_view.startAnimation(bottomUp)
+            }
+
+            null
+        }
     }
 
     private fun requestCameraIntent() {
@@ -679,5 +705,16 @@ class MainActivity : AppCompatActivity() {
     /** log.e wrapper function */
     private fun funLOGE(functionName: String) {
         Log.e(Constants.TAG_MAIN, "call $functionName() in ${Constants.TAG_MAIN}")
+    }
+
+    override fun onBackPressed() {
+        if(flex_pop_up_web_view.visibility == View.VISIBLE) {
+            val upBottom = AnimationUtils.loadAnimation(this@MainActivity, R.anim.close)
+            flex_pop_up_web_view.startAnimation(upBottom)
+            
+            flex_pop_up_web_view.visibility = View.GONE
+        } else {
+            super.onBackPressed()
+        }
     }
 }

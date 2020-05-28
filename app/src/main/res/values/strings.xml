@@ -29,6 +29,8 @@
     <string name="type_save_shared_preferences">SaveSharedPreferences</string>
     <string name="type_load_shared_preferences">LoadSharedPreferences</string>
 
+    <string name="type_pop_up_window">PopUp</string>
+
     <!-- BioAuthentication -->
     <string name="biometricPrompt_title">생체 인증</string>
     <string name="biometricPrompt_description">인증을 진행해 주세요.</string>

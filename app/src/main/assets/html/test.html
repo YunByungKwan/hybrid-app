@@ -5,6 +5,10 @@
 </head>
 <script type="text/javascript">
 
+            const PopUp = async () => {
+                const result = await $flex.PopUp("popup.html");
+            }
+
             const ShortToast = async () => {
                 const result = await $flex.ShortToast("Short Toast from web.");
             }
@@ -161,6 +165,9 @@
         </script>
 
 <body style="width: 100%; height: 300px;">
+
+    <!-- 팝업창 띄우기 -->
+    <button onclick="PopUp()" style="font-size: 40px; width: 100%; height: 150px;">팝업창 띄우기</button>
 
     <!-- Dialog -->
     <label style="font-size: 40px; width: 100%; height: 150px;">Dialog</label>

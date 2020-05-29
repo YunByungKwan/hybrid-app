@@ -29,6 +29,8 @@
     <string name="type_save_shared_preferences">SaveSharedPreferences</string>
     <string name="type_load_shared_preferences">LoadSharedPreferences</string>
 
+    <string name="type_url_log">LogUrl</string>
+
     <string name="type_pop_up_window">PopUp</string>
 
     <!-- BioAuthentication -->
@@ -59,6 +61,10 @@
     <string name="network_cellular_text">데이터에 연결되어 있습니다.</string>
     <string name="network_wifi_text">와이파이에 연결되어 있습니다.</string>
     <string name="network_no_text">네트워크가 연결되어 있지 않습니다.</string>
+
+    <!-- 앱 접속 이력 관리
+     -->
+    <string name="url_log">url_log</string>
 
     <!-- log message -->
     <string name="log_camera_intent_error">Camera app can\'t be launched.</string>

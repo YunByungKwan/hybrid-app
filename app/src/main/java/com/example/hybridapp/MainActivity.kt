@@ -1,7 +1,6 @@
 package com.example.hybridapp
 
 import android.Manifest
-import android.animation.ObjectAnimator
 import android.app.Activity
 import android.app.DownloadManager
 import android.content.DialogInterface
@@ -22,9 +21,9 @@ import android.webkit.WebChromeClient
 import android.webkit.WebView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.isVisible
 import app.dvkyun.flexhybridand.FlexAction
 import app.dvkyun.flexhybridand.FlexWebChromeClient
+import app.dvkyun.flexhybridand.FlexWebViewClient
 import com.example.hybridapp.util.Constants
 import com.example.hybridapp.util.sms.SMSReceiver
 import com.example.hybridapp.util.Utils
@@ -36,9 +35,11 @@ import com.google.zxing.integration.android.IntentResult
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.NonCancellable.start
 import kotlinx.coroutines.launch
 import java.net.URLDecoder
+import java.text.SimpleDateFormat
+import java.util.*
+import kotlin.collections.ArrayList
 
 class MainActivity : AppCompatActivity() {
 
@@ -56,6 +57,11 @@ class MainActivity : AppCompatActivity() {
     private var locationAction: FlexAction? = null
     private var bioAuthenticationAction: FlexAction? = null
     private var loadSharedPreferencesAction: FlexAction? = null
+
+    private val scope = CoroutineScope(Dispatchers.IO)
+
+    /** Room Database */
+    private lateinit var repository: LogUrlRepository
 
     private val iRequestCodePhoneNumber = 100
 
@@ -104,8 +110,15 @@ class MainActivity : AppCompatActivity() {
 
         utils = Utils()
 
-        flex_pop_up_web_view.setBaseUrl("file:///android_asset")
+        /** Room Database default settings */
+//        scope.launch {
+//            val logUrlDao
+//                    = LogUrlRoomDatabase.getDatabase(applicationContext).logUrlDao()
+//            repository = LogUrlRepository(logUrlDao)
+//        }
 
+        /** FlexWebview default settings */
+        flex_pop_up_web_view.setBaseUrl("file:///android_asset")
         flex_web_view.setBaseUrl("file:///android_asset")
         flex_web_view.loadUrl("file:///android_asset/html/test.html")
         flex_web_view.addFlexInterface(FlexInterface())
@@ -118,9 +131,8 @@ class MainActivity : AppCompatActivity() {
         flex_web_view.setAction(getString(R.string.type_dialog)) { action, array ->
             funLOGE(getString(R.string.type_dialog))
 
-            CoroutineScope(Dispatchers.Main).launch {
+            scope.launch(Dispatchers.Main) {
                 dialogAction = action
-
                 val title = array!!.getString(0)
                 val contents = array!!.getString(1)
                 val posButtonText = array!!.getString(2)
@@ -331,6 +343,29 @@ class MainActivity : AppCompatActivity() {
                 return true
             }
         }
+        /** 앱 접속 이력 관리 */
+        flex_web_view.webViewClient = object : FlexWebViewClient() {
+            override fun doUpdateVisitedHistory(view: WebView?, url: String?, isReload: Boolean) {
+                funLOGE("doUpdateVisitedHistory")
+
+//                scope.launch {
+//                    val currentDateTime = Calendar.getInstance().time
+//                    var dateFormat
+//                            = SimpleDateFormat("yyyy.MM.dd HH:mm:ss", Locale.KOREA).format(currentDateTime)
+//
+//                    if(url != null) {
+//                        Log.e(Constants.TAG_MAIN, "($dateFormat)접속 URL: $url")
+//
+//                        val logUrl = LogUrl(0, dateFormat, url)
+//                        repository.insert(logUrl)
+//
+//                        // utils.putDataToPreferences(getString(R.string.url_log), dateFormat, url)
+//                    }
+//                }
+
+                super.doUpdateVisitedHistory(view, url, isReload)
+            }
+        }
         /** File Download */
         WebView.setWebContentsDebuggingEnabled(true)
         flex_web_view.setDownloadListener { url, userAgent, contentDisposition, mimetype, contentLength ->
@@ -485,6 +520,22 @@ class MainActivity : AppCompatActivity() {
 
             loadSharedPreferencesAction!!.promiseReturn(result)
             loadSharedPreferencesAction = null
+        }
+        /** 접속 이력 모두 보기 */
+        flex_web_view.setInterface(getString(R.string.type_url_log)) {
+            funLOGE(getString(R.string.type_url_log))
+
+            // utils.loadAllUrlLog()
+//            scope.launch {
+//                val logUrls = repository.getAll(
+//
+//                )
+//                for(i in logUrls) {
+//                    Log.e(Constants.TAG_MAIN, "${i.id}, ${i.visitingTime}, ${i.visitingUrl}")
+//                }
+//            }
+
+            null
         }
         /** PopUp window Interface */
         flex_web_view.setInterface(getString(R.string.type_pop_up_window)) {
@@ -711,7 +762,7 @@ class MainActivity : AppCompatActivity() {
         if(flex_pop_up_web_view.visibility == View.VISIBLE) {
             val upBottom = AnimationUtils.loadAnimation(this@MainActivity, R.anim.close)
             flex_pop_up_web_view.startAnimation(upBottom)
-            
+
             flex_pop_up_web_view.visibility = View.GONE
         } else {
             super.onBackPressed()

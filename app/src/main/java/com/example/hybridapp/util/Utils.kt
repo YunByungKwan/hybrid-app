@@ -26,6 +26,8 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentActivity
 import com.example.hybridapp.App
+import com.example.hybridapp.LogUrlRepository
+import com.example.hybridapp.LogUrlRoomDatabase
 import com.example.hybridapp.R
 import com.google.android.gms.auth.api.phone.SmsRetriever
 import com.google.android.material.snackbar.Snackbar
@@ -675,6 +677,30 @@ class Utils {
         val editor = prefs.edit()
 
         editor.remove(key).apply()
+    }
+
+    /** 앱 접속 이력 관리 */
+    fun loadAllUrlLog() {
+        val prefs = App.activity.getSharedPreferences(
+            App.INSTANCE.getString(R.string.url_log), Context.MODE_PRIVATE)
+
+        val urlLogMap = prefs.all
+        val sortedUrlLogMap = urlLogMap.toSortedMap(reverseOrder())
+
+        Log.e(Constants.TAG_UTILS, "============================= Visit Url Log =============================")
+        for(i in sortedUrlLogMap) {
+            Log.e(Constants.TAG_UTILS, "접속시간: ${i.key} 접속 URL: ${i.value}")
+        }
+    }
+
+    fun createDatabase() {
+        val logUrlDao = LogUrlRoomDatabase.getDatabase(App.INSTANCE).logUrlDao()
+        val repository = LogUrlRepository(logUrlDao)
+        val allLogUrls = repository.allLogUrls
+    }
+
+    fun insert() {
+
     }
 
     /** ########################################## ETC ########################################## */

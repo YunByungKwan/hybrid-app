@@ -38,6 +38,7 @@ import java.io.ByteArrayOutputStream
 import java.nio.charset.StandardCharsets
 import java.security.MessageDigest
 import java.security.NoSuchAlgorithmException
+import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.Executor
 import kotlin.collections.ArrayList
@@ -704,6 +705,12 @@ class Utils {
     }
 
     /** ########################################## ETC ########################################## */
+
+    /** get current time */
+    fun getCurrentTime(): String {
+        val currentDateTime = Calendar.getInstance().time
+        return SimpleDateFormat("yyyy.MM.dd HH:mm:ss", Locale.KOREA).format(currentDateTime)
+    }
 
     /** log.e wrapper function */
     private fun funLOGE(functionName: String) {

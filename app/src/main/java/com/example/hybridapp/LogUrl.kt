@@ -16,4 +16,6 @@ data class LogUrl(
     @ColumnInfo(name = "visitingUrl")
     var visitingUrl: String
 
-)
+) {
+    constructor() : this(0, "", "")
+}

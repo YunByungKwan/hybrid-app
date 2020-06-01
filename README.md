@@ -4,9 +4,9 @@
 
 #### 1. Toast
 
-fun showShortToast(message: String)
+fun showShortText(message: String)
 
-fun showLongToast(message: String)
+fun showLongText(message: String)
 
 #### 2. Snackbar
 
@@ -16,24 +16,24 @@ fun showLongSnackbar(view: View, message: String)
 
 #### 3. Dialog
 
-fun showDialog(title: String, message: String)
+fun show(title: String, message: String)
 
-fun showDialog(title: String, message: String, positiveButtonText: String)
+fun show(title: String, message: String, positiveButtonText: String)
 
-fun showDialog(title: String, message: String, positiveButtonText: String, negativeButtonText: String)
+fun show(title: String, message: String, positiveButtonText: String, negativeButtonText: String)
 
-fun showDialog(title: String, message: String, positiveButtonText: String, negativeButtonText: String, 
+fun show(title: String, message: String, positiveButtonText: String, negativeButtonText: String,
     pListener: DialogInterface.OnClickListener?, nListener: DialogInterface.OnClickListener?)
 
 ## Network
 
-fun isNetworkConnected(): Boolean
+fun isConnected(): Boolean
 
-fun getNetworkStatus(): Int
+fun getStatus(): Int
 
 ## Permission
 
-internal fun hasPermissionFor(permissionName: String): Boolean
+internal fun existsPermission(permissionName: String): Boolean
 
 internal fun isRejectPermission(permissionName: String): Boolean
 
@@ -41,13 +41,13 @@ fun requestPermissions(permissions: Array<out String>, requestCode: Int)
 
 fun checkPermissions(permissions: Array<String>, requestCode: Int)
 
-fun showPermissionDeniedDialog()
+fun showDenialPermissionText()
 
 ## Photo
 
 fun takeCameraIntent(): Intent
 
-fun takeQRCodeReader()
+fun startScan()
 
 fun takeSinglePhotoIntent(): Intent
 

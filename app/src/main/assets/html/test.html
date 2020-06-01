@@ -113,6 +113,10 @@
                 const temp = await $flex.connectFuncNotification();
             }
 
+            const Record = async () => {
+                const result = await $flex.Record();
+            }
+
             const SendSMS = async () => {
                 const result = await $flex.SendSMS();
             }
@@ -254,7 +258,8 @@
     <label style="font-size: 40px; width: 100%; height: 150px;">NFC(구현중)</label>
 
     <!-- Network -->
-    <label style="font-size: 40px; width: 100%; height: 150px;">Audio(구현중)</label>
+    <label style="font-size: 40px; width: 100%; height: 150px;">Record</label>
+    <button onclick='Record()' style="font-size: 40px; width: 100%; height: 150px;">녹음하기</button>
 
     <!-- SMS -->
     <label style="font-size: 40px; width: 100%; height: 150px;">SMS</label>

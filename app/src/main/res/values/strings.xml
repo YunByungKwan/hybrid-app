@@ -24,8 +24,13 @@
     <string name="type_location">Location</string>
     <string name="type_bio_authentication">BioAuthentication</string>
 
+    <string name="type_record">Record</string>
+
     <string name="type_send_sms">SendSMS</string>
     <string name="type_receive_sms">ReceiveSMS</string>
+
+    <string name="type_notification">Notification</string>
+
     <string name="type_save_shared_preferences">SaveSharedPreferences</string>
     <string name="type_load_shared_preferences">LoadSharedPreferences</string>
 
@@ -38,11 +43,6 @@
     <string name="biometricPrompt_description">인증을 진행해 주세요.</string>
     <string name="biometricPrompt_sub_title">롯데정보통신</string>
     <string name="biometricPrompt_negative_button">취소</string>
-
-    <!-- showPermissionDeniedDialog  -->
-    <string name="permission_denied_dialog_title">알림</string>
-    <string name="permission_denied_dialog_message">해당 권한이 거부되었습니다.</string>
-    <string name="permission_denied_dialog_positiveButtonText">확인</string>
 
     <!-- rejectedPermissionDialog -->
     <string name="dialog_title_text">알림</string>

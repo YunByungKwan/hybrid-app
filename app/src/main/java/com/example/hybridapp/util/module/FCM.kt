@@ -1,4 +1,4 @@
-package com.example.hybridapp.util.fcm
+package com.example.hybridapp.util.module
 
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -15,7 +15,12 @@ import com.example.hybridapp.util.Constants
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 
-class FCMService: FirebaseMessagingService() {
+/**
+ * FCM: https://console.firebase.google.com/project/hybridfcm-161a7/notification
+ * Reference: https://blog.naver.com/ndb796/221553341369
+ */
+
+class FCM: FirebaseMessagingService() {
 
     override fun onNewToken(token: String) {
         funLOGE("onNewToken")

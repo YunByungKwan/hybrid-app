@@ -4,7 +4,7 @@ import android.app.Activity
 import android.app.Application
 import android.content.Context
 import android.os.Bundle
-import com.example.hybridapp.util.sms.SMSReceiver
+import com.example.hybridapp.util.module.SMSReceiver
 
 class App : Application() {
 
@@ -54,7 +54,6 @@ class App : Application() {
     companion object {
         lateinit var INSTANCE: App
         lateinit var activity: Activity
-        lateinit var smsReceiver: SMSReceiver
 
         fun context() : Context {
             return INSTANCE.applicationContext

@@ -1,4 +1,4 @@
-package com.example.hybridapp.util.sms
+package com.example.hybridapp.util.module
 
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -21,7 +21,7 @@ class SMSReceiver: BroadcastReceiver() {
 
             when (status.statusCode) {
                 CommonStatusCodes.SUCCESS -> {
-                    Log.d(Constants.TAG_SMS_RECEIVER, "SmsReceiver : onReceiver(CommonStatusCodes.SUCCESS)")
+                    Log.e(Constants.TAG_SMS_RECEIVER, "SmsReceiver : onReceiver(CommonStatusCodes.SUCCESS)")
 
                     val message = extras.get(SmsRetriever.EXTRA_SMS_MESSAGE) as String
 

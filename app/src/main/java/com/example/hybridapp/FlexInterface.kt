@@ -1,13 +1,12 @@
 package com.example.hybridapp
 
-import android.app.PendingIntent
-import android.content.DialogInterface
-import android.content.Intent
 import android.util.Log
-import androidx.core.app.NotificationManagerCompat
 import app.dvkyun.flexhybridand.FlexFuncInterface
 import com.example.hybridapp.util.Constants
+import com.example.hybridapp.util.module.Toast
+import com.example.hybridapp.util.module.Snackbar
 import com.example.hybridapp.util.Utils
+import com.example.hybridapp.util.module.SharedPreferences
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -24,7 +23,7 @@ class FlexInterface {
         CoroutineScope(Dispatchers.Main).launch {
             funLOGE(App.INSTANCE.getString(R.string.type_short_toast))
 
-            utils.showShortToast(array.get(0).toString())
+            Toast.showShortText(array.get(0).toString())
         }
     }
 
@@ -33,7 +32,7 @@ class FlexInterface {
         CoroutineScope(Dispatchers.Main).launch {
             funLOGE(App.INSTANCE.getString(R.string.type_long_toast))
 
-            utils.showLongToast(array.get(0).toString())
+            Toast.showLongText(array.get(0).toString())
         }
     }
 
@@ -44,7 +43,7 @@ class FlexInterface {
         CoroutineScope(Dispatchers.Main).launch {
             funLOGE(App.INSTANCE.getString(R.string.type_short_snackbar))
 
-            utils.showShortSnackbar(App.activity.findViewById(R.id.linearLayout),
+            Snackbar.showShortText(App.activity.findViewById(R.id.linearLayout),
                 array.get(0).toString())
         }
     }
@@ -54,33 +53,9 @@ class FlexInterface {
         CoroutineScope(Dispatchers.Main).launch {
             funLOGE(App.INSTANCE.getString(R.string.type_long_snackbar))
 
-            utils.showLongSnackbar(App.activity.findViewById(R.id.linearLayout),
+            Snackbar.showLongText(App.activity.findViewById(R.id.linearLayout),
                 array.get(0).toString())
         }
-    }
-
-    @FlexFuncInterface
-    fun Notification(array: JSONArray) {
-        funLOGE("Notification")
-
-        val importance = NotificationManagerCompat.IMPORTANCE_DEFAULT
-        val showBadge = false
-        val channelName = "알림"
-        val description = "App notification channel"
-        utils.createNotificationChannel(importance, showBadge, channelName, description)
-
-        val channelId = "01040501485"
-        val title = "알림 제목"
-        val content = "알림 본문입니다."
-        val intent = Intent(App.INSTANCE, MainActivity::class.java).apply {
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-        }
-
-        val pendingIntent
-                = PendingIntent.getActivity(App.INSTANCE, 0, intent, 0)
-
-        utils.createNotification(channelId,
-            R.drawable.ic_launcher_background, title, content, pendingIntent)
     }
 
     @FlexFuncInterface
@@ -109,7 +84,7 @@ class FlexInterface {
         val key = array.getString(1)
         val value = array.get(2)
 
-        utils.putDataToPreferences(fileName, key, value)
+        SharedPreferences.putData(fileName, key, value)
     }
 
     @FlexFuncInterface
@@ -119,7 +94,7 @@ class FlexInterface {
         val fileName = array.getString(0)
         val key = array.getString(1)
 
-        utils.removeDataFromPreferences(fileName, key)
+        SharedPreferences.removeData(fileName, key)
     }
 
     /** log.e wrapper function */

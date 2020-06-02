@@ -15,53 +15,28 @@ import org.json.JSONObject
 
 object Action {
 
-    /**
-     * UI Thread에서 실행해야 함
-     * @param array 다이얼로그 텍스트
-     *              Ex)
-     *              setArgs(0, "Title Text");
-     *              setArgs(1, "Body Text");
-     *              setArgs(2, [
-     *              ["확인", "basic"],
-     *              ["취소", "cancel"],
-     *              ["삭제", "destructive"],]);
-     *              setArgs(3, true);
-     *              setArgs(4, true);
-     */
     val dialog: (FlexAction?, JSONArray?) -> Unit = { dialogAction, array ->
         CoroutineScope(Dispatchers.Main).launch {
+            val title = array?.getString(0)
+            val message = array?.getString(1)
 
-            val a = FlexUtil.convertJSONArray(array)!!
-            var t = a[0] as String
+            val jsonObject = array?.get(2) as JSONObject
+            val basic: String? = jsonObject.get("basic").toString()
+            val destructive: String? = jsonObject.get("destructive").toString()
+            val cancel: String? = jsonObject.get("cancel").toString()
 
-            // 맵으로 바꾸는게 좋은듯
-            val dic = array!!.get(2) as JSONObject
-            val dic2 = dic.get("basic").toString()
-            val title = array!!.getString(0)
-            val contents = array.getString(1)
-            val btns = array.getJSONArray(2)
-            for(i in 0..btns.length()) {
-                if(btns.getJSONArray(i).getString(1) == "basic") {
-
-                }
-            }
-            btns.getJSONArray(0).getString(1)
-            val posButtonText
-                    = dic2
-            val negButtonText
-                    = array.getJSONArray(2).getJSONArray(1).getString(0)
             val posListener = DialogInterface.OnClickListener { _, _ ->
-                dialogAction?.promiseReturn(posButtonText)
+                dialogAction?.promiseReturn(basic)
             }
             val negListener = DialogInterface.OnClickListener { _, _ ->
-                dialogAction?.promiseReturn(negButtonText)
+                dialogAction?.promiseReturn(cancel)
             }
             val cancelListener = {
                 dialogAction?.promiseReturn(Constants.RESULT_CANCELED)
             }
 
-            Dialog.show(title, contents, posButtonText, negButtonText,
-                posListener, negListener, cancelListener)
+            Dialog.show(title, message, basic, destructive, cancel,
+                posListener, null, negListener, cancelListener)
         }
     }
 

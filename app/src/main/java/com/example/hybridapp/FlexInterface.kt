@@ -18,39 +18,31 @@ import org.json.JSONArray
 
 class FlexInterface {
 
-    /**
-     * Interface 명: Toast
-     * UI Thread에서 실행해야 함
-     * @param array 크기 2인 배열
-     *        arrray[0]: 토스트 텍스트
-     *        array[1]: true(showShortText) or false(showLongText)
-     */
     @FlexFuncInterface
     fun Toast(array: JSONArray) {
         CoroutineScope(Dispatchers.Main).launch {
-            if(array.getBoolean(1)) {
-                Toast.showShortText(array.get(0).toString())
+            val isShortToast = array.getBoolean(1)
+            val message = array.getString(0)
+
+            if(isShortToast) {
+                Toast.showShortText(message)
             } else {
-                Toast.showLongText(array.get(0).toString())
+                Toast.showLongText(message)
             }
         }
     }
 
     @FlexFuncInterface
-    fun ShortSnackbar(array: JSONArray) {
+    fun Snackbar(array: JSONArray) {
         CoroutineScope(Dispatchers.Main).launch {
+            val isShortSnackbar = array.getBoolean(1)
+            val message = array.getString(0)
 
-            Snackbar.showShortText(App.activity.findViewById(R.id.linearLayout),
-                array.get(0).toString())
-        }
-    }
-
-    @FlexFuncInterface
-    fun LongSnackbar(array: JSONArray) {
-        CoroutineScope(Dispatchers.Main).launch {
-
-            Snackbar.showLongText(App.activity.findViewById(R.id.linearLayout),
-                array.get(0).toString())
+            if(isShortSnackbar) {
+                Snackbar.showShortText(App.activity.findViewById(R.id.linearLayout), message)
+            } else {
+                Snackbar.showLongText(App.activity.findViewById(R.id.linearLayout), message)
+            }
         }
     }
 

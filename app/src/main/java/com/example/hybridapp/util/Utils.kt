@@ -47,11 +47,17 @@ object Utils {
     /** 위험 권한이 없을 경우 */
     fun requestDangerousPermissions(permissions: Array<out String>, permissionCode: Int) {
         if (existsDenialPermission(permissions)) {
-            Dialog.show(Constants.DIAL_TITLE, getDialogMessage(permissionCode),
-                Constants.DIAL_POS, Constants.DIAL_NEG,
+            Dialog.show(Constants.DIAL_TITLE,
+                getDialogMessage(permissionCode),
+                Constants.DIAL_POS,
+                null,
+                Constants.DIAL_NEG,
                 DialogInterface.OnClickListener { _, _ ->
                     requestAppSettingsIntent()
-                }, null, {})
+                },
+                null,
+                null,
+                {})
         } else {
             val permissionsToRequest = getPermissionsToRequest(permissions)
             requestPermissions(permissionsToRequest, permissionCode)

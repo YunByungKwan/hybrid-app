@@ -1,6 +1,11 @@
 # hybrid-app
 
 ## Dialog
+From Web >
+순서
+basic
+destuctive
+cancel
 
 #### 1. Toast
 

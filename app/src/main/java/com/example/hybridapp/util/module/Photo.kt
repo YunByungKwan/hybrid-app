@@ -10,40 +10,42 @@ import android.util.Base64
 import android.util.Log
 import app.dvkyun.flexhybridand.FlexAction
 import com.example.hybridapp.App
-import com.example.hybridapp.R
+import com.example.hybridapp.basic.BasicActivity
 import com.example.hybridapp.util.Constants
 import com.example.hybridapp.util.Utils
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import org.json.JSONArray
 import java.io.ByteArrayOutputStream
 
 object Photo {
-    
+
+    private val basicActivity = App.activity as BasicActivity
+
     /** 갤러리 호출 (1장) */
-    fun requestSingle() {
-        Constants.LOGE("requestSingle", Constants.TAG_PHOTO)
+    fun requestImage(action: FlexAction?) {
+        Constants.LOGE("requestImage", Constants.TAG_PHOTO)
 
         val singlePhotoIntent = getSinglePhotoIntent()
 
-        if(Utils().existsReceiveActivity(singlePhotoIntent, App.INSTANCE.packageManager)) {
-            App.activity.startActivityForResult(singlePhotoIntent, Constants.REQ_CODE_SINGLE_PHOTO)
+        if(Utils.existsReceiveActivity(singlePhotoIntent, App.INSTANCE.packageManager)) {
+            basicActivity.singlePhotoAction = action
+            basicActivity.startActivityForResult(singlePhotoIntent, Constants.REQ_CODE_SINGLE_PHOTO)
         } else {
             Log.e(Constants.TAG_UTILS, Constants.LOG_MSG_GALLERY)
+            action?.promiseReturn(null)
         }
     }
 
     /** 갤러리 호출 (여러 장) */
-    fun requestMultiple() {
-        Constants.LOGE("requestMultiple", Constants.TAG_PHOTO)
+    fun requestMultipleImages(action: FlexAction?) {
+        Constants.LOGE("requestMultipleImages", Constants.TAG_PHOTO)
 
         val multiplePhotosIntent = getMultiplePhotosIntent()
 
-        if(Utils().existsReceiveActivity(multiplePhotosIntent, App.INSTANCE.packageManager)) {
-            App.activity.startActivityForResult(multiplePhotosIntent, Constants.REQ_CODE_MULTIPLE_PHOTO)
+        if(Utils.existsReceiveActivity(multiplePhotosIntent, App.INSTANCE.packageManager)) {
+            basicActivity.multiplePhotosAction = action
+            basicActivity.startActivityForResult(multiplePhotosIntent, Constants.REQ_CODE_MULTIPLE_PHOTO)
         } else {
             Log.e(Constants.TAG_UTILS, Constants.LOG_MSG_GALLERY)
+            action?.promiseReturn(null)
         }
     }
 
@@ -96,20 +98,5 @@ object Photo {
         val byteArray = byteArrayOutputStream.toByteArray()
 
         return Base64.encodeToString(byteArray, Base64.NO_WRAP)
-    }
-
-    val lambda: (FlexAction?, JSONArray?) -> Unit = { action, _ ->
-        CoroutineScope(Dispatchers.Main).launch {
-//            funLOGE(getString(R.string.type_camera))
-
-            if(Utils().existAllPermission(arrayOf(Constants.PERM_CAMERA))) {
-                if (action != null) {
-                    Camera.request(action)
-                }
-            } else {
-                Utils().requestDangerousPermissions(arrayOf(Constants.PERM_CAMERA),
-                    Constants.REQ_PERM_CODE_CAMERA)
-            }
-        }
     }
 }

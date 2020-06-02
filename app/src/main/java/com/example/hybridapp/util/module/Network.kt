@@ -32,17 +32,12 @@ object Network {
             val networkCapabilities
                     = connectivityManger.getNetworkCapabilities(activeNetwork) ?: return false
             return when {
-                networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) -> {
-                    Log.e(Constants.TAG_NETWORK, "")
-
-                    true
-                }
+                networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) -> true
                 networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) -> true
                 else -> false
             }
         } else {
             Log.e(Constants.TAG_NETWORK, "Build version is smaller than Marshmallow.")
-
             connectivityManger.activeNetworkInfo ?: return false
         }
 

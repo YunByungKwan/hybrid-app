@@ -27,10 +27,6 @@ object Notification {
         Constants.LOGE("createChannel", Constants.TAG_NOTIFICATION)
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            Log.e(
-                Constants.TAG_NOTIFICATION,
-                "Version is greater(or equals) than ${Build.VERSION_CODES.O}")
-
             val channelId = "${App.activity.packageName}-$name"
             val mChannel = NotificationChannel(channelId, name, importance)
             mChannel.description = descriptionText
@@ -39,10 +35,6 @@ object Notification {
             val notificationManager
                     = App.activity.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             notificationManager.createNotificationChannel(mChannel)
-        } else {
-            Log.e(
-                Constants.TAG_NOTIFICATION,
-                "SDK VERSION ${Build.VERSION.SDK_INT} doesn't need channel.")
         }
     }
 
@@ -60,6 +52,7 @@ object Notification {
 
         val notificationManager
                 = NotificationManagerCompat.from(App.activity)
+
         notificationManager.notify(Constants.NOTIFICATION_ID, builder.build())
     }
 }

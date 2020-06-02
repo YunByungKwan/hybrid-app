@@ -1,4 +1,4 @@
-package com.example.hybridapp
+package com.example.hybridapp.data
 
 import android.content.Context
 import android.util.Log
@@ -17,7 +17,8 @@ abstract class LogUrlRoomDatabase: RoomDatabase() {
         private const val TAG = "LogUrlRoomDatabase"
 
         fun getDatabase(context: Context): LogUrlRoomDatabase {
-            val tempInstance = INSTANCE
+            val tempInstance =
+                INSTANCE
             if(tempInstance != null) {
                 Log.e(TAG, "Database is already created.")
 
@@ -30,6 +31,7 @@ abstract class LogUrlRoomDatabase: RoomDatabase() {
                     LogUrlRoomDatabase::class.java,
                     "url_database.db"
                 ).build()
+
 
                 INSTANCE = instance
 

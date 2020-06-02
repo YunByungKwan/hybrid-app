@@ -22,7 +22,7 @@ import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.ArrayList
 
-class Utils {
+object Utils {
 
     /** permissionName이 있는지 없는지 확인 */
     fun existsPermission(permissionName: String): Boolean
@@ -51,7 +51,7 @@ class Utils {
                 Constants.DIAL_POS, Constants.DIAL_NEG,
                 DialogInterface.OnClickListener { _, _ ->
                     requestAppSettingsIntent()
-                }, null)
+                }, null, {})
         } else {
             val permissionsToRequest = getPermissionsToRequest(permissions)
             requestPermissions(permissionsToRequest, permissionCode)

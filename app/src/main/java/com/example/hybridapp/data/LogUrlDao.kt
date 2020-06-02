@@ -1,6 +1,7 @@
-package com.example.hybridapp
+package com.example.hybridapp.data
 
 import androidx.room.*
+import com.example.hybridapp.data.LogUrl
 
 @Dao
 interface LogUrlDao {

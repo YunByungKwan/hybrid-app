@@ -1,43 +1,5 @@
 <resources>
     <string name="app_name">HybridApp</string>
-
-    <!-- Type -->
-    <string name="type_short_toast">ShortToast</string>
-    <string name="type_long_toast">LongToast</string>
-
-    <string name="type_short_snackbar">ShortSnackbar</string>
-    <string name="type_long_snackbar">LongSnackbar</string>
-
-    <string name="type_dialog">Dialog</string>
-
-    <string name="type_network">Network</string>
-    <string name="type_network_status">NetworkStatus</string>
-
-    <string name="type_permission">Permission</string>
-
-    <string name="type_camera">Camera</string>
-    <string name="type_qr_code_scan">QRCodeScan</string>
-
-    <string name="type_single_photo">SinglePhoto</string>
-    <string name="type_multi_photo">MultiplePhotos</string>
-
-    <string name="type_location">Location</string>
-    <string name="type_bio_authentication">BioAuthentication</string>
-
-    <string name="type_record">Record</string>
-
-    <string name="type_send_sms">SendSMS</string>
-    <string name="type_receive_sms">ReceiveSMS</string>
-
-    <string name="type_notification">Notification</string>
-
-    <string name="type_save_shared_preferences">SaveSharedPreferences</string>
-    <string name="type_load_shared_preferences">LoadSharedPreferences</string>
-
-    <string name="type_url_log">LogUrl</string>
-
-    <string name="type_pop_up_window">PopUp</string>
-
     <!-- BioAuthentication -->
     <string name="biometricPrompt_title">생체 인증</string>
     <string name="biometricPrompt_description">인증을 진행해 주세요.</string>
@@ -58,9 +20,6 @@
     <string name="network_connected_text">네트워크가 연결되어 있습니다.</string>
     <string name="network_disconnected_text">네트워크가 연결되어 있지 않습니다.</string>
 
-    <string name="network_cellular_text">데이터에 연결되어 있습니다.</string>
-    <string name="network_wifi_text">와이파이에 연결되어 있습니다.</string>
-    <string name="network_no_text">네트워크가 연결되어 있지 않습니다.</string>
 
     <!-- 앱 접속 이력 관리
      -->

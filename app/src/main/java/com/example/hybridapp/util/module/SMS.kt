@@ -1,5 +1,6 @@
 package com.example.hybridapp.util.module
 
+import android.content.IntentFilter
 import android.telephony.SmsManager
 import android.util.Log
 import com.example.hybridapp.App
@@ -19,6 +20,21 @@ import com.google.android.gms.auth.api.phone.SmsRetriever
  */
 
 object SMS {
+
+    fun registerReceiver(receiver: SMSReceiver?) {
+        val filter = IntentFilter()
+        filter.addAction(receiver!!.SMSRetrievedAction)
+
+        App.activity.registerReceiver(receiver, filter)
+    }
+
+    fun unregisterReceiver(receiver: SMSReceiver?) {
+        if(receiver != null) {
+            App.activity.unregisterReceiver(receiver)
+        } else {
+            Log.e(Constants.TAG_MAIN, "smsReceiver is null in onPause().")
+        }
+    }
 
     /** Send message */
     fun sendMessage(phoneNumber: String, message: String) {

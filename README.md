@@ -62,3 +62,30 @@ private fun convertUriToBitmap(uri: Uri): Bitmap
 internal fun convertBitmapToBase64(bitmap: Bitmap): String
 
 fun takeAppSettingsIntent(): Intent
+
+## Notification
+
+
+## BioAuthentication
+필요 권한 > USE_BIOMETRIC(Protection level: normal)
+```xml
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.example.hybridapp">
+    ...
+    <!-- Biometric -->
+    <uses-permission android:name="android.permission.USE_BIOMETRIC" />
+    ...
+```
+
+의존성 추가 >
+```gradle
+// Biometric
+dependencies {
+    ...
+    implementation 'androidx.biometric:biometric:1.0.1'
+    ...
+}
+```
+
+참고 사이트 >
+- https://dev.to/ranilch/securing-data-with-biometricprompt-35mo

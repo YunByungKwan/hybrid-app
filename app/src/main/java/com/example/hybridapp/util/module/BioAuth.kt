@@ -12,7 +12,7 @@ import java.util.concurrent.Executor
 
 object BioAuth {
 
-    /** 생체 인증이 지원되는지 판별 */
+    /** 생체 인증이 가능한지 판별 */
     fun canAuthenticate(): Boolean {
         val biometricManager = BiometricManager.from(App.INSTANCE)
         when (biometricManager.canAuthenticate()) {
@@ -44,30 +44,35 @@ object BioAuth {
     fun showPrompt(fragmentActivity: FragmentActivity, action: FlexAction?){
         Constants.LOGE("showPrompt", Constants.TAG_BIO_AUTH)
 
-        val basicActivity = App.activity as BasicActivity
-        basicActivity.bioAuthAction = action
+        (App.activity as BasicActivity).bioAuthAction = action
 
-        var biometricPromptInfo = BiometricPrompt.PromptInfo.Builder()
-            .setTitle(Constants.BIO_PROMPT_TITLE)
-            .setDescription(Constants.BIO_PROMPT_DESCRIPTION)
-            .setSubtitle(Constants.BIO_PROMPT_SUB_TITLE)
-            .setNegativeButtonText(Constants.BIO_PROMPT_NEGATIVE_BUTTON)
-            .build()
+        val promptInfo = getBiometricPromptInfo()
 
-        val authenticationCallback = getAuthenticationCallback()
-        val biometricPrompt = BiometricPrompt(fragmentActivity, Executor {  }, authenticationCallback)
+        val biometricPrompt = BiometricPrompt(fragmentActivity,
+            Executor {}, getAuthenticationCallback())
 
-        biometricPrompt.authenticate(biometricPromptInfo)
+        biometricPrompt.authenticate(promptInfo)
+    }
+
+    private fun getBiometricPromptInfo(): BiometricPrompt.PromptInfo {
+        return BiometricPrompt.PromptInfo.Builder()
+        .setTitle(Constants.BIO_PROMPT_TITLE)
+        .setDescription(Constants.BIO_PROMPT_DESCRIPTION)
+        .setSubtitle(Constants.BIO_PROMPT_SUB_TITLE)
+        .setNegativeButtonText(Constants.BIO_PROMPT_NEGATIVE_BUTTON)
+        .build()
     }
 
     private fun getAuthenticationCallback() = object : BiometricPrompt.AuthenticationCallback() {
         override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
             super.onAuthenticationError(errorCode, errString)
+
             Constants.LOGE("onAuthenticationError", Constants.TAG_BIO_AUTH)
         }
 
         override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
-            //super.onAuthenticationSucceeded(result)
+            super.onAuthenticationSucceeded(result)
+
             Constants.LOGE("onAuthenticationSucceeded", Constants.TAG_BIO_AUTH)
 
             val cryptoObject = result.cryptoObject

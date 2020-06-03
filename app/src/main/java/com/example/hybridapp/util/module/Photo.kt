@@ -7,6 +7,7 @@ import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
 import android.util.Base64
+import android.util.DisplayMetrics
 import android.util.Log
 import app.dvkyun.flexhybridand.FlexAction
 import com.example.hybridapp.App
@@ -20,14 +21,25 @@ object Photo {
     private val basicActivity = App.activity as BasicActivity
 
     /** 갤러리 호출 (1장) */
-    fun requestImage(action: FlexAction?) {
+    fun requestImage(action: FlexAction?, ratio: Double?, isWidthRatio: Boolean?) {
         Constants.LOGE("requestImage", Constants.TAG_PHOTO)
 
         val singlePhotoIntent = getSinglePhotoIntent()
+        singlePhotoIntent.putExtra("ratio", ratio)
 
         if(Utils.existsReceiveActivity(singlePhotoIntent, App.INSTANCE.packageManager)) {
             basicActivity.singlePhotoAction = action
-            basicActivity.startActivityForResult(singlePhotoIntent, Constants.REQ_CODE_SINGLE_PHOTO)
+
+            if(isWidthRatio != null) {
+                singlePhotoIntent.putExtra("isWidthRatio", isWidthRatio)
+                if(isWidthRatio) {
+                    basicActivity.startActivityForResult(singlePhotoIntent, Constants.REQ_CODE_PHOTO_DEVICE_RATIO)
+                } else {
+                    basicActivity.startActivityForResult(singlePhotoIntent, Constants.REQ_CODE_PHOTO_DEVICE_RATIO)
+                }
+            } else {
+                basicActivity.startActivityForResult(singlePhotoIntent, Constants.REQ_CODE_PHOTO_RATIO)
+            }
         } else {
             Log.e(Constants.TAG_UTILS, Constants.LOG_MSG_GALLERY)
             action?.promiseReturn(null)
@@ -35,14 +47,25 @@ object Photo {
     }
 
     /** 갤러리 호출 (여러 장) */
-    fun requestMultipleImages(action: FlexAction?) {
+    fun requestMultipleImages(action: FlexAction?, ratio: Double?, isWidthRatio: Boolean?) {
         Constants.LOGE("requestMultipleImages", Constants.TAG_PHOTO)
 
         val multiplePhotosIntent = getMultiplePhotosIntent()
-
+        multiplePhotosIntent.putExtra("ratio", ratio)
+        multiplePhotosIntent.putExtra("isWidthRatio", isWidthRatio)
         if(Utils.existsReceiveActivity(multiplePhotosIntent, App.INSTANCE.packageManager)) {
             basicActivity.multiplePhotosAction = action
-            basicActivity.startActivityForResult(multiplePhotosIntent, Constants.REQ_CODE_MULTIPLE_PHOTO)
+
+            if(isWidthRatio != null) {
+                multiplePhotosIntent.putExtra("isWidthRatio", isWidthRatio)
+                if(isWidthRatio) {
+                    basicActivity.startActivityForResult(multiplePhotosIntent, Constants.REQ_CODE_MULTI_PHOTO_DEVICE_RATIO)
+                } else {
+                    basicActivity.startActivityForResult(multiplePhotosIntent, Constants.REQ_CODE_MULTI_PHOTO_DEVICE_RATIO)
+                }
+            } else {
+                basicActivity.startActivityForResult(multiplePhotosIntent, Constants.REQ_CODE_MULTI_PHOTO_RATIO)
+            }
         } else {
             Log.e(Constants.TAG_UTILS, Constants.LOG_MSG_GALLERY)
             action?.promiseReturn(null)
@@ -100,11 +123,34 @@ object Photo {
         return Base64.encodeToString(byteArray, Base64.NO_WRAP)
     }
 
-    /** Image resize */
+    /** 디바이스 화면 비율에 맞게 리사이즈 */
+    fun resizeBitmapByDeviceRatio(bitmap: Bitmap, ratio: Double, isWidthRatio: Boolean?): Bitmap {
+        val displayMetrics = DisplayMetrics()
+        App.activity.windowManager.defaultDisplay.getMetrics(displayMetrics)
+
+        val screenWidth = displayMetrics.widthPixels
+        val screenHeight = displayMetrics.heightPixels
+
+        return if(isWidthRatio!!) {
+            val resizeWidth = (screenWidth * ratio).toInt()
+            val resizeHeight = (bitmap.height * ((screenWidth * ratio) / bitmap.width)).toInt()
+
+            Bitmap.createScaledBitmap(bitmap, resizeWidth, resizeHeight, true)
+        } else {
+            val resizeWidth = (bitmap.height * ((screenHeight * ratio) / bitmap.height)).toInt()
+            val resizeHeight = (screenHeight * ratio).toInt()
+
+            Bitmap.createScaledBitmap(bitmap, resizeWidth, resizeHeight, true)
+        }
+    }
+
+    /** 이미지 비율에 맞게 리사이즈 */
     fun resizeBitmapByRatio(bitmap: Bitmap, aspectRatio: Double): Bitmap {
         val width = (bitmap.width * aspectRatio).toInt()
         val height = (bitmap.height * aspectRatio).toInt()
 
         return Bitmap.createScaledBitmap(bitmap, width, height, false)
     }
+
+
 }

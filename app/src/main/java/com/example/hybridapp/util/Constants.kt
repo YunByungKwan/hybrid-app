@@ -8,7 +8,7 @@ import com.google.zxing.integration.android.IntentIntegrator
 
 class Constants {
     @Retention(AnnotationRetention.SOURCE)
-    @IntDef(REQ_CODE_CAMERA, REQ_PERM_CODE_CAMERA)
+    @IntDef(REQ_PERM_CODE_CAMERA)
     @StringDef(TAG_UTILS, TAG_TOAST, TAG_SNACKBAR, TAG_DIALOG, TAG_PERMISSION,
         PERM_CAMERA, TAG_NETWORK, PERM_WRITE_EXTERNAL_STORAGE, PERM_READ_EXTERNAL_STORAGE
     )
@@ -16,42 +16,38 @@ class Constants {
 
    companion object {
 
+       /** WebView Url */
+       const val BASE_URL = "file:///android_asset"
+
+       const val SHARED_FILE_NAME = "prefs"
+
        /** 권한 이름 */
        const val PERM_CAMERA = Manifest.permission.CAMERA
        const val PERM_WRITE_EXTERNAL_STORAGE = Manifest.permission.WRITE_EXTERNAL_STORAGE
        const val PERM_READ_EXTERNAL_STORAGE = Manifest.permission.READ_EXTERNAL_STORAGE
        const val PERM_ACCESS_FINE_LOCATION = Manifest.permission.ACCESS_FINE_LOCATION
        const val PERM_ACCESS_COARSE_LOCATION = Manifest.permission.ACCESS_COARSE_LOCATION
-       const val PERM_ACCESS_BACKGROUND_LOCATION = Manifest.permission.ACCESS_BACKGROUND_LOCATION
        const val PERM_RECORD_AUDIO = Manifest.permission.RECORD_AUDIO
        const val PERM_SEND_SMS = Manifest.permission.SEND_SMS
 
        /** 인터페이스, 액션 이름 */
-       const val TYPE_SHORT_SNACKBAR = "ShortSnackbar"
-       const val TYPE_LONG_SNACKBAR = "LongSnackbar"
        const val TYPE_DIALOG = "Dialog"
        const val TYPE_NETWORK = "Network"
-       const val TYPE_NETWORK_STATUS = "NetworkStatus"
-       const val TYPE_CAMERA = "Camera"
+       const val TYPE_CAMERA_DEVICE_RATIO = "CameraByDeviceRatio"
+       const val TYPE_CAMERA_RATIO = "CameraByRatio"
+       const val TYPE_PHOTO_DEVICE_RATIO = "PhotoByDeviceRatio"
+       const val TYPE_PHOTO_RATIO = "PhotoByRatio"
+       const val TYPE_MULTI_PHOTO_DEVICE_RATIO = "MultiPhotoByDeviceRatio"
+       const val TYPE_MULTI_PHOTO_RATIO = "MultiPhotoByRatio"
        const val TYPE_QR_CODE_SCAN = "QRCodeScan"
-       const val TYPE_SINGLE_PHOTO = "SinglePhoto"
-       const val TYPE_MULTI_PHOTO = "MultiplePhotos"
        const val TYPE_LOCATION = "Location"
        const val TYPE_BIO_AUTHENTICATION = "BioAuthentication"
        const val TYPE_RECORD = "Record"
-       const val TYPE_SEND_SMS = "SendSMS"
-       const val TYPE_RECEIVE_SMS = "ReceiveSMS"
-       const val TYPE_NOTIFICATION = "Notification"
-       const val TYPE_SAVE_SHARED_PREFERENCES = "SaveSharedPreferences"
        const val TYPE_LOAD_SHARED_PREFERENCES = "LoadSharedPreferences"
-       const val TYPE_URL_LOG = "LogUrl"
        const val TYPE_POP_UP_WINDOW = "PopUp"
        const val TYPE_LOCAL_REPO = "LocalRepository"
 
-       /** WebView Url */
-       const val BASE_URL = "file:///android_asset"
 
-       const val SHARED_FILE_NAME = "prefs"
 
        /** Class or Activity LOG TAG */
        const val TAG_UTILS = "Utils class"
@@ -88,9 +84,13 @@ class Constants {
        const val DIAL_POS = "설정"
        const val DIAL_NEG = "닫기"
 
+       /** 권한 다이얼로그 텍스트 */
        const val DIAL_MSG_CAMERA = "앱을 사용하기 위해 카메라 권한이 필요합니다."
-       const val DIAL_MSG_GALLERY = "앱을 사용하기 위해 저장소 읽기/쓰기 권한이 필요합니다."
-       const val DIAL_MSG_SMS = "앱을 사용하기 위해 SMS 보내기 권한이 필요합니다."
+       const val DIAL_MSG_WRITE = "앱을 사용하기 위해 저장소 쓰기 권한이 필요합니다."
+       const val DIAL_MSG_READ_WRITE = "앱을 사용하기 위해 저장소 읽기/쓰기 권한이 필요합니다."
+       const val DIAL_MSG_LOCATION = "앱을 사용하기 위해 위치 권한이 필요합니다."
+       const val DIAL_MSG_RECORD_AUDIO = "앱을 사용하기 위해 음성 녹음 권한이 필요합니다."
+       const val DIAL_MSG_SEND_SMS = "앱을 사용하기 위해 SMS 보내기 권한이 필요합니다."
 
        const val DENIED_DIAL_TITLE = "알림"
        const val DENIED_DIAL_MSG = "해당 권한이 거부되었습니다."
@@ -120,23 +120,23 @@ class Constants {
        const val STATUS_WIFI = 2
 
        /** INTENT REQUEST CODE */
-       const val REQ_CODE_CAMERA = 10001
-       const val REQ_CODE_SINGLE_PHOTO = 10002
-       const val REQ_CODE_MULTIPLE_PHOTO = 10003
-       const val REQ_CODE_FILE_UPLOAD = 10004
+       const val REQ_CODE_CAMERA_DEVICE_RATIO = 10001
+       const val REQ_CODE_CAMERA_RATIO = 10002
+       const val REQ_CODE_PHOTO_DEVICE_RATIO = 10003
+       const val REQ_CODE_PHOTO_RATIO = 10004
+       const val REQ_CODE_MULTI_PHOTO_DEVICE_RATIO = 10005
+       const val REQ_CODE_MULTI_PHOTO_RATIO = 10006
+       const val REQ_CODE_FILE_UPLOAD = 10007
        const val REQ_CODE_QR =  IntentIntegrator.REQUEST_CODE
-       const val REQ_CODE_RECORD = 10005
+       const val REQ_CODE_RECORD = 10008
 
        /** PERMISSION CODE */
-       const val REQ_PERM_CODE_CAMERA = 1003
-       const val REQ_PERM_CODE_SINGLE_PHOTO = 1004
-       const val REQ_PERM_CODE_MULTIPLE_PHOTO = 1005
-       const val REQ_PERM_CODE_WRITE = 1011
-       const val REQ_PERM_CODE_READ_WRITE = 1010
-       const val REQ_PERM_CODE_LOCATION = 1006
-       const val REQ_PERM_CODE_RECORD_AUDIO = 1007
-       const val REQ_PERM_CODE_SMS = 1008
-       const val REQ_PERM_CODE_SEND_SMS = 1009
+       const val REQ_PERM_CODE_CAMERA = 1001
+       const val REQ_PERM_CODE_WRITE = 1002
+       const val REQ_PERM_CODE_READ_WRITE = 1003
+       const val REQ_PERM_CODE_LOCATION = 1004
+       const val REQ_PERM_CODE_RECORD_AUDIO = 1005
+       const val REQ_PERM_CODE_SEND_SMS = 1006
 
        const val NOTIFICATION_ID = 101
 

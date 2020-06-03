@@ -107,14 +107,20 @@ object Utils {
             Constants.REQ_PERM_CODE_CAMERA -> {
                 return Constants.DIAL_MSG_CAMERA
             }
-            Constants.REQ_PERM_CODE_SINGLE_PHOTO -> {
-                return Constants.DIAL_MSG_GALLERY
+            Constants.REQ_PERM_CODE_WRITE -> {
+                return Constants.DIAL_MSG_WRITE
             }
-            Constants.REQ_PERM_CODE_MULTIPLE_PHOTO -> {
-                return Constants.DIAL_MSG_GALLERY
+            Constants.REQ_PERM_CODE_READ_WRITE -> {
+                return Constants.DIAL_MSG_READ_WRITE
             }
-            Constants.REQ_PERM_CODE_SMS -> {
-                return Constants.DIAL_MSG_SMS
+            Constants.REQ_PERM_CODE_LOCATION -> {
+                return Constants.DIAL_MSG_LOCATION
+            }
+            Constants.REQ_PERM_CODE_RECORD_AUDIO -> {
+                return Constants.DIAL_MSG_RECORD_AUDIO
+            }
+            Constants.REQ_PERM_CODE_SEND_SMS -> {
+                return Constants.DIAL_MSG_SEND_SMS
             }
         }
 

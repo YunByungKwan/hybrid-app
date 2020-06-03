@@ -6,7 +6,7 @@ import com.example.hybridapp.data.LogUrl
 @Dao
 interface LogUrlDao {
 
-    @Query("SELECT * FROM url_log")
+    @Query("SELECT * FROM url_log ORDER BY visitingTime DESC")
     fun getAll(): List<LogUrl>
 
     // vararg: 가변인자

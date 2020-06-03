@@ -44,6 +44,94 @@
                 console.log(result);
             }
 
+            const CameraByDeviceRatio = async () => {
+                const result = await $flex.CameraByDeviceRatio(0.8, true);
+
+                if(result != 'Cancel'){
+                    console.log(result);
+
+                    var imgTag = document.createElement("img")
+                    imgTag.src = 'data:image/png;base64,' + result;
+                    var imgDiv = document.getElementById('photos');
+                    imgDiv.appendChild(imgTag)
+                }else {
+                    console.log(result)
+                }
+            }
+
+            const CameraByRatio = async () => {
+                const result = await $flex.CameraByRatio(0.8);
+
+                if(result != 'Cancel'){
+                    console.log(result);
+
+                    var imgTag = document.createElement("img")
+                    imgTag.src = 'data:image/png;base64,' + result;
+                    var imgDiv = document.getElementById('photos');
+                    imgDiv.appendChild(imgTag)
+                }else {
+                    console.log(result)
+                }
+            }
+
+            const PhotoByDeviceRatio = async () => {
+                const result = await $flex.PhotoByDeviceRatio(0.6, false);
+
+                if(result != 'Cancel'){
+                    var imgTag = document.createElement("img")
+                    imgTag.src = 'data:image/png;base64,' + result;
+                    var imgDiv = document.getElementById('photos');
+                    imgDiv.appendChild(imgTag)
+                }else {
+                    console.log(result)
+                }
+            }
+
+            const PhotoByRatio = async () => {
+                const result = await $flex.PhotoByRatio(0.6);
+
+                if(result != 'Cancel'){
+                    var imgTag = document.createElement("img")
+                    imgTag.src = 'data:image/png;base64,' + result;
+                    var imgDiv = document.getElementById('photos');
+                    imgDiv.appendChild(imgTag)
+                }else {
+                    console.log(result)
+                }
+            }
+
+            const MultiPhotoByDeviceRatio = async () => {
+                const result = await $flex.MultiPhotoByDeviceRatio(0.3, true);
+
+                if(result != 'Cancel'){
+                    console.log('Return by Native with MultiplePhotos   : ' + result.length)
+                    for (var i=0; i<result.length; i++){
+                        var imgTag = document.createElement("img")
+                        imgTag.src = 'data:image/png;base64,' + result[i];
+                        var imgDiv = document.getElementById('photos');
+                        imgDiv.appendChild(imgTag)
+                    }
+                }else {
+                    console.log(result)
+                }
+            }
+
+            const MultiPhotoByRatio = async () => {
+                const result = await $flex.MultiPhotoByRatio(0.3);
+
+                if(result != 'Cancel'){
+                    console.log('Return by Native with MultiplePhotos   : ' + result.length)
+                    for (var i=0; i<result.length; i++){
+                        var imgTag = document.createElement("img")
+                        imgTag.src = 'data:image/png;base64,' + result[i];
+                        var imgDiv = document.getElementById('photos');
+                        imgDiv.appendChild(imgTag)
+                    }
+                }else {
+                    console.log(result)
+                }
+            }
+
             const Camera = async () => {
                 const result = await $flex.Camera();
                 if(result != 'Cancel'){
@@ -201,6 +289,13 @@
 
     <!-- Camera -->
     <label style="font-size: 40px; width: 100%; height: 150px;">Camera</label>
+    <button onclick='CameraByDeviceRatio()' style="font-size: 40px; width: 100%; height: 150px;">CameraByDeviceRatio</button>
+    <button onclick='CameraByRatio()' style="font-size: 40px; width: 100%; height: 150px;">CameraByRatio</button>
+    <button onclick='PhotoByDeviceRatio()' style="font-size: 40px; width: 100%; height: 150px;">PhotoByDeviceRatio</button>
+    <button onclick='PhotoByRatio()' style="font-size: 40px; width: 100%; height: 150px;">PhotoByRatio</button>
+    <button onclick='MultiPhotoByDeviceRatio()' style="font-size: 40px; width: 100%; height: 150px;">MultiPhotoByDeviceRatio</button>
+    <button onclick='MultiPhotoByRatio()' style="font-size: 40px; width: 100%; height: 150px;">MultiPhotoByRatio</button>
+
     <button onclick='Camera()' style="font-size: 40px; width: 100%; height: 150px;">카메라 Intent 호출하기</button>
     <button onclick='QRCodeScan()' style="font-size: 40px; width: 100%; height: 150px;">QR Code 스캔</button>
 

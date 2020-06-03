@@ -6,11 +6,16 @@ import app.dvkyun.flexhybridand.FlexAction
 
 @SuppressLint("Registered")
 open class BasicActivity: AppCompatActivity() {
+
+    var cameraDeviceAction: FlexAction? = null
     var cameraAction: FlexAction? = null
+    var photoDeviceAction: FlexAction? = null
+    var photoAction: FlexAction? = null
+    var multiplePhotoDeviceAction: FlexAction? = null
+    var multiplePhotosAction: FlexAction? = null
     var qrCodeScanAction: FlexAction? = null
     var singlePhotoAction: FlexAction? = null
-    var multiplePhotosAction: FlexAction? = null
-    var locationAction: FlexAction? = null
     var bioAuthAction: FlexAction? = null
     var recordAction: FlexAction? = null
+
 }

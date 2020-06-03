@@ -7,6 +7,8 @@ import android.view.View
 import android.view.animation.AnimationUtils
 import androidx.core.app.NotificationManagerCompat
 import app.dvkyun.flexhybridand.FlexFuncInterface
+import com.example.hybridapp.data.LogUrlRepository
+import com.example.hybridapp.data.LogUrlRoomDatabase
 import com.example.hybridapp.util.Constants
 import com.example.hybridapp.util.Utils
 import com.example.hybridapp.util.module.*
@@ -120,12 +122,13 @@ class FlexInterface {
 
     @FlexFuncInterface
     fun LogUrl(array: JSONArray) {
-//        CoroutineScope(Dispatchers.Default).launch {
-//            val repository =
-//            val logUrls = repository.allLogUrls
-//            for(i in logUrls) {
-//                Log.e(Constants.TAG_MAIN, "${i.id}, ${i.visitingTime}, ${i.visitingUrl}")
-//            }
-//        }
+        CoroutineScope(Dispatchers.Default).launch {
+            val logUrlDao = LogUrlRoomDatabase.getDatabase(App.INSTANCE).logUrlDao()
+            val repository = LogUrlRepository(logUrlDao)
+            val logUrls = repository.allLogUrls
+            for(i in logUrls) {
+                Log.e(Constants.TAG_MAIN, "${i.id}, ${i.visitingTime}, ${i.visitingUrl}")
+            }
+        }
     }
 }

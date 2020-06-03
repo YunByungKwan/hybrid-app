@@ -4,6 +4,7 @@ import android.content.DialogInterface
 import androidx.fragment.app.FragmentActivity
 import app.dvkyun.flexhybridand.FlexAction
 import com.example.hybridapp.App
+import com.example.hybridapp.basic.BasicActivity
 import com.example.hybridapp.util.Constants
 import com.example.hybridapp.util.Utils
 import kotlinx.coroutines.CoroutineScope
@@ -60,36 +61,109 @@ object Action {
         }
     }
 
-    val networkStatus: (FlexAction?, JSONArray?) -> Unit = { networkStatusAction, _ ->
+    val cameraDeviceRatio: (FlexAction?, JSONArray?) -> Unit = { cameraDeviceAction, array ->
         CoroutineScope(Dispatchers.Main).launch {
-            when (Network.getStatus()) {
-                Constants.STATUS_CELLULAR -> {
-                    Toast.showShortText(Constants.TOAST_MSG_CELLULAR)
-                    networkStatusAction?.promiseReturn(Constants.STATUS_CELLULAR)
-                }
-                Constants.STATUS_WIFI -> {
-                    Toast.showShortText(Constants.TOAST_MSG_WIFI)
-                    networkStatusAction?.promiseReturn(Constants.STATUS_WIFI)
-                }
-                Constants.STATUS_NO -> {
-                    Toast.showShortText(Constants.TOAST_MSG_NO)
-                    networkStatusAction?.promiseReturn(Constants.STATUS_NO)
-                }
-            }
-        }
-    }
+            val ratio = array?.getDouble(0)
+            val isWidthRatio = array?.getBoolean(1)
 
-    val camera: (FlexAction?, JSONArray?) -> Unit = { cameraAction, _ ->
-        CoroutineScope(Dispatchers.Main).launch {
             if(Utils.existAllPermission(arrayOf(Constants.PERM_CAMERA))) {
-                if (cameraAction != null) {
-                    Camera.request(cameraAction)
+                if (cameraDeviceAction != null) {
+                    Camera.request(cameraDeviceAction, ratio, isWidthRatio)
                 }
             } else {
                 Utils.requestDangerousPermissions(arrayOf(Constants.PERM_CAMERA),
                     Constants.REQ_PERM_CODE_CAMERA)
             }
         }
+    }
+
+    val cameraRatio: (FlexAction?, JSONArray?) -> Unit = { cameraAction, array ->
+        CoroutineScope(Dispatchers.Main).launch {
+            val ratio = array?.getDouble(0)
+
+            if(Utils.existAllPermission(arrayOf(Constants.PERM_CAMERA))) {
+                if (cameraAction != null) {
+                    Camera.request(cameraAction, ratio, null)
+                }
+            } else {
+                Utils.requestDangerousPermissions(arrayOf(Constants.PERM_CAMERA),
+                    Constants.REQ_PERM_CODE_CAMERA)
+            }
+        }
+    }
+
+    val photoDeviceRatio: (FlexAction?, JSONArray?) -> Unit = { photoDeviceAction, array ->
+        CoroutineScope(Dispatchers.Main).launch {
+            val ratio = array?.getDouble(0)
+            val isWidthRatio = array?.getBoolean(1)
+
+            val storagePermissions = arrayOf(Constants.PERM_WRITE_EXTERNAL_STORAGE,
+                Constants.PERM_READ_EXTERNAL_STORAGE)
+
+            if(Utils.existAllPermission(storagePermissions)) {
+                if (photoDeviceAction != null) {
+                    Photo.requestImage(photoDeviceAction, ratio, isWidthRatio!!)
+                }
+            } else {
+                Utils.requestDangerousPermissions(storagePermissions,
+                    Constants.REQ_PERM_CODE_READ_WRITE)
+            }
+        }
+    }
+
+    val photoRatio: (FlexAction?, JSONArray?) -> Unit = { photoAction, array ->
+        CoroutineScope(Dispatchers.Main).launch {
+            val ratio = array?.getDouble(0)
+
+            val storagePermissions = arrayOf(Constants.PERM_WRITE_EXTERNAL_STORAGE,
+                Constants.PERM_READ_EXTERNAL_STORAGE)
+
+            if(Utils.existAllPermission(storagePermissions)) {
+                if (photoAction != null) {
+                    Photo.requestImage(photoAction, ratio, null)
+                }
+            } else {
+                Utils.requestDangerousPermissions(storagePermissions,
+                    Constants.REQ_PERM_CODE_READ_WRITE)
+            }
+        }
+    }
+
+    val multiPhotoDeviceRatio: (FlexAction?, JSONArray?) -> Unit = { multiplePhotoDeviceAction, array ->
+        CoroutineScope(Dispatchers.Main).launch {
+            val ratio = array?.getDouble(0)
+            val isWidthRatio = array?.getBoolean(1)
+
+            val storagePermissions =
+                arrayOf(Constants.PERM_WRITE_EXTERNAL_STORAGE,
+                    Constants.PERM_READ_EXTERNAL_STORAGE)
+
+            if(Utils.existAllPermission(storagePermissions)) {
+                Photo.requestMultipleImages(multiplePhotoDeviceAction, ratio, isWidthRatio!!)
+            } else {
+                Utils.requestDangerousPermissions(storagePermissions,
+                    Constants.REQ_PERM_CODE_READ_WRITE)
+            }
+        }
+
+    }
+
+    val multiPhotoRatio: (FlexAction?, JSONArray?) -> Unit = { multiplePhotoAction, array ->
+        CoroutineScope(Dispatchers.Main).launch {
+            val ratio = array?.getDouble(0)
+
+            val storagePermissions =
+                arrayOf(Constants.PERM_WRITE_EXTERNAL_STORAGE,
+                    Constants.PERM_READ_EXTERNAL_STORAGE)
+
+            if(Utils.existAllPermission(storagePermissions)) {
+                Photo.requestMultipleImages(multiplePhotoAction, ratio, null)
+            } else {
+                Utils.requestDangerousPermissions(storagePermissions,
+                    Constants.REQ_PERM_CODE_READ_WRITE)
+            }
+        }
+
     }
 
     val qrcode: (FlexAction?, JSONArray?) -> Unit = { qrCodeAction, _->
@@ -99,37 +173,6 @@ object Action {
             Utils.requestDangerousPermissions(arrayOf(Constants.PERM_CAMERA),
                 Constants.REQ_PERM_CODE_CAMERA)
         }
-    }
-    val singlePhoto: (FlexAction?, JSONArray?) -> Unit = { singlePhotoAction, _ ->
-        CoroutineScope(Dispatchers.Main).launch {
-            val storagePermissions = arrayOf(Constants.PERM_WRITE_EXTERNAL_STORAGE,
-                Constants.PERM_READ_EXTERNAL_STORAGE)
-
-            if(Utils.existAllPermission(storagePermissions)) {
-                if (singlePhotoAction != null) {
-                    Photo.requestImage(singlePhotoAction)
-                }
-            } else {
-                Utils.requestDangerousPermissions(storagePermissions,
-                    Constants.REQ_PERM_CODE_READ_WRITE)
-            }
-        }
-    }
-
-    val multiplePhoto: (FlexAction?, JSONArray?) -> Unit = { multiplePhotoAction, _ ->
-        CoroutineScope(Dispatchers.Main).launch {
-            val storagePermissions =
-                arrayOf(Constants.PERM_WRITE_EXTERNAL_STORAGE,
-                Constants.PERM_READ_EXTERNAL_STORAGE)
-
-            if(Utils.existAllPermission(storagePermissions)) {
-                Photo.requestMultipleImages(multiplePhotoAction)
-            } else {
-                Utils.requestDangerousPermissions(storagePermissions,
-                    Constants.REQ_PERM_CODE_READ_WRITE)
-            }
-        }
-
     }
 
     val location: (FlexAction?, JSONArray?) -> Unit = { locationAction, _->
@@ -166,9 +209,6 @@ object Action {
         }
     }
 
-    /**
-     * @param array
-     */
     val localRepository: (FlexAction?, JSONArray?) -> Unit = { localRepoAction, array ->
         val state = array!!.getJSONArray(0).getInt(1)
 

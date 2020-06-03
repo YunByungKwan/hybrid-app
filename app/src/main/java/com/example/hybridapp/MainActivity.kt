@@ -67,6 +67,7 @@ class MainActivity : BasicActivity() {
 
         setFlexWebViewSettings()
 
+        setInterface()
         setActions()
 
         /** File Download */

@@ -5,16 +5,19 @@ import android.app.DownloadManager
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
+import android.graphics.Point
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Environment
+import android.util.DisplayMetrics
 import android.util.Log
 import android.view.View
 import android.view.animation.AnimationUtils
 import android.webkit.ValueCallback
 import android.webkit.WebChromeClient
 import android.webkit.WebView
+import androidx.core.graphics.BitmapCompat
 import app.dvkyun.flexhybridand.FlexWebChromeClient
 import com.example.hybridapp.data.LogUrlRepository
 import com.example.hybridapp.data.LogUrlRoomDatabase
@@ -131,7 +134,7 @@ class MainActivity : BasicActivity() {
     private fun setFlexWebViewSettings() {
         flex_pop_up_web_view.setBaseUrl(Constants.BASE_URL)
         flex_web_view.setBaseUrl(Constants.BASE_URL)
-        flex_web_view.loadUrl("file:///android_asset/demo/index.html")
+        flex_web_view.loadUrl("file:///android_asset/html/test.html")
         flex_web_view.addFlexInterface(FlexInterface())
         flex_web_view.settings.setSupportMultipleWindows(true)
         WebView.setWebContentsDebuggingEnabled(true)
@@ -226,9 +229,16 @@ class MainActivity : BasicActivity() {
                     val imageBitmap = data?.extras?.get("data") as Bitmap
                     val base64Image = Photo.convertBitmapToBase64(imageBitmap)
 
-                    Log.e(Constants.TAG_MAIN, "base64: $base64Image")
+                    // 비율로 줄이기
+                    val aspectRatio = 0.3
+                    val resizedWidth = (imageBitmap.width * aspectRatio).toInt()
+                    val resizedHeight = (imageBitmap.height * aspectRatio).toInt()
+                    val resizedImageBitmap
+                            = Bitmap.createScaledBitmap(imageBitmap, resizedWidth, resizedHeight, false)
+                    val resizedBase64Image = Photo.convertBitmapToBase64(resizedImageBitmap)
+                    Log.e(Constants.TAG_MAIN, "base64: $resizedBase64Image")
 
-                    cameraAction?.promiseReturn(base64Image)
+                    cameraAction?.promiseReturn(resizedBase64Image)
                 } else {
                     cameraAction?.promiseReturn(Constants.RESULT_CANCELED)
                 }
@@ -237,11 +247,50 @@ class MainActivity : BasicActivity() {
                 if(resultOk) {
                     val imageUri = data?.data
                     if(imageUri != null) {
-                        val base64Image = Photo.convertUriToBase64(imageUri)
+//                        val base64Image = Photo.convertUriToBase64(imageUri)
+//
+//                        Log.e(Constants.TAG_MAIN, "base64: $base64Image")
+//
+//                        //
+//                        val image = Photo.convertUriToBitmap(imageUri)
+//                        val displayMetrics = DisplayMetrics()
+//                        windowManager.defaultDisplay.getMetrics(displayMetrics)
+//
+//                        val deviceWidth = (displayMetrics.widthPixels).toInt()
+//                        val deviceHeight = (displayMetrics.heightPixels).toInt()
+//                        Log.e("TAG", "Device width: $deviceWidth, height: $deviceHeight")
+//                        Log.e("TAG", "WebView width: ${flex_web_view.width}, WebView height: ${flex_web_view.height}")
+//                        // width 기준
+//                        val ratio = 1.0
+//                        val newWidth = (deviceWidth * ratio).toInt()
+//                        Log.e("TAG", " width: ${image.width}, height: ${image.height}")
+//                        val newHeight = (image.height * ((deviceWidth * ratio) / image.width)).toInt()
+//                        Log.e("TAG", "Device new width: $newWidth, new height: $newHeight")
+//                        val newBit = Bitmap.createScaledBitmap(image, newWidth, newHeight, false)
+//                        val newBase64 = Photo.convertBitmapToBase64(newBit)
+//                        //
+//
+//                        singlePhotoAction?.promiseReturn(base64Image)
+                        val orginalImageBitmap = Photo.convertUriToBitmap(imageUri)
 
-                        Log.e(Constants.TAG_MAIN, "base64: $base64Image")
+                        Log.e("TAG", "원본이미지 Width: ${orginalImageBitmap.width}, Height: ${orginalImageBitmap.height}")
 
-                        singlePhotoAction?.promiseReturn(base64Image)
+                        val displayMetrics = DisplayMetrics()
+                        windowManager.defaultDisplay.getMetrics(displayMetrics)
+                        val deviceWidth = displayMetrics.widthPixels
+                        val deviceHeight = displayMetrics.heightPixels
+                        val deviceDensity = displayMetrics.density // 320dpi
+                        Log.e("TAG", "디바이스 Width: $deviceWidth, Height: $deviceHeight, Density: $deviceDensity")
+
+                        val ratio = 1.0
+                        val newImageWidth = (deviceWidth * ratio).toInt()
+                        val newImageHeight = (orginalImageBitmap.height * ((deviceWidth * ratio) / orginalImageBitmap.width)).toInt()
+                        Log.e("TAG", "리사이즈 Width: $newImageWidth, Height: $newImageHeight")
+
+                        val resizeBitmap = Bitmap.createScaledBitmap(orginalImageBitmap, newImageWidth, newImageHeight, false)
+                        val newBase64 = Photo.convertBitmapToBase64(resizeBitmap)
+
+                        singlePhotoAction?.promiseReturn(newBase64)
                     } else {
                         singlePhotoAction?.promiseReturn(Constants.RESULT_CANCELED)
                     }
@@ -290,6 +339,13 @@ class MainActivity : BasicActivity() {
                     }
                 } else {
                     qrCodeScanAction?.promiseReturn(Constants.RESULT_CANCELED)
+                }
+            }
+            Constants.REQ_PERM_CODE_SEND_SMS -> {
+                if(resultOk) {
+
+                } else {
+
                 }
             }
             Constants.REQ_CODE_FILE_UPLOAD -> {

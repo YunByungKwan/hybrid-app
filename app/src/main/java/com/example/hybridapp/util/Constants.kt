@@ -136,6 +136,7 @@ class Constants {
        const val REQ_PERM_CODE_LOCATION = 1006
        const val REQ_PERM_CODE_RECORD_AUDIO = 1007
        const val REQ_PERM_CODE_SMS = 1008
+       const val REQ_PERM_CODE_SEND_SMS = 1009
 
        const val NOTIFICATION_ID = 101
 

@@ -3,7 +3,6 @@ package com.example.hybridapp.util.module
 import android.content.DialogInterface
 import androidx.fragment.app.FragmentActivity
 import app.dvkyun.flexhybridand.FlexAction
-import app.dvkyun.flexhybridand.FlexUtil
 import com.example.hybridapp.App
 import com.example.hybridapp.util.Constants
 import com.example.hybridapp.util.Utils
@@ -20,10 +19,19 @@ object Action {
             val title = array?.getString(0)
             val message = array?.getString(1)
 
-            val jsonObject = array?.get(2) as JSONObject
-            val basic: String? = jsonObject.get("basic").toString()
-            val destructive: String? = jsonObject.get("destructive").toString()
-            val cancel: String? = jsonObject.get("cancel").toString()
+            val jsonObject: JSONObject? = array?.get(2) as JSONObject
+            val basic: String? =
+                if(jsonObject?.has("basic")!!)
+                    jsonObject.get("basic").toString()
+                else null
+            val destructive: String? =
+                if(jsonObject.has("destructive"))
+                    jsonObject.get("destructive").toString()
+                else null
+            val cancel: String? =
+                if(jsonObject.has("cancel"))
+                    jsonObject.get("cancel").toString()
+                else null
 
             val posListener = DialogInterface.OnClickListener { _, _ ->
                 dialogAction?.promiseReturn(basic)

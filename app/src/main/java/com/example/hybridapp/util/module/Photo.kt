@@ -77,7 +77,7 @@ object Photo {
     }
 
     /** Uri->Bitmap으로 변환 */
-    private fun convertUriToBitmap(uri: Uri): Bitmap {
+    fun convertUriToBitmap(uri: Uri): Bitmap {
         Constants.LOGE("convertUriToBitmap", Constants.TAG_PHOTO)
 
         return if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
@@ -98,5 +98,13 @@ object Photo {
         val byteArray = byteArrayOutputStream.toByteArray()
 
         return Base64.encodeToString(byteArray, Base64.NO_WRAP)
+    }
+
+    /** Image resize */
+    fun resizeBitmapByRatio(bitmap: Bitmap, aspectRatio: Double): Bitmap {
+        val width = (bitmap.width * aspectRatio).toInt()
+        val height = (bitmap.height * aspectRatio).toInt()
+
+        return Bitmap.createScaledBitmap(bitmap, width, height, false)
     }
 }

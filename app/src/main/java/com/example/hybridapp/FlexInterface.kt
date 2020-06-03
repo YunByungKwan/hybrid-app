@@ -55,7 +55,7 @@ class FlexInterface {
             SMS.sendMessage(phoneNumber, msg)
         } else {
             Utils.requestDangerousPermissions(arrayOf(Constants.PERM_SEND_SMS),
-                Constants.REQ_PERM_CODE_RECORD_AUDIO)
+                Constants.REQ_PERM_CODE_SEND_SMS)
         }
     }
 

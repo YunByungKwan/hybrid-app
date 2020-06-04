@@ -2,10 +2,12 @@ package com.example.hybridapp
 
 import android.app.PendingIntent
 import android.content.Intent
+import android.os.Build
+import android.util.DisplayMetrics
 import android.util.Log
 import android.view.View
 import android.view.animation.AnimationUtils
-import androidx.core.app.NotificationManagerCompat
+import androidx.constraintlayout.widget.ConstraintLayout
 import app.dvkyun.flexhybridand.FlexFuncInterface
 import com.example.hybridapp.data.LogUrlRepository
 import com.example.hybridapp.data.LogUrlRoomDatabase
@@ -41,24 +43,26 @@ class FlexInterface {
             val message = array.getString(0)
 
             if(isShortSnackbar) {
-                Snackbar.showShortText(App.activity.findViewById(R.id.linearLayout), message)
+                Snackbar.showShortText(App.activity.findViewById(R.id.constraintLayout), message)
             } else {
-                Snackbar.showLongText(App.activity.findViewById(R.id.linearLayout), message)
+                Snackbar.showLongText(App.activity.findViewById(R.id.constraintLayout), message)
             }
         }
     }
 
     @FlexFuncInterface
-    fun SendSMS(array: JSONArray) {
+    fun SendSMS(array: JSONArray): String {
         val phoneNumber = array.getString(0)
-        val msg = array.getString(1)
+        val message = array.getString(1)
 
         if(Utils.existAllPermission(arrayOf(Constants.PERM_SEND_SMS))) {
-            SMS.sendMessage(phoneNumber, msg)
+            SMS.sendMessage(phoneNumber, message)
         } else {
-            Utils.requestDangerousPermissions(arrayOf(Constants.PERM_SEND_SMS),
+            Utils.checkDangerousPermissions(arrayOf(Constants.PERM_SEND_SMS),
                 Constants.REQ_PERM_CODE_SEND_SMS)
         }
+
+        return Constants.MSG_SMS_SUCCESS
     }
 
     @FlexFuncInterface
@@ -68,24 +72,29 @@ class FlexInterface {
 
     @FlexFuncInterface
     fun Notification(array: JSONArray) {
-        val importance = NotificationManagerCompat.IMPORTANCE_DEFAULT
-        val showBadge = false
-        val channelName = "채널1"
-        val description = "App notification channel"
-        Notification.createChannel(importance, showBadge, channelName, description)
+        // 알림 채널 생성
+        val channelId = Constants.NOTI_CHANNEL_ID
+        val channelName = Constants.NOTI_CHANNEL_NAME
+        val description = Constants.NOTI_DESC
+        val importance = Constants.NOTI_DEFAULT
 
-        val channelId = "01040501485"
-        val title = "알림 제목"
-        val content = "알림 본문입니다."
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            Notification.createChannel(channelId, channelName, description, importance, true)
+        } else {
+            Log.e(Constants.TAG_FCM_SERVICE, Constants.LOG_MSG_NOT_CHANNEL)
+        }
+
         val intent = Intent(App.INSTANCE, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         }
+        val pendingIntent = PendingIntent.getActivity(App.INSTANCE, 0,
+            intent, 0)
 
-        val pendingIntent
-                = PendingIntent.getActivity(App.INSTANCE, 0, intent, 0)
-
-        Notification.create(channelId,
-            R.drawable.ic_launcher_background, title, content, pendingIntent)
+        // 알림 생성
+        val id = Constants.NOTIFICATION_ID
+        val title = array.getString(0)
+        val message = array.getString(2)
+        Notification.create(channelId, id, title, message, Constants.NOTI_DEFAULT, pendingIntent)
     }
 
     @FlexFuncInterface
@@ -103,24 +112,6 @@ class FlexInterface {
     }
 
     @FlexFuncInterface
-    fun SaveSharedPreferences(array: JSONArray) {
-        val fileName = array.getString(0)
-        val key = array.getString(1)
-        val value = array.get(2)
-
-        SharedPreferences.putData(fileName, key, value)
-    }
-
-    @FlexFuncInterface
-    fun removeSharedPreferences(array: JSONArray) {
-
-        val fileName = array.getString(0)
-        val key = array.getString(1)
-
-        SharedPreferences.removeData(fileName, key)
-    }
-
-    @FlexFuncInterface
     fun LogUrl(array: JSONArray) {
         CoroutineScope(Dispatchers.Default).launch {
             val logUrlDao = LogUrlRoomDatabase.getDatabase(App.INSTANCE).logUrlDao()
@@ -131,4 +122,6 @@ class FlexInterface {
             }
         }
     }
+
+
 }

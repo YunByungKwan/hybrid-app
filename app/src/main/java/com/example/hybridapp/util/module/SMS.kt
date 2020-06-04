@@ -36,7 +36,7 @@ object SMS {
         }
     }
 
-    /** Send message */
+    /** 문자 메시지를 보냄  */
     fun sendMessage(phoneNumber: String, message: String) {
         Constants.LOGE("sendMessage", Constants.TAG_SMS)
 

@@ -5,9 +5,12 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.os.Build
+import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.example.hybridapp.App
+import com.example.hybridapp.R
 import com.example.hybridapp.util.Constants
 
 /**
@@ -21,37 +24,66 @@ import com.example.hybridapp.util.Constants
 
 object Notification {
 
-    fun createChannel(importance: Int, showBadge: Boolean,
-                                  name: String, descriptionText: String) {
-        Constants.LOGE("createChannel", Constants.TAG_NOTIFICATION)
+    /**
+     *  알림 채널 생성
+     *  Android 8.0(API 레벨 26, O) 이상부터 필수 생성해야 함
+     */
+//    fun createChannel(channelId: String, name: String, description: String, importance: Int,
+//                      showBadge: Boolean)
+//    {
+//        Constants.LOGE("createChannel", Constants.TAG_NOTI)
+//
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+//            val mChannel = NotificationChannel(channelId, name, importance)
+//            mChannel.description = description
+//            mChannel.setShowBadge(showBadge)
+//
+//            val manager = getNotificationManager(App.activity)
+//            manager.createNotificationChannel(mChannel)
+//        } else {
+//            Log.e(Constants.TAG_NOTI, Constants.LOG_MSG_NOT_CHANNEL)
+//        }
+//    }
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channelId = "${App.activity.packageName}-$name"
-            val mChannel = NotificationChannel(channelId, name, importance)
-            mChannel.description = descriptionText
-            mChannel.setShowBadge(showBadge)
+    /**
+     * 알림 채널 생성
+     * Android 8.0(API 레벨 26, O) 이상부터 필수 생성해야 함
+     */
+    @RequiresApi(Build.VERSION_CODES.O)
+    fun createChannel(channelId: String, name: String, description: String, importance: Int,
+                       showBadge: Boolean)
+    {
+        Constants.LOGE("createChannel", Constants.TAG_NOTI)
 
-            val notificationManager
-                    = App.activity.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-            notificationManager.createNotificationChannel(mChannel)
-        }
+        val mChannel = NotificationChannel(channelId, name, importance)
+        mChannel.description = description
+        mChannel.setShowBadge(showBadge)
+
+        val manager = getNotificationManager(App.activity)
+        manager.createNotificationChannel(mChannel)
     }
 
-    fun create(channelId: String, icon: Int, title: String,
-                           content: String, pendingIntent: PendingIntent) {
-        Constants.LOGE("create", Constants.TAG_NOTIFICATION)
+    /** NotificationManager */
+    private fun getNotificationManager(context: Context): NotificationManager {
+        return context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+    }
+
+    /** 알림 생성 */
+    fun create(channelId: String, notificationId: Int, title: String, message: String,
+               importance: Int, pendingIntent: PendingIntent) {
+        Constants.LOGE("create", Constants.TAG_NOTI)
 
         val builder = NotificationCompat.Builder(App.activity, channelId)
-        builder.setSmallIcon(icon)
         builder.setContentTitle(title)
-        builder.setContentText(content)
-        builder.priority = NotificationCompat.PRIORITY_DEFAULT
+        builder.setContentText(message)
+        builder.priority = importance
         builder.setAutoCancel(true)
         builder.setContentIntent(pendingIntent)
+        builder.setSmallIcon(R.drawable.ic_launcher_background)
 
         val notificationManager
                 = NotificationManagerCompat.from(App.activity)
 
-        notificationManager.notify(Constants.NOTIFICATION_ID, builder.build())
+        notificationManager.notify(notificationId, builder.build())
     }
 }

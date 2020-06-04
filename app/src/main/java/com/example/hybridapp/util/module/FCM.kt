@@ -23,49 +23,37 @@ import com.google.firebase.messaging.RemoteMessage
 class FCM: FirebaseMessagingService() {
 
     override fun onNewToken(token: String) {
-        funLOGE("onNewToken")
+        Constants.LOGE("onNewToken", Constants.TAG_FCM_SERVICE)
 
         Log.e(Constants.TAG_FCM_SERVICE, "Refreshed token: $token")
     }
 
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
-        funLOGE("onMessageReceived")
+        Constants.LOGE("onMessageReceived", Constants.TAG_FCM_SERVICE)
 
         if(remoteMessage.notification != null) {
             Log.e(Constants.TAG_FCM_SERVICE, "알림 메시지: ${remoteMessage.notification!!.body}")
-            val messageBody = remoteMessage.notification!!.body
-            val messageTitle = remoteMessage.notification!!.title
+
+            val channelId = Constants.NOTI_CHANNEL_ID
+            val channelName = Constants.NOTI_CHANNEL_NAME
+            val description = Constants.NOTI_DESC
+            val importance = Constants.NOTI_DEFAULT
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                Notification.createChannel(channelId, channelName, description,
+                    importance, true)
+            } else {
+                Log.e(Constants.TAG_FCM_SERVICE, Constants.LOG_MSG_NOT_CHANNEL)
+            }
+
+            val title = remoteMessage.notification!!.title
+            val message = remoteMessage.notification!!.body
             val intent = Intent(this, MainActivity::class.java)
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
             val pendingIntent = PendingIntent.getActivity(
                 this, 0, intent, PendingIntent.FLAG_ONE_SHOT)
-            val channelId = "Channel ID"
-            val defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
-            val notificationBuilder
-                    = NotificationCompat.Builder(this, channelId)
-                .setSmallIcon(R.drawable.ic_launcher_background)
-                .setContentTitle(messageTitle)
-                .setContentText(messageBody)
-                .setAutoCancel(true)
-                .setSound(defaultSoundUri)
-                .setContentIntent(pendingIntent)
-
-            val notificationManager
-                    = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                val channelName = "Channel Name"
-                val channel = NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_HIGH)
-                notificationManager.createNotificationChannel(channel)
-            }
-
-
-
-            notificationManager.notify(0, notificationBuilder.build())
+            Notification.create(channelId, Constants.NOTIFICATION_ID, title!!, message!!,
+                importance, pendingIntent)
         }
-    }
-
-    /** log.e wrapper function */
-    private fun funLOGE(functionName: String) {
-        Log.e(Constants.TAG_FCM_SERVICE, "call $functionName() in ${Constants.TAG_FCM_SERVICE}")
     }
 }

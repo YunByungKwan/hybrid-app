@@ -21,24 +21,24 @@ object Photo {
     private val basicActivity = App.activity as BasicActivity
 
     /** 갤러리 호출 (1장) */
-    fun requestImage(action: FlexAction?, ratio: Double?, isWidthRatio: Boolean?) {
+    fun requestImage(action: FlexAction?, ratio: Double, isWidthRatio: Boolean?) {
         Constants.LOGE("requestImage", Constants.TAG_PHOTO)
 
         val singlePhotoIntent = getSinglePhotoIntent()
         singlePhotoIntent.putExtra("ratio", ratio)
 
+        Log.e("requestImage", "ratio: $ratio")
         if(Utils.existsReceiveActivity(singlePhotoIntent, App.INSTANCE.packageManager)) {
-            basicActivity.singlePhotoAction = action
+            basicActivity.photoDeviceAction = action
 
             if(isWidthRatio != null) {
+                Log.e("afadfasdf", "isWidthRatio is not null")
                 singlePhotoIntent.putExtra("isWidthRatio", isWidthRatio)
-                if(isWidthRatio) {
-                    basicActivity.startActivityForResult(singlePhotoIntent, Constants.REQ_CODE_PHOTO_DEVICE_RATIO)
-                } else {
-                    basicActivity.startActivityForResult(singlePhotoIntent, Constants.REQ_CODE_PHOTO_DEVICE_RATIO)
-                }
+                basicActivity.startActivityForResult(singlePhotoIntent,
+                    Constants.REQ_CODE_PHOTO_DEVICE_RATIO)
             } else {
-                basicActivity.startActivityForResult(singlePhotoIntent, Constants.REQ_CODE_PHOTO_RATIO)
+                basicActivity.startActivityForResult(singlePhotoIntent,
+                    Constants.REQ_CODE_PHOTO_RATIO)
             }
         } else {
             Log.e(Constants.TAG_UTILS, Constants.LOG_MSG_GALLERY)

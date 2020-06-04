@@ -5,7 +5,6 @@ import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.os.Build
 import android.util.Log
-import com.example.hybridapp.App
 import com.example.hybridapp.util.Constants
 
 /**
@@ -18,32 +17,6 @@ import com.example.hybridapp.util.Constants
 
 object Network {
 
-    /** 네트워크 연결 체크 */
-    fun isConnected(): Boolean {
-        Constants.LOGE("isConnected", Constants.TAG_NETWORK)
-
-        val connectivityManger
-                = App.activity.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            Log.e(Constants.TAG_NETWORK, "Build version is greater than Marshmallow.")
-
-            val activeNetwork = connectivityManger.activeNetwork ?: return false
-            val networkCapabilities
-                    = connectivityManger.getNetworkCapabilities(activeNetwork) ?: return false
-            return when {
-                networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) -> true
-                networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) -> true
-                else -> false
-            }
-        } else {
-            Log.e(Constants.TAG_NETWORK, "Build version is smaller than Marshmallow.")
-            connectivityManger.activeNetworkInfo ?: return false
-        }
-
-        return true
-    }
-
     /**
      * 네트워크 상태를 확인
      *
@@ -52,29 +25,48 @@ object Network {
      * 1 : 데이터 연결됨
      * 2 : 와이파이 연결됨
      */
-    fun getStatus(): Int {
+    fun getStatus(context: Context): Int {
         Constants.LOGE("getStatus", Constants.TAG_NETWORK)
 
-        val connectivityManger
-                = App.activity.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-
+        val manager = getConnectivityManager(context)
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             Log.e(Constants.TAG_NETWORK, "Build version is greater than Marshmallow.")
 
-            val activeNetwork = connectivityManger.activeNetwork ?: return 0
-            val networkCapabilities
-                    = connectivityManger.getNetworkCapabilities(activeNetwork) ?: return 0
+            val network = manager.activeNetwork ?: return Constants.STATUS_DISCONNECTED
+            val capabilities = manager.getNetworkCapabilities(network)
+                ?: return Constants.STATUS_DISCONNECTED
             return when {
-                networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) -> 1
-                networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) -> 2
-                else -> 0
+                capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) -> {
+                    Constants.STATUS_CELLULAR
+                }
+                capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) -> {
+                    Constants.STATUS_WIFI
+                }
+                else -> {
+                    Constants.STATUS_DISCONNECTED
+                }
             }
         } else {
             Log.e(Constants.TAG_NETWORK, "Build version is smaller than Marshmallow.")
 
-            connectivityManger.activeNetworkInfo ?: return 0
+            val network = manager.activeNetworkInfo
+                ?: return Constants.STATUS_DISCONNECTED
+            return when(network.type) {
+                ConnectivityManager.TYPE_MOBILE -> {
+                    Constants.STATUS_CELLULAR
+                }
+                ConnectivityManager.TYPE_WIFI -> {
+                    Constants.STATUS_WIFI
+                }
+                else -> {
+                    Constants.STATUS_DISCONNECTED
+                }
+            }
         }
+    }
 
-        return 0
+    /** ConnectivityManager 생성 */
+    private fun getConnectivityManager(context: Context): ConnectivityManager {
+        return context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
     }
 }

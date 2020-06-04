@@ -8,7 +8,6 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Environment
-import android.util.DisplayMetrics
 import android.util.Log
 import android.view.View
 import android.view.animation.AnimationUtils
@@ -38,6 +37,7 @@ class MainActivity : BasicActivity() {
     private lateinit var repository: LogUrlRepository
     private var smsReceiver: SMSReceiver? = null
     private var mFilePatCallback: ValueCallback<Array<Uri>>? = null
+    var backgroundView: View? = null
 
     override fun onResume() {
         super.onResume()
@@ -66,7 +66,6 @@ class MainActivity : BasicActivity() {
         }
 
         setFlexWebViewSettings()
-
         setInterface()
         setActions()
 
@@ -108,16 +107,6 @@ class MainActivity : BasicActivity() {
                 Utils.requestPermissions(arrayOf(Constants.PERM_WRITE_EXTERNAL_STORAGE), 1234)
             }
         }
-        /** Load SharedPreferences Interface */
-        flex_web_view.setAction(Constants.TYPE_LOAD_SHARED_PREFERENCES) { action, array ->
-
-            val fileName = array!!.getString(0)
-            val key = array.getString(1)
-
-            val result = SharedPreferences.getString(fileName, key)
-
-            action?.promiseReturn(result)
-        }
     }
 
     private fun setFlexWebViewSettings() {
@@ -147,27 +136,43 @@ class MainActivity : BasicActivity() {
 
     /** FlexWebView Interface 셋팅 */
     private fun setInterface() {
-        flex_web_view.setInterface("WebPopup") {array ->
+        /** 팝업 */
+        flex_web_view.setInterface(Constants.TYPE_POP_UP) {array ->
             CoroutineScope(Dispatchers.Main).launch {
-                val isExternalUrl = true
-                val url = array.getString(1)
-                val width = array.getDouble(2)
-                val height = array.getDouble(3)
-                val displayMetrics = DisplayMetrics()
-                App.activity.windowManager.defaultDisplay.getMetrics(displayMetrics)
 
-                val screenWidth = displayMetrics.widthPixels
-                val screenHeight = displayMetrics.heightPixels
-                val newWidth = (width * screenWidth).toInt()
-                val newHeight = (height * screenHeight).toInt()
+                // 뒷배경 뷰 생성
+                val mInflater = Utils.getLayoutInflater(this@MainActivity)
+                backgroundView = mInflater.inflate(R.layout.background_popup, null)
+                constraintLayout.addView(backgroundView)
 
-                flex_pop_up_web_view.loadUrl("https://www.naver.com")
-                flex_pop_up_web_view.layoutParams =
-                    ConstraintLayout.LayoutParams(newWidth, newHeight)
+                val url = array.getString(0)
+                val ratio = array.getDouble(1)
+
+                val screenSize = Utils.getScreenSize(this@MainActivity)
+                val popupWidth = (ratio * screenSize.getValue(Constants.SCREEN_WIDTH)).toInt()
+                val popupHeight = (ratio * screenSize.getValue(Constants.SCREEN_HEIGHT)).toInt()
+
+                flex_pop_up_web_view.loadUrl(url)
                 flex_pop_up_web_view.visibility = View.VISIBLE
+                flex_pop_up_web_view.layoutParams = Utils.getParamsAlignCenterInConstraintLayout(
+                    popupWidth, popupHeight, R.id.constraintLayout)
 
-                val bottomUp = AnimationUtils.loadAnimation(App.INSTANCE, R.anim.open)
+                val bottomUp = AnimationUtils.loadAnimation(this@MainActivity, R.anim.open)
                 flex_pop_up_web_view.startAnimation(bottomUp)
+                flex_pop_up_web_view.bringToFront()
+
+                // 닫기 버튼 생성
+                val button = Utils.createCloseButton(this@MainActivity)
+                constraintLayout.addView(button)
+
+                button.setOnClickListener {
+                    val closeAnimation = AnimationUtils.loadAnimation(
+                        this@MainActivity, R.anim.close)
+                    flex_pop_up_web_view.startAnimation(closeAnimation)
+                    flex_pop_up_web_view.visibility = View.GONE
+                    constraintLayout.removeView(backgroundView)
+                    constraintLayout.removeView(button)
+                }
             }
 
             null
@@ -178,12 +183,12 @@ class MainActivity : BasicActivity() {
     private fun setActions() {
         flex_web_view.setAction(Constants.TYPE_DIALOG, Action.dialog)
         flex_web_view.setAction(Constants.TYPE_NETWORK, Action.network)
-        flex_web_view.setAction(Constants.TYPE_CAMERA_DEVICE_RATIO, Action.cameraDeviceRatio)
-        flex_web_view.setAction(Constants.TYPE_CAMERA_RATIO, Action.cameraRatio)
-        flex_web_view.setAction(Constants.TYPE_PHOTO_DEVICE_RATIO, Action.photoDeviceRatio)
-        flex_web_view.setAction(Constants.TYPE_PHOTO_RATIO, Action.photoRatio)
-        flex_web_view.setAction(Constants.TYPE_MULTI_PHOTO_DEVICE_RATIO, Action.multiPhotoDeviceRatio)
-        flex_web_view.setAction(Constants.TYPE_MULTI_PHOTO_RATIO, Action.multiPhotoRatio)
+        flex_web_view.setAction(Constants.TYPE_CAMERA_DEVICE_RATIO, Action.cameraByDeviceRatio)
+        flex_web_view.setAction(Constants.TYPE_CAMERA_RATIO, Action.cameraByRatio)
+        flex_web_view.setAction(Constants.TYPE_PHOTO_DEVICE_RATIO, Action.photoByDeviceRatio)
+        flex_web_view.setAction(Constants.TYPE_PHOTO_RATIO, Action.photoByRatio)
+        flex_web_view.setAction(Constants.TYPE_MULTI_PHOTO_DEVICE_RATIO, Action.multiPhotoByDeviceRatio)
+        flex_web_view.setAction(Constants.TYPE_MULTI_PHOTO_RATIO, Action.multiPhotoByRatio)
         flex_web_view.setAction(Constants.TYPE_QR_CODE_SCAN, Action.qrcode)
         flex_web_view.setAction(Constants.TYPE_LOCATION, Action.location)
         flex_web_view.setAction(Constants.TYPE_BIO_AUTHENTICATION, Action.bioAuth)
@@ -240,15 +245,20 @@ class MainActivity : BasicActivity() {
                 if(resultOk) {
                     val imageUri = data?.data
                     val ratio = data?.getDoubleExtra("ratio",1.0)
-                    var isWidthRatio = data?.getBooleanExtra("isWidthRatio", true)
+                    val isWidthRatio = data?.getBooleanExtra("isWidthRatio", true)
 
                     if(imageUri != null) {
                         val bitmapImage = Photo.convertUriToBitmap(imageUri)
+
+                        Log.e("TAG", "ratio: $ratio, isWidthRatio: $isWidthRatio")
+
                         val resizedBitmapImage = Photo.resizeBitmapByDeviceRatio(bitmapImage,
                             ratio!!, isWidthRatio!!)
                         val base64Image = Photo.convertBitmapToBase64(resizedBitmapImage)
 
-                        photoDeviceAction?.promiseReturn(base64Image)
+                        Log.e("123", "data:image/jpeg;base64,$base64Image")
+
+                        photoDeviceAction?.promiseReturn("data:image/jpeg;base64,$base64Image")
                     } else {
                         photoDeviceAction?.promiseReturn(Constants.RESULT_CANCELED)
                     }
@@ -266,7 +276,7 @@ class MainActivity : BasicActivity() {
                         val resizedBitmapImage = Photo.resizeBitmapByRatio(bitmapImage, ratio!!)
                         val base64Image = Photo.convertBitmapToBase64(resizedBitmapImage)
 
-                        photoAction?.promiseReturn(base64Image)
+                        photoAction?.promiseReturn("data:image/jpeg;base64,$base64Image")
                     } else {
                         photoAction?.promiseReturn(Constants.RESULT_CANCELED)
                     }
@@ -429,10 +439,11 @@ class MainActivity : BasicActivity() {
     /** 뒤로 가기 버튼 클릭 이벤트 */
     override fun onBackPressed() {
         if(flex_pop_up_web_view.visibility == View.VISIBLE) {
-            val upBottom = AnimationUtils.loadAnimation(this@MainActivity, R.anim.close)
-            flex_pop_up_web_view.startAnimation(upBottom)
-
+            val closeAnimation = AnimationUtils.loadAnimation(
+                this@MainActivity, R.anim.close)
+            flex_pop_up_web_view.startAnimation(closeAnimation)
             flex_pop_up_web_view.visibility = View.GONE
+            constraintLayout.removeView(backgroundView)
         } else {
             super.onBackPressed()
         }

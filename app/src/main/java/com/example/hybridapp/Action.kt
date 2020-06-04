@@ -1,12 +1,11 @@
-package com.example.hybridapp.util.module
+package com.example.hybridapp
 
 import android.content.DialogInterface
 import androidx.fragment.app.FragmentActivity
 import app.dvkyun.flexhybridand.FlexAction
-import com.example.hybridapp.App
-import com.example.hybridapp.basic.BasicActivity
 import com.example.hybridapp.util.Constants
 import com.example.hybridapp.util.Utils
+import com.example.hybridapp.util.module.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -44,74 +43,82 @@ object Action {
                 dialogAction?.promiseReturn(Constants.RESULT_CANCELED)
             }
 
-            Dialog.show(title, message, basic, destructive, cancel,
-                posListener, null, negListener, cancelListener)
+            Dialog.show(
+                title, message, basic, destructive, cancel,
+                posListener, null, negListener, cancelListener
+            )
         }
     }
 
     val network: (FlexAction?, JSONArray?) -> Unit = { networkAction, _ ->
         CoroutineScope(Dispatchers.Main).launch {
-            if(Network.isConnected()) {
-                Toast.showShortText(Constants.TOAST_MSG_NETWORK_CONNECTED)
-                networkAction?.promiseReturn(true)
-            } else {
-                Toast.showShortText(Constants.TOAST_MSG_NETWORK_DISCONNECTED)
-                networkAction?.promiseReturn(false)
+            when(Network.getStatus(App.activity)) {
+                Constants.STATUS_CELLULAR -> {
+                    networkAction?.promiseReturn(Constants.MSG_CELLULAR)
+                }
+                Constants.STATUS_WIFI -> {
+                    networkAction?.promiseReturn(Constants.MSG_WIFI)
+                }
+                else -> {
+                    networkAction?.promiseReturn(Constants.MSG_DISCONNECTED)
+                }
             }
         }
     }
 
-    val cameraDeviceRatio: (FlexAction?, JSONArray?) -> Unit = { cameraDeviceAction, array ->
+    val cameraByDeviceRatio: (FlexAction?, JSONArray?) -> Unit = { cameraDeviceAction, array ->
         CoroutineScope(Dispatchers.Main).launch {
             val ratio = array?.getDouble(0)
             val isWidthRatio = array?.getBoolean(1)
 
             if(Utils.existAllPermission(arrayOf(Constants.PERM_CAMERA))) {
                 if (cameraDeviceAction != null) {
-                    Camera.request(cameraDeviceAction, ratio, isWidthRatio)
+                    Camera.request(cameraDeviceAction, ratio, isWidthRatio
+                    )
                 }
             } else {
-                Utils.requestDangerousPermissions(arrayOf(Constants.PERM_CAMERA),
-                    Constants.REQ_PERM_CODE_CAMERA)
+                Utils.checkDangerousPermissions(arrayOf(Constants.PERM_CAMERA), Constants.REQ_PERM_CODE_CAMERA)
             }
         }
     }
 
-    val cameraRatio: (FlexAction?, JSONArray?) -> Unit = { cameraAction, array ->
+    val cameraByRatio: (FlexAction?, JSONArray?) -> Unit = { cameraAction, array ->
         CoroutineScope(Dispatchers.Main).launch {
             val ratio = array?.getDouble(0)
 
             if(Utils.existAllPermission(arrayOf(Constants.PERM_CAMERA))) {
                 if (cameraAction != null) {
-                    Camera.request(cameraAction, ratio, null)
+                    Camera.request(
+                        cameraAction,
+                        ratio,
+                        null
+                    )
                 }
             } else {
-                Utils.requestDangerousPermissions(arrayOf(Constants.PERM_CAMERA),
-                    Constants.REQ_PERM_CODE_CAMERA)
+                Utils.checkDangerousPermissions(arrayOf(Constants.PERM_CAMERA), Constants.REQ_PERM_CODE_CAMERA)
             }
         }
     }
 
-    val photoDeviceRatio: (FlexAction?, JSONArray?) -> Unit = { photoDeviceAction, array ->
+    val photoByDeviceRatio: (FlexAction?, JSONArray?) -> Unit = { photoDeviceAction, array ->
         CoroutineScope(Dispatchers.Main).launch {
-            val ratio = array?.getDouble(0)
-            val isWidthRatio = array?.getBoolean(1)
+            val ratio = 0.1
+            val isWidthRatio = false
 
             val storagePermissions = arrayOf(Constants.PERM_WRITE_EXTERNAL_STORAGE,
                 Constants.PERM_READ_EXTERNAL_STORAGE)
 
             if(Utils.existAllPermission(storagePermissions)) {
                 if (photoDeviceAction != null) {
-                    Photo.requestImage(photoDeviceAction, ratio, isWidthRatio!!)
+                    Photo.requestImage(photoDeviceAction, ratio, isWidthRatio)
                 }
             } else {
-                Utils.requestDangerousPermissions(storagePermissions,
-                    Constants.REQ_PERM_CODE_READ_WRITE)
+                Utils.checkDangerousPermissions(storagePermissions, Constants.REQ_PERM_CODE_READ_WRITE)
             }
         }
     }
 
-    val photoRatio: (FlexAction?, JSONArray?) -> Unit = { photoAction, array ->
+    val photoByRatio: (FlexAction?, JSONArray?) -> Unit = { photoAction, array ->
         CoroutineScope(Dispatchers.Main).launch {
             val ratio = array?.getDouble(0)
 
@@ -120,16 +127,15 @@ object Action {
 
             if(Utils.existAllPermission(storagePermissions)) {
                 if (photoAction != null) {
-                    Photo.requestImage(photoAction, ratio, null)
+                    Photo.requestImage(photoAction, ratio!!, null)
                 }
             } else {
-                Utils.requestDangerousPermissions(storagePermissions,
-                    Constants.REQ_PERM_CODE_READ_WRITE)
+                Utils.checkDangerousPermissions(storagePermissions, Constants.REQ_PERM_CODE_READ_WRITE)
             }
         }
     }
 
-    val multiPhotoDeviceRatio: (FlexAction?, JSONArray?) -> Unit = { multiplePhotoDeviceAction, array ->
+    val multiPhotoByDeviceRatio: (FlexAction?, JSONArray?) -> Unit = { multiplePhotoDeviceAction, array ->
         CoroutineScope(Dispatchers.Main).launch {
             val ratio = array?.getDouble(0)
             val isWidthRatio = array?.getBoolean(1)
@@ -139,16 +145,19 @@ object Action {
                     Constants.PERM_READ_EXTERNAL_STORAGE)
 
             if(Utils.existAllPermission(storagePermissions)) {
-                Photo.requestMultipleImages(multiplePhotoDeviceAction, ratio, isWidthRatio!!)
+                Photo.requestMultipleImages(
+                    multiplePhotoDeviceAction,
+                    ratio,
+                    isWidthRatio!!
+                )
             } else {
-                Utils.requestDangerousPermissions(storagePermissions,
-                    Constants.REQ_PERM_CODE_READ_WRITE)
+                Utils.checkDangerousPermissions(storagePermissions, Constants.REQ_PERM_CODE_READ_WRITE)
             }
         }
 
     }
 
-    val multiPhotoRatio: (FlexAction?, JSONArray?) -> Unit = { multiplePhotoAction, array ->
+    val multiPhotoByRatio: (FlexAction?, JSONArray?) -> Unit = { multiplePhotoAction, array ->
         CoroutineScope(Dispatchers.Main).launch {
             val ratio = array?.getDouble(0)
 
@@ -159,7 +168,7 @@ object Action {
             if(Utils.existAllPermission(storagePermissions)) {
                 Photo.requestMultipleImages(multiplePhotoAction, ratio, null)
             } else {
-                Utils.requestDangerousPermissions(storagePermissions,
+                Utils.checkDangerousPermissions(storagePermissions,
                     Constants.REQ_PERM_CODE_READ_WRITE)
             }
         }
@@ -170,7 +179,7 @@ object Action {
         if(Utils.existAllPermission(arrayOf(Constants.PERM_CAMERA))) {
             QRCode.startScan(qrCodeAction)
         } else {
-            Utils.requestDangerousPermissions(arrayOf(Constants.PERM_CAMERA),
+            Utils.checkDangerousPermissions(arrayOf(Constants.PERM_CAMERA),
                 Constants.REQ_PERM_CODE_CAMERA)
         }
     }
@@ -181,9 +190,11 @@ object Action {
                 Constants.PERM_ACCESS_COARSE_LOCATION)
 
             if(Utils.existAllPermission(locationPermissions)) {
-                Location.getCurrent(locationAction)
+                Location.getCurrent(
+                    locationAction
+                )
             } else {
-                Utils.requestDangerousPermissions(locationPermissions,
+                Utils.checkDangerousPermissions(locationPermissions,
                     Constants.REQ_PERM_CODE_LOCATION)
             }
         }
@@ -193,7 +204,10 @@ object Action {
         CoroutineScope(Dispatchers.Main).launch {
             val fragmentActivity = App.activity as FragmentActivity
             if(BioAuth.canAuthenticate()) {
-                BioAuth.showPrompt(fragmentActivity, bioAuthAction)
+                BioAuth.showPrompt(
+                    fragmentActivity,
+                    bioAuthAction
+                )
             } else {
 
             }
@@ -204,27 +218,29 @@ object Action {
         if(Utils.existAllPermission(arrayOf(Constants.PERM_RECORD_AUDIO))) {
             Record.getIntent(recordAction)
         } else {
-            Utils.requestDangerousPermissions(arrayOf(Constants.PERM_RECORD_AUDIO),
+            Utils.checkDangerousPermissions(arrayOf(Constants.PERM_RECORD_AUDIO),
                 Constants.REQ_PERM_CODE_RECORD_AUDIO)
         }
     }
 
     val localRepository: (FlexAction?, JSONArray?) -> Unit = { localRepoAction, array ->
-        val state = array!!.getJSONArray(0).getInt(1)
-
-        if(state == 0) {
-            val key = array.getJSONArray(1).getString(1)
-            val value = array.getJSONArray(1).getString(1)
-
-            SharedPreferences.putData(Constants.SHARED_FILE_NAME, key, value)
-        } else if(state == 1) { // get
-            val key = array.getJSONArray(1).getString(1)
-
-            SharedPreferences.getString(Constants.SHARED_FILE_NAME, key)
-        } else if(state == 2) { // delete
-            val key = array.getJSONArray(1).getString(1)
-
-            SharedPreferences.removeData(Constants.SHARED_FILE_NAME, key)
+        when (array!!.getInt(0)) {
+            Constants.SET_DATA_SHARED -> {
+                val key = array.getString(1)
+                val value = array.getString(2)
+                SharedPreferences.putData(Constants.SHARED_FILE_NAME, key, value)
+                localRepoAction?.promiseReturn("데이터를 저장하였습니다.")
+            }
+            Constants.GET_DATA_SHARED -> {
+                val key = array.getString(1)
+                val value = SharedPreferences.getString(Constants.SHARED_FILE_NAME, key)
+                localRepoAction?.promiseReturn(value)
+            }
+            Constants.DELETE_DATA_SHARED -> {
+                val key = array.getString(1)
+                SharedPreferences.removeData(Constants.SHARED_FILE_NAME, key)
+                localRepoAction?.promiseReturn("데이터를 제거하였습니다.")
+            }
         }
     }
 }

@@ -4,6 +4,7 @@ import android.Manifest
 import android.util.Log
 import androidx.annotation.IntDef
 import androidx.annotation.StringDef
+import androidx.core.app.NotificationManagerCompat
 import com.google.zxing.integration.android.IntentIntegrator
 
 class Constants {
@@ -15,11 +16,13 @@ class Constants {
     annotation class types
 
    companion object {
-
        /** WebView Url */
        const val BASE_URL = "file:///android_asset"
-
        const val SHARED_FILE_NAME = "prefs"
+
+       /** 화면 정보 */
+       const val SCREEN_WIDTH = "width"
+       const val SCREEN_HEIGHT = "height"
 
        /** 권한 이름 */
        const val PERM_CAMERA = Manifest.permission.CAMERA
@@ -43,11 +46,8 @@ class Constants {
        const val TYPE_LOCATION = "Location"
        const val TYPE_BIO_AUTHENTICATION = "BioAuthentication"
        const val TYPE_RECORD = "Record"
-       const val TYPE_LOAD_SHARED_PREFERENCES = "LoadSharedPreferences"
-       const val TYPE_POP_UP_WINDOW = "PopUp"
        const val TYPE_LOCAL_REPO = "LocalRepository"
-
-
+       const val TYPE_POP_UP = "WebPopup"
 
        /** Class or Activity LOG TAG */
        const val TAG_UTILS = "Utils class"
@@ -60,7 +60,7 @@ class Constants {
        const val TAG_PHOTO = "Photo class"
        const val TAG_SMS = "SMS class"
        const val TAG_BIO_AUTH = "BioAuth class"
-       const val TAG_NOTIFICATION = "Notification class"
+       const val TAG_NOTI = "Notification class"
        const val TAG_SHARED = "SharedPreferences class"
 
        const val TAG_INTERFACE = "FlexInterface"
@@ -71,13 +71,6 @@ class Constants {
        const val TAG_PERMISSION = "PERMISSION"
        const val TAG_IDENTIFIER = "IDENTIFIER"
        const val TAG_NFC = "NFC"
-
-       /** 토스트 텍스트 */
-       const val TOAST_MSG_NETWORK_CONNECTED = "네트워크가 연결되어 있습니다."
-       const val TOAST_MSG_NETWORK_DISCONNECTED = "네트워크가 연결되어 있지 않습니다."
-       const val TOAST_MSG_CELLULAR = "데이터에 연결되어 있습니다."
-       const val TOAST_MSG_WIFI = "와이파이에 연결되어 있습니다."
-       const val TOAST_MSG_NO = "네트워크가 연결되어 있지 않습니다."
 
        /** 다이얼로그 텍스트 */
        const val DIAL_TITLE = "알림"
@@ -106,18 +99,36 @@ class Constants {
        const val BIOMETRIC_ERROR_HW_UNAVAILABLE = "Biometric features are currently unavailable."
        const val BIOMETRIC_ERROR_NONE_ENROLLED
                = "The user hasn't associated any biometric credentials with their account."
-       
+
+       /** 알림 텍스트 */
+       const val NOTI_CHANNEL_ID = "com.example.hybridapp"
+       const val NOTI_CHANNEL_NAME = "롯데정보통신"
+       const val NOTI_DESC = "롯데정보통신 알림 채널입니다."
+       const val NOTI_DEFAULT: Int = NotificationManagerCompat.IMPORTANCE_DEFAULT
+       const val NOTIFICATION_ID = 101
+
+       /** SharedPreferences */
+       const val SET_DATA_SHARED = 0
+       const val GET_DATA_SHARED = 1
+       const val DELETE_DATA_SHARED = 2
+
        /** 로그 텍스트 */
        const val LOG_MSG_CAMERA = "Camera app can't be launched."
        const val LOG_MSG_GALLERY = "Gallery app can't be launched."
-
        const val LOG_RESULT_OK = "RESULT_OK - onActivityResult"
-
+       const val LOG_MSG_NOT_CHANNEL = "No notification channel required."
        const val RESULT_CANCELED = "Cancel"
 
-       const val STATUS_NO = 0
+       /** 네트워크 상태 텍스트 */
+       const val MSG_DISCONNECTED = "No Connection!"
+       const val MSG_CELLULAR = "Cellular Connection!"
+       const val MSG_WIFI = "WIFI Connection!"
+       const val STATUS_DISCONNECTED = 0
        const val STATUS_CELLULAR = 1
        const val STATUS_WIFI = 2
+
+       /** SMS 텍스트 */
+       const val MSG_SMS_SUCCESS = "문자 메시지를 전송하였습니다."
 
        /** INTENT REQUEST CODE */
        const val REQ_CODE_CAMERA_DEVICE_RATIO = 10001
@@ -137,8 +148,6 @@ class Constants {
        const val REQ_PERM_CODE_LOCATION = 1004
        const val REQ_PERM_CODE_RECORD_AUDIO = 1005
        const val REQ_PERM_CODE_SEND_SMS = 1006
-
-       const val NOTIFICATION_ID = 101
 
        const val LOG_PERM_GRANTED_CAMERA = "CAMERA permission is granted."
        const val LOG_PERM_GRANTED_WRITE = "WRITE EXTERNAL STORAGE permission is granted."

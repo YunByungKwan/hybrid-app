@@ -9,12 +9,21 @@ import android.net.Uri
 import android.os.Build
 import android.provider.Settings
 import android.util.Base64
+import android.util.DisplayMetrics
 import android.util.Log
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.widget.Button
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.core.content.ContextCompat.getSystemService
 import com.example.hybridapp.App
+import com.example.hybridapp.R
 import com.example.hybridapp.util.module.Dialog
 import com.google.firebase.iid.FirebaseInstanceId
+import kotlinx.android.synthetic.main.activity_main.*
 import java.nio.charset.StandardCharsets
 import java.security.MessageDigest
 import java.security.NoSuchAlgorithmException
@@ -45,7 +54,7 @@ object Utils {
         ActivityCompat.shouldShowRequestPermissionRationale(App.activity, permissionName)
 
     /** 위험 권한이 없을 경우 */
-    fun requestDangerousPermissions(permissions: Array<out String>, permissionCode: Int) {
+    fun checkDangerousPermissions(permissions: Array<out String>, permissionCode: Int) {
         if (existsDenialPermission(permissions)) {
             Dialog.show(Constants.DIAL_TITLE,
                 getDialogMessage(permissionCode),
@@ -89,7 +98,7 @@ object Utils {
 
     /** 다수 권한 요청 */
     fun requestPermissions(permissions: Array<out String>, requestCode: Int) {
-        funLOGE("requestPermissions")
+        Constants.LOGE("requestPermissions", Constants.TAG_UTILS)
 
         ActivityCompat.requestPermissions(App.activity, permissions, requestCode)
     }
@@ -158,8 +167,7 @@ object Utils {
 
     /** Hash값 반환 */
     private fun getHash(packageName: String, signature: String): String? {
-        funLOGE("getHash")
-
+        Constants.LOGE("getHash", Constants.TAG_UTILS)
         val appInfo = "$packageName $signature"
 
         try {
@@ -220,8 +228,56 @@ object Utils {
         return SimpleDateFormat("yyyy.MM.dd HH:mm:ss", Locale.KOREA).format(currentDateTime)
     }
 
-    /** 로그 */
-    private fun funLOGE(functionName: String) {
-        Log.e(Constants.TAG_UTILS, "call $functionName() in ${Constants.TAG_UTILS}")
+    /** Inflater 가져오기 */
+    fun getLayoutInflater(context: Context): LayoutInflater {
+        return context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
+    }
+
+    /** 동적 뷰 생성 */
+    fun createView(resource: Int, view: ViewGroup?, attachToRoot: Boolean) {
+        val mInflater = (App.INSTANCE).getSystemService(
+            Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
+
+        mInflater.inflate(resource, view, attachToRoot)
+    }
+
+    /** 화면 크기 정보 가져오기 */
+    fun getScreenSize(context: Context): Map<String, Int> {
+        val displayMetrics = DisplayMetrics()
+        App.activity.windowManager.defaultDisplay.getMetrics(displayMetrics)
+        val width = displayMetrics.widthPixels
+        val height = displayMetrics.heightPixels
+
+        return mapOf(Constants.SCREEN_WIDTH to width, Constants.SCREEN_HEIGHT to height)
+    }
+
+    /** 닫기 버튼 동적 생성 */
+    fun createCloseButton(context: Context): Button {
+        val button = Button(context)
+        val params = ConstraintLayout.LayoutParams(70, 70)
+        params.topToTop = R.id.constraintLayout
+        params.endToEnd = R.id.constraintLayout
+        params.startToStart = R.id.constraintLayout
+        params.topMargin = 10
+        button.text = "X"
+        button.background = ContextCompat.getDrawable(context, R.drawable.circle)
+        button.textAlignment = View.TEXT_ALIGNMENT_CENTER
+
+        return button
+    }
+
+    fun getParamsAlignCenterInConstraintLayout(
+        width: Int, height: Int, root: Int): ConstraintLayout.LayoutParams {
+        val params = getParamsInConstraintLayout(width, height)
+        params.topToTop = root
+        params.bottomToBottom = root
+        params.endToEnd = root
+        params.startToStart = root
+
+        return params
+    }
+
+    fun getParamsInConstraintLayout(width: Int, height: Int): ConstraintLayout.LayoutParams {
+        return ConstraintLayout.LayoutParams(width, height)
     }
 }

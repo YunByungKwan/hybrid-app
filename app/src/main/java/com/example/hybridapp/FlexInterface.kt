@@ -3,18 +3,13 @@ package com.example.hybridapp
 import android.app.PendingIntent
 import android.content.Intent
 import android.os.Build
-import android.util.DisplayMetrics
 import android.util.Log
-import android.view.View
-import android.view.animation.AnimationUtils
-import androidx.constraintlayout.widget.ConstraintLayout
 import app.dvkyun.flexhybridand.FlexFuncInterface
 import com.example.hybridapp.data.LogUrlRepository
 import com.example.hybridapp.data.LogUrlRoomDatabase
 import com.example.hybridapp.util.Constants
 import com.example.hybridapp.util.Utils
 import com.example.hybridapp.util.module.*
-import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -98,17 +93,13 @@ class FlexInterface {
     }
 
     @FlexFuncInterface
-    fun InstanceId(array: JSONArray) {
-        CoroutineScope(Dispatchers.Main).launch {
-            val instanceId = Utils.getInstanceId()
-            Log.e(Constants.TAG_INTERFACE, "Instance id: $instanceId")
-        }
+    fun UniqueAppID(array: JSONArray) {
+
     }
 
     @FlexFuncInterface
-    fun GUID(array: JSONArray) {
-        val guid = Utils.getGUID()
-        Log.e(Constants.TAG_INTERFACE, "GUID: $guid")
+    fun UniqueDeviceID(array: JSONArray): String {
+        return Utils.getDeviceId(App.INSTANCE)
     }
 
     @FlexFuncInterface

@@ -14,8 +14,9 @@ open class BasicActivity: AppCompatActivity() {
     var multiplePhotoDeviceAction: FlexAction? = null
     var multiplePhotosAction: FlexAction? = null
     var qrCodeScanAction: FlexAction? = null
-    var singlePhotoAction: FlexAction? = null
     var bioAuthAction: FlexAction? = null
     var recordAction: FlexAction? = null
 
+    var ratio: Double? = null
+    var isWidthRatio: Boolean? = null
 }

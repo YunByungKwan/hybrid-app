@@ -115,7 +115,6 @@ class Constants {
        /** 로그 텍스트 */
        const val LOG_MSG_CAMERA = "Camera app can't be launched."
        const val LOG_MSG_GALLERY = "Gallery app can't be launched."
-       const val LOG_RESULT_OK = "RESULT_OK - onActivityResult"
        const val LOG_MSG_NOT_CHANNEL = "No notification channel required."
        const val RESULT_CANCELED = "Cancel"
 

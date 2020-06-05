@@ -6,10 +6,11 @@ import android.webkit.ValueCallback
 import android.webkit.WebChromeClient
 import android.webkit.WebView
 import app.dvkyun.flexhybridand.FlexWebChromeClient
-import com.example.hybridapp.App
 import com.example.hybridapp.util.Constants
 
-object BasicWebChromeClient: FlexWebChromeClient(App.activity) {
+class BasicWebChromeClient(activity: BasicActivity): FlexWebChromeClient(activity) {
+
+    private val mActivity = activity
 
     private var mFilePatCallback: ValueCallback<Array<Uri>>? = null
 
@@ -23,9 +24,9 @@ object BasicWebChromeClient: FlexWebChromeClient(App.activity) {
         intent.addCategory(Intent.CATEGORY_OPENABLE)
         intent.type = "image/*"
 
-        App.activity.
-        startActivityForResult(intent, Constants.REQ_CODE_FILE_UPLOAD)
+        mActivity.startActivityForResult(intent, Constants.REQ_CODE_FILE_UPLOAD)
 
         return true
     }
+
 }

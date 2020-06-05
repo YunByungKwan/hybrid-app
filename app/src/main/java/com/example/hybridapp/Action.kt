@@ -1,6 +1,7 @@
 package com.example.hybridapp
 
 import android.content.DialogInterface
+import android.util.Log
 import androidx.fragment.app.FragmentActivity
 import app.dvkyun.flexhybridand.FlexAction
 import com.example.hybridapp.util.Constants
@@ -18,6 +19,7 @@ object Action {
         CoroutineScope(Dispatchers.Main).launch {
             val title = array?.getString(0)
             val message = array?.getString(1)
+
 
             val jsonObject: JSONObject? = array?.get(2) as JSONObject
             val basic: String? =
@@ -71,14 +73,7 @@ object Action {
             val ratio = array?.getDouble(0)
             val isWidthRatio = array?.getBoolean(1)
 
-            if(Utils.existAllPermission(arrayOf(Constants.PERM_CAMERA))) {
-                if (cameraDeviceAction != null) {
-                    Camera.request(cameraDeviceAction, ratio, isWidthRatio
-                    )
-                }
-            } else {
-                Utils.checkDangerousPermissions(arrayOf(Constants.PERM_CAMERA), Constants.REQ_PERM_CODE_CAMERA)
-            }
+            Camera.request(cameraDeviceAction, ratio, isWidthRatio)
         }
     }
 
@@ -86,35 +81,16 @@ object Action {
         CoroutineScope(Dispatchers.Main).launch {
             val ratio = array?.getDouble(0)
 
-            if(Utils.existAllPermission(arrayOf(Constants.PERM_CAMERA))) {
-                if (cameraAction != null) {
-                    Camera.request(
-                        cameraAction,
-                        ratio,
-                        null
-                    )
-                }
-            } else {
-                Utils.checkDangerousPermissions(arrayOf(Constants.PERM_CAMERA), Constants.REQ_PERM_CODE_CAMERA)
-            }
+            Camera.request(cameraAction, ratio, null)
         }
     }
 
     val photoByDeviceRatio: (FlexAction?, JSONArray?) -> Unit = { photoDeviceAction, array ->
         CoroutineScope(Dispatchers.Main).launch {
-            val ratio = 0.1
-            val isWidthRatio = false
+            val ratio = array?.getDouble(0)
+            val isWidthRatio = array?.getBoolean(1)
 
-            val storagePermissions = arrayOf(Constants.PERM_WRITE_EXTERNAL_STORAGE,
-                Constants.PERM_READ_EXTERNAL_STORAGE)
-
-            if(Utils.existAllPermission(storagePermissions)) {
-                if (photoDeviceAction != null) {
-                    Photo.requestImage(photoDeviceAction, ratio, isWidthRatio)
-                }
-            } else {
-                Utils.checkDangerousPermissions(storagePermissions, Constants.REQ_PERM_CODE_READ_WRITE)
-            }
+            Photo.requestImage(photoDeviceAction, ratio, isWidthRatio)
         }
     }
 
@@ -122,16 +98,7 @@ object Action {
         CoroutineScope(Dispatchers.Main).launch {
             val ratio = array?.getDouble(0)
 
-            val storagePermissions = arrayOf(Constants.PERM_WRITE_EXTERNAL_STORAGE,
-                Constants.PERM_READ_EXTERNAL_STORAGE)
-
-            if(Utils.existAllPermission(storagePermissions)) {
-                if (photoAction != null) {
-                    Photo.requestImage(photoAction, ratio!!, null)
-                }
-            } else {
-                Utils.checkDangerousPermissions(storagePermissions, Constants.REQ_PERM_CODE_READ_WRITE)
-            }
+            Photo.requestImage(photoAction, ratio!!, null)
         }
     }
 
@@ -140,39 +107,16 @@ object Action {
             val ratio = array?.getDouble(0)
             val isWidthRatio = array?.getBoolean(1)
 
-            val storagePermissions =
-                arrayOf(Constants.PERM_WRITE_EXTERNAL_STORAGE,
-                    Constants.PERM_READ_EXTERNAL_STORAGE)
-
-            if(Utils.existAllPermission(storagePermissions)) {
-                Photo.requestMultipleImages(
-                    multiplePhotoDeviceAction,
-                    ratio,
-                    isWidthRatio!!
-                )
-            } else {
-                Utils.checkDangerousPermissions(storagePermissions, Constants.REQ_PERM_CODE_READ_WRITE)
-            }
+            Photo.requestMultipleImages(multiplePhotoDeviceAction, ratio!!, isWidthRatio!!)
         }
-
     }
 
     val multiPhotoByRatio: (FlexAction?, JSONArray?) -> Unit = { multiplePhotoAction, array ->
         CoroutineScope(Dispatchers.Main).launch {
             val ratio = array?.getDouble(0)
 
-            val storagePermissions =
-                arrayOf(Constants.PERM_WRITE_EXTERNAL_STORAGE,
-                    Constants.PERM_READ_EXTERNAL_STORAGE)
-
-            if(Utils.existAllPermission(storagePermissions)) {
-                Photo.requestMultipleImages(multiplePhotoAction, ratio, null)
-            } else {
-                Utils.checkDangerousPermissions(storagePermissions,
-                    Constants.REQ_PERM_CODE_READ_WRITE)
-            }
+            Photo.requestMultipleImages(multiplePhotoAction, ratio!!, null)
         }
-
     }
 
     val qrcode: (FlexAction?, JSONArray?) -> Unit = { qrCodeAction, _->
@@ -190,9 +134,7 @@ object Action {
                 Constants.PERM_ACCESS_COARSE_LOCATION)
 
             if(Utils.existAllPermission(locationPermissions)) {
-                Location.getCurrent(
-                    locationAction
-                )
+                Location.getCurrent(locationAction)
             } else {
                 Utils.checkDangerousPermissions(locationPermissions,
                     Constants.REQ_PERM_CODE_LOCATION)

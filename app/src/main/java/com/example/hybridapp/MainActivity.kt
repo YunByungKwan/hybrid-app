@@ -14,12 +14,12 @@ import android.view.animation.AnimationUtils
 import android.webkit.ValueCallback
 import android.webkit.WebChromeClient
 import android.webkit.WebView
-import androidx.constraintlayout.widget.ConstraintLayout
-import app.dvkyun.flexhybridand.FlexWebChromeClient
+import android.widget.Button
 import com.example.hybridapp.data.LogUrlRepository
 import com.example.hybridapp.data.LogUrlRoomDatabase
 import com.example.hybridapp.util.*
 import com.example.hybridapp.basic.BasicActivity
+import com.example.hybridapp.basic.BasicWebChromeClient
 import com.example.hybridapp.basic.BasicWebViewClient
 import com.example.hybridapp.util.module.*
 import com.google.zxing.integration.android.IntentIntegrator
@@ -38,6 +38,7 @@ class MainActivity : BasicActivity() {
     private var smsReceiver: SMSReceiver? = null
     private var mFilePatCallback: ValueCallback<Array<Uri>>? = null
     var backgroundView: View? = null
+    var popupCloseButton: Button? = null
 
     override fun onResume() {
         super.onResume()
@@ -116,22 +117,8 @@ class MainActivity : BasicActivity() {
         flex_web_view.addFlexInterface(FlexInterface())
         flex_web_view.settings.setSupportMultipleWindows(true)
         WebView.setWebContentsDebuggingEnabled(true)
-        flex_web_view.webChromeClient = object: FlexWebChromeClient(this) {
-            override fun onShowFileChooser(
-                webView: WebView?, filePathCallback: ValueCallback<Array<Uri>>?,
-                fileChooserParams: WebChromeClient.FileChooserParams?): Boolean
-            {
-                mFilePatCallback = filePathCallback
-
-                val intent = Intent(Intent.ACTION_GET_CONTENT)
-                intent.addCategory(Intent.CATEGORY_OPENABLE)
-                intent.type = "image/*"
-
-                App.activity.startActivityForResult(intent, Constants.REQ_CODE_FILE_UPLOAD)
-                return true
-            }
-        }
-        flex_web_view.webViewClient = BasicWebViewClient
+        flex_web_view.webChromeClient = BasicWebChromeClient(this)
+        flex_web_view.webViewClient = BasicWebViewClient()
     }
 
     /** FlexWebView Interface 셋팅 */
@@ -162,16 +149,16 @@ class MainActivity : BasicActivity() {
                 flex_pop_up_web_view.bringToFront()
 
                 // 닫기 버튼 생성
-                val button = Utils.createCloseButton(this@MainActivity)
-                constraintLayout.addView(button)
+                popupCloseButton = Utils.createCloseButton(this@MainActivity, R.id.constraintLayout)
+                constraintLayout.addView(popupCloseButton)
 
-                button.setOnClickListener {
+                popupCloseButton!!.setOnClickListener {
                     val closeAnimation = AnimationUtils.loadAnimation(
                         this@MainActivity, R.anim.close)
                     flex_pop_up_web_view.startAnimation(closeAnimation)
                     flex_pop_up_web_view.visibility = View.GONE
                     constraintLayout.removeView(backgroundView)
-                    constraintLayout.removeView(button)
+                    constraintLayout.removeView(popupCloseButton)
                 }
             }
 
@@ -205,144 +192,129 @@ class MainActivity : BasicActivity() {
             Constants.REQ_CODE_CAMERA_DEVICE_RATIO -> {
                 if(resultOk) {
                     val imageUri = data?.data
-                    val ratio = data?.getDoubleExtra("ratio",1.0)
-                    var isWidthRatio = data?.getBooleanExtra("isWidthRatio", true)
 
                     if(imageUri != null) {
-                        val bitmapImage = Photo.convertUriToBitmap(imageUri)
-                        val resizedBitmapImage = Photo.resizeBitmapByDeviceRatio(bitmapImage,
+                        val bitmap = Photo.convertUriToBitmap(imageUri)
+                        val resizedBitmap = Photo.resizeBitmapByDeviceRatio(bitmap,
                             ratio!!, isWidthRatio!!)
-                        val base64Image = Photo.convertBitmapToBase64(resizedBitmapImage)
+                        val base64 = Photo.convertBitmapToBase64(resizedBitmap)
 
-                        cameraDeviceAction?.promiseReturn(base64Image)
+                        cameraDeviceAction?.promiseReturn("data:image/jpeg;base64,$base64")
+                        ratio = null
+                        isWidthRatio = null
                     } else {
-                        cameraDeviceAction?.promiseReturn(Constants.RESULT_CANCELED)
+                        cameraDeviceAction?.promiseReturn(null)
                     }
                 } else {
-                    cameraDeviceAction?.promiseReturn(Constants.RESULT_CANCELED)
+                    cameraDeviceAction?.promiseReturn(null)
                 }
             }
             Constants.REQ_CODE_CAMERA_RATIO -> {
                 if(resultOk) {
                     val imageUri = data?.data
-                    val ratio = data?.getDoubleExtra("ratio",1.0)
 
                     if(imageUri != null) {
-                        val bitmapImage = Photo.convertUriToBitmap(imageUri)
-                        val resizedBitmapImage = Photo.resizeBitmapByRatio(bitmapImage,
-                            ratio!!)
-                        val base64Image = Photo.convertBitmapToBase64(resizedBitmapImage)
+                        val bitmap = Photo.convertUriToBitmap(imageUri)
+                        val resizedBitmap = Photo.resizeBitmapByRatio(bitmap, ratio!!)
+                        val base64 = Photo.convertBitmapToBase64(resizedBitmap)
 
-                        cameraAction?.promiseReturn(base64Image)
+                        cameraAction?.promiseReturn("data:image/jpeg;base64,$base64")
+                        ratio = null
                     } else {
-                        cameraAction?.promiseReturn(Constants.RESULT_CANCELED)
+                        cameraAction?.promiseReturn(null)
                     }
                 } else {
-                    cameraAction?.promiseReturn(Constants.RESULT_CANCELED)
+                    cameraAction?.promiseReturn(null)
                 }
             }
             Constants.REQ_CODE_PHOTO_DEVICE_RATIO -> {
                 if(resultOk) {
                     val imageUri = data?.data
-                    val ratio = data?.getDoubleExtra("ratio",1.0)
-                    val isWidthRatio = data?.getBooleanExtra("isWidthRatio", true)
 
                     if(imageUri != null) {
-                        val bitmapImage = Photo.convertUriToBitmap(imageUri)
+                        val base64 = Photo.convertUriToResizingBase64(imageUri,
+                            ratio, isWidthRatio)
 
-                        Log.e("TAG", "ratio: $ratio, isWidthRatio: $isWidthRatio")
-
-                        val resizedBitmapImage = Photo.resizeBitmapByDeviceRatio(bitmapImage,
-                            ratio!!, isWidthRatio!!)
-                        val base64Image = Photo.convertBitmapToBase64(resizedBitmapImage)
-
-                        Log.e("123", "data:image/jpeg;base64,$base64Image")
-
-                        photoDeviceAction?.promiseReturn("data:image/jpeg;base64,$base64Image")
+                        photoDeviceAction?.promiseReturn("data:image/jpeg;base64,$base64")
+                        ratio = null
+                        isWidthRatio = null
                     } else {
-                        photoDeviceAction?.promiseReturn(Constants.RESULT_CANCELED)
+                        photoDeviceAction?.promiseReturn(null)
                     }
                 } else {
-                    photoDeviceAction?.promiseReturn(Constants.RESULT_CANCELED)
+                    photoDeviceAction?.promiseReturn(null)
                 }
             }
             Constants.REQ_CODE_PHOTO_RATIO -> {
                 if(resultOk) {
                     val imageUri = data?.data
-                    val ratio = data?.getDoubleExtra("ratio",1.0)
 
                     if(imageUri != null) {
-                        val bitmapImage = Photo.convertUriToBitmap(imageUri)
-                        val resizedBitmapImage = Photo.resizeBitmapByRatio(bitmapImage, ratio!!)
-                        val base64Image = Photo.convertBitmapToBase64(resizedBitmapImage)
+                        val base64 = Photo.convertUriToResizingBase64(imageUri,
+                            ratio, isWidthRatio)
 
-                        photoAction?.promiseReturn("data:image/jpeg;base64,$base64Image")
+                        photoAction?.promiseReturn("data:image/jpeg;base64,$base64")
+                        ratio = null
                     } else {
-                        photoAction?.promiseReturn(Constants.RESULT_CANCELED)
+                        photoAction?.promiseReturn(null)
                     }
                 } else {
-                    photoAction?.promiseReturn(Constants.RESULT_CANCELED)
+                    photoAction?.promiseReturn(null)
                 }
             }
             Constants.REQ_CODE_MULTI_PHOTO_DEVICE_RATIO -> {
                 if(resultOk) {
-                    val base64Photos = ArrayList<String>()
+                    val base64Images = ArrayList<String>()
                     val clipData = data?.clipData
-
-                    val ratio = data?.getDoubleExtra("ratio", 1.0)
-                    val isWidthRatio = data?.getBooleanExtra("isWidthRatio", true)
 
                     if(clipData != null) {
                         if(clipData.itemCount in 1..9) {
                             for(idx in 0 until clipData.itemCount) {
                                 val imageUri = clipData.getItemAt(idx).uri
-                                val bitmapImage = Photo.convertUriToBitmap(imageUri)
-                                val resizedBitmapImage = Photo.resizeBitmapByDeviceRatio(bitmapImage, ratio!!, isWidthRatio)
-                                val base64Image = Photo.convertBitmapToBase64(resizedBitmapImage)
-
-                                base64Photos.add(base64Image)
+                                val base64 = Photo.convertUriToResizingBase64(imageUri,
+                                    ratio, isWidthRatio)
+                                base64Images.add("data:image/jpeg;base64,$base64")
                             }
-                            multiplePhotoDeviceAction?.promiseReturn(base64Photos.toArray())
+                            multiplePhotoDeviceAction?.promiseReturn(base64Images.toTypedArray())
+                            ratio = null
+                            isWidthRatio = null
                         } else {
                             Log.e(Constants.TAG_MAIN, "10장 이상의 사진을 첨부할 수 없습니다.")
-                            multiplePhotoDeviceAction?.promiseReturn(Constants.RESULT_CANCELED)
+                            multiplePhotoDeviceAction?.promiseReturn(null)
                         }
                     } else {
                         Log.e(Constants.TAG_MAIN, "ClipData is null.")
-                        multiplePhotoDeviceAction?.promiseReturn(Constants.RESULT_CANCELED)
+                        multiplePhotoDeviceAction?.promiseReturn(null)
                     }
                 } else {
-                    multiplePhotoDeviceAction?.promiseReturn(Constants.RESULT_CANCELED)
+                    multiplePhotoDeviceAction?.promiseReturn(null)
                 }
             }
             Constants.REQ_CODE_MULTI_PHOTO_RATIO -> {
                 if(resultOk) {
-                    val base64Photos = ArrayList<String>()
+                    val base64Images = ArrayList<String>()
                     val clipData = data?.clipData
-
-                    val ratio = data?.getDoubleExtra("ratio", 1.0)
 
                     if(clipData != null) {
                         if(clipData.itemCount in 1..9) {
                             for(idx in 0 until clipData.itemCount) {
                                 val imageUri = clipData.getItemAt(idx).uri
-                                val bitmapImage = Photo.convertUriToBitmap(imageUri)
-                                val resizedBitmapImage = Photo.resizeBitmapByRatio(bitmapImage, ratio!!)
-                                val base64Image = Photo.convertBitmapToBase64(resizedBitmapImage)
-
-                                base64Photos.add(base64Image)
+                                val base64 = Photo.convertUriToResizingBase64(imageUri,
+                                    ratio, isWidthRatio)
+                                base64Images.add("data:image/jpeg;base64,$base64")
                             }
-                            multiplePhotosAction?.promiseReturn(base64Photos.toArray())
+                            multiplePhotosAction?.promiseReturn(base64Images.toTypedArray())
+                            ratio = null
                         } else {
                             Log.e(Constants.TAG_MAIN, "10장 이상의 사진을 첨부할 수 없습니다.")
-                            multiplePhotosAction?.promiseReturn(Constants.RESULT_CANCELED)
+                            multiplePhotosAction?.promiseReturn(null)
                         }
                     } else {
                         Log.e(Constants.TAG_MAIN, "ClipData is null.")
-                        multiplePhotosAction?.promiseReturn(Constants.RESULT_CANCELED)
+                        multiplePhotosAction?.promiseReturn(null)
                     }
                 } else {
-                    multiplePhotosAction?.promiseReturn(Constants.RESULT_CANCELED)
+                    multiplePhotosAction?.promiseReturn(null)
                 }
             }
             Constants.REQ_CODE_QR -> {
@@ -355,10 +327,10 @@ class MainActivity : BasicActivity() {
                         qrCodeScanAction?.promiseReturn(result.contents)
                     } else {
                         Log.e(Constants.TAG_MAIN, "QR Code is null.")
-                        qrCodeScanAction?.promiseReturn(Constants.RESULT_CANCELED)
+                        qrCodeScanAction?.promiseReturn(null)
                     }
                 } else {
-                    qrCodeScanAction?.promiseReturn(Constants.RESULT_CANCELED)
+                    qrCodeScanAction?.promiseReturn(null)
                 }
             }
             Constants.REQ_PERM_CODE_SEND_SMS -> {
@@ -390,49 +362,29 @@ class MainActivity : BasicActivity() {
         val isNotEmpty = grantResults.isNotEmpty()
         val isGranted = (grantResults[0] == PackageManager.PERMISSION_GRANTED)
 
-        when(requestCode) {
-            Constants.REQ_PERM_CODE_CAMERA -> {
-                if (isNotEmpty && isGranted) {
+        if(isNotEmpty && isGranted) {
+            when(requestCode) {
+                Constants.REQ_PERM_CODE_CAMERA -> {
                     Log.e(Constants.TAG_MAIN, Constants.LOG_PERM_GRANTED_CAMERA)
-                } else {
-                    Dialog.showDenialPermissionText()
                 }
-            }
-            Constants.REQ_PERM_CODE_WRITE -> {
-                if(isNotEmpty && isGranted) {
+                Constants.REQ_PERM_CODE_WRITE -> {
                     Log.e(Constants.TAG_MAIN, Constants.LOG_PERM_GRANTED_WRITE)
-                } else {
-                    Dialog.showDenialPermissionText()
                 }
-            }
-            Constants.REQ_PERM_CODE_READ_WRITE -> {
-                if(isNotEmpty && isGranted) {
+                Constants.REQ_PERM_CODE_READ_WRITE -> {
                     Log.e(Constants.TAG_MAIN, Constants.LOG_PERM_GRANTED_READ_WRITE)
-                } else {
-                    Dialog.showDenialPermissionText()
                 }
-            }
-            Constants.REQ_PERM_CODE_LOCATION -> {
-                if(isNotEmpty && isGranted) {
+                Constants.REQ_PERM_CODE_LOCATION -> {
                     Log.e(Constants.TAG_MAIN, Constants.LOG_PERM_GRANTED_LOCATION)
-                } else {
-                    Dialog.showDenialPermissionText()
                 }
-            }
-            Constants.REQ_PERM_CODE_RECORD_AUDIO -> {
-                if(isNotEmpty && isGranted) {
+                Constants.REQ_PERM_CODE_RECORD_AUDIO -> {
                     Log.e(Constants.TAG_MAIN, Constants.LOG_PERM_GRANTED_RECORD_AUDIO)
-                } else {
-                    Dialog.showDenialPermissionText()
                 }
-            }
-            Constants.REQ_PERM_CODE_SEND_SMS -> {
-                if(isNotEmpty && isGranted) {
+                Constants.REQ_PERM_CODE_SEND_SMS -> {
                     Log.e(Constants.TAG_MAIN, Constants.LOG_PERM_GRANTED_SEND_SMS)
-                } else {
-                    Dialog.showDenialPermissionText()
                 }
             }
+        } else {
+            Dialog.showDenialPermissionText()
         }
     }
 
@@ -443,7 +395,9 @@ class MainActivity : BasicActivity() {
                 this@MainActivity, R.anim.close)
             flex_pop_up_web_view.startAnimation(closeAnimation)
             flex_pop_up_web_view.visibility = View.GONE
+
             constraintLayout.removeView(backgroundView)
+            constraintLayout.removeView(popupCloseButton)
         } else {
             super.onBackPressed()
         }

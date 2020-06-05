@@ -18,12 +18,10 @@ import android.widget.Button
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import androidx.core.content.ContextCompat.getSystemService
 import com.example.hybridapp.App
 import com.example.hybridapp.R
 import com.example.hybridapp.util.module.Dialog
 import com.google.firebase.iid.FirebaseInstanceId
-import kotlinx.android.synthetic.main.activity_main.*
 import java.nio.charset.StandardCharsets
 import java.security.MessageDigest
 import java.security.NoSuchAlgorithmException
@@ -199,22 +197,13 @@ object Utils {
             Base64.NO_PADDING or Base64.NO_WRAP).substring(0, 11)
     }
 
-    /** Instance id 반환 */
-    fun getInstanceId(): String {
-        var instanceId = ""
-        FirebaseInstanceId.getInstance().instanceId.addOnCompleteListener {task ->
-            if(task.isSuccessful) {
-                val token = task.result?.token
+    fun getAppId() {
 
-                if(token != null) {
-                    instanceId = token
-                }
-            } else {
-                Log.e(Constants.TAG_IDENTIFIER, "getInstanceId failed", task.exception)
-            }
-        }
+    }
 
-        return instanceId
+    /** 디바이스 id 가져오기 */
+    fun getDeviceId(context: Context): String {
+        return Settings.Secure.getString(context.contentResolver, Settings.Secure.ANDROID_ID)
     }
 
     /** Guid 반환 */
@@ -252,16 +241,17 @@ object Utils {
     }
 
     /** 닫기 버튼 동적 생성 */
-    fun createCloseButton(context: Context): Button {
+    fun createCloseButton(context: Context, root: Int): Button {
         val button = Button(context)
         val params = ConstraintLayout.LayoutParams(70, 70)
-        params.topToTop = R.id.constraintLayout
-        params.endToEnd = R.id.constraintLayout
-        params.startToStart = R.id.constraintLayout
+        params.topToTop = root
+        params.endToEnd = root
+        params.startToStart = root
         params.topMargin = 10
         button.text = "X"
         button.background = ContextCompat.getDrawable(context, R.drawable.circle)
         button.textAlignment = View.TEXT_ALIGNMENT_CENTER
+        button.layoutParams = params
 
         return button
     }

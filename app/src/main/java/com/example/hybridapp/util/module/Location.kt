@@ -40,6 +40,7 @@ object Location {
             }
         } catch (e: NullPointerException) {
             Log.e(Constants.TAG_MAIN, e.stackTrace.toString())
+            action?.promiseReturn(null)
         }
     }
 }

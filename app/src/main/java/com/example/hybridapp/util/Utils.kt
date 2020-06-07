@@ -21,7 +21,6 @@ import androidx.core.content.ContextCompat
 import com.example.hybridapp.App
 import com.example.hybridapp.R
 import com.example.hybridapp.util.module.Dialog
-import com.google.firebase.iid.FirebaseInstanceId
 import java.nio.charset.StandardCharsets
 import java.security.MessageDigest
 import java.security.NoSuchAlgorithmException
@@ -123,9 +122,6 @@ object Utils {
             Constants.REQ_PERM_CODE_LOCATION -> {
                 return Constants.DIAL_MSG_LOCATION
             }
-            Constants.REQ_PERM_CODE_RECORD_AUDIO -> {
-                return Constants.DIAL_MSG_RECORD_AUDIO
-            }
             Constants.REQ_PERM_CODE_SEND_SMS -> {
                 return Constants.DIAL_MSG_SEND_SMS
             }
@@ -197,18 +193,9 @@ object Utils {
             Base64.NO_PADDING or Base64.NO_WRAP).substring(0, 11)
     }
 
-    fun getAppId() {
-
-    }
-
     /** 디바이스 id 가져오기 */
     fun getDeviceId(context: Context): String {
         return Settings.Secure.getString(context.contentResolver, Settings.Secure.ANDROID_ID)
-    }
-
-    /** Guid 반환 */
-    fun getGUID(): String {
-        return UUID.randomUUID().toString()
     }
 
     /** 현재 날짜와 시간 반환 */

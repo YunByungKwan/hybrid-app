@@ -4,7 +4,6 @@ import android.app.Activity
 import android.app.Application
 import android.content.Context
 import android.os.Bundle
-import com.example.hybridapp.basic.BasicActivity
 
 class App : Application() {
 

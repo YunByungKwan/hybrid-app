@@ -17,7 +17,6 @@ open class BasicActivity: AppCompatActivity() {
     var qrCodeScanAction: FlexAction? = null
     var locationAction: FlexAction? = null
     var bioAuthAction: FlexAction? = null
-    var recordAction: FlexAction? = null
 
     /** 이미지 리사이징 정보 */
     var ratio: Double? = null

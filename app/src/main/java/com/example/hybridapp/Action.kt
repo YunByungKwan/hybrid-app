@@ -1,7 +1,6 @@
 package com.example.hybridapp
 
 import android.content.DialogInterface
-import android.util.Log
 import androidx.fragment.app.FragmentActivity
 import app.dvkyun.flexhybridand.FlexAction
 import com.example.hybridapp.util.Constants
@@ -143,15 +142,6 @@ object Action {
             } else {
 
             }
-        }
-    }
-
-    val record: (FlexAction?, JSONArray?) -> Unit = { recordAction, _->
-        if(Utils.existAllPermission(arrayOf(Constants.PERM_RECORD_AUDIO))) {
-            Record.getIntent(recordAction)
-        } else {
-            Utils.checkDangerousPermissions(arrayOf(Constants.PERM_RECORD_AUDIO),
-                Constants.REQ_PERM_CODE_RECORD_AUDIO)
         }
     }
 

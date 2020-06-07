@@ -3,7 +3,6 @@ package com.example.hybridapp.util.module
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.util.Log
 import com.example.hybridapp.util.Constants
 import com.google.android.gms.auth.api.phone.SmsRetriever
 import com.google.android.gms.common.api.CommonStatusCodes
@@ -13,22 +12,27 @@ class SMSReceiver: BroadcastReceiver() {
     val SMSRetrievedAction = "com.google.android.gms.auth.api.phone.SMS_RETRIEVED"
 
     override fun onReceive(context: Context, intent: Intent) {
+        Constants.LOGD("Call onReceive() in SMSReceiver.")
+
         if (SmsRetriever.SMS_RETRIEVED_ACTION == intent.action) {
             val extras = intent.extras
             val status = extras?.get(SmsRetriever.EXTRA_STATUS) as Status
 
-            Log.d(Constants.TAG_SMS_RECEIVER, "SmsReceiver : onReceiver")
-
             when (status.statusCode) {
                 CommonStatusCodes.SUCCESS -> {
-                    Log.e(Constants.TAG_SMS_RECEIVER, "SmsReceiver : onReceiver(CommonStatusCodes.SUCCESS)")
+                    Constants.LOGD(Constants.LOG_MSG_SMS_SUCCESS)
 
                     val message = extras.get(SmsRetriever.EXTRA_SMS_MESSAGE) as String
-
-                    Log.e(Constants.TAG_SMS_RECEIVER, "Message: $message")
+                    Constants.LOGD("Message: $message")
+                }
+                CommonStatusCodes.CANCELED -> {
+                    Constants.LOGD(Constants.LOG_MSG_SMS_CANCELED)
+                }
+                CommonStatusCodes.ERROR -> {
+                    Constants.LOGD(Constants.LOG_MSG_SMS_ERROR)
                 }
                 CommonStatusCodes.TIMEOUT-> {
-                    Log.d(Constants.TAG_SMS_RECEIVER, "SmsReceiver : onReceiver(CommonStatusCodes.TIMEOUT)")
+                    Constants.LOGD(Constants.LOG_MSG_SMS_TIMEOUT)
                 }
             }
         }

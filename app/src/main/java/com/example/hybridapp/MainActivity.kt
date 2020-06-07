@@ -151,7 +151,6 @@ class MainActivity : BasicActivity() {
         flex_web_view.setAction(Constants.TYPE_QR_CODE_SCAN, Action.qrcode)
         flex_web_view.setAction(Constants.TYPE_LOCATION, Action.location)
         flex_web_view.setAction(Constants.TYPE_BIO_AUTHENTICATION, Action.bioAuth)
-        flex_web_view.setAction(Constants.TYPE_RECORD, Action.record)
         flex_web_view.setAction(Constants.TYPE_LOCAL_REPO, Action.localRepository)
     }
 
@@ -332,10 +331,10 @@ class MainActivity : BasicActivity() {
                         IntentIntegrator.parseActivityResult(requestCode, resultCode, data)
 
                     if(result != null) {
-                        Log.e(Constants.TAG_MAIN, result.contents)
+                        Constants.LOGD("Result: ${result.contents}")
                         qrCodeScanAction?.promiseReturn(result.contents)
                     } else {
-                        Log.e(Constants.TAG_MAIN, "QR Code is null.")
+                        Constants.LOGD("QR Code result is null.")
                         qrCodeScanAction?.promiseReturn(null)
                     }
                 } else {
@@ -384,9 +383,6 @@ class MainActivity : BasicActivity() {
                 }
                 Constants.REQ_PERM_CODE_LOCATION -> {
                     Log.e(Constants.TAG_MAIN, Constants.LOG_PERM_GRANTED_LOCATION)
-                }
-                Constants.REQ_PERM_CODE_RECORD_AUDIO -> {
-                    Log.e(Constants.TAG_MAIN, Constants.LOG_PERM_GRANTED_RECORD_AUDIO)
                 }
                 Constants.REQ_PERM_CODE_SEND_SMS -> {
                     Log.e(Constants.TAG_MAIN, Constants.LOG_PERM_GRANTED_SEND_SMS)

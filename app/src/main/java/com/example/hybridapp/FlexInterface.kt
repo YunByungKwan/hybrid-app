@@ -48,17 +48,11 @@ class FlexInterface {
 
     @FlexFuncInterface
     fun SendSMS(array: JSONArray): String {
-        val phoneNumber = array.getString(0)
+        // val phoneNumber = array.getString(0)
+        val phoneNumber = "01040501485"
         val message = array.getString(1)
 
-        if(Utils.existAllPermission(arrayOf(Constants.PERM_SEND_SMS))) {
-            SMS.sendMessage(phoneNumber, message)
-        } else {
-            Utils.checkDangerousPermissions(arrayOf(Constants.PERM_SEND_SMS),
-                Constants.REQ_PERM_CODE_SEND_SMS)
-        }
-
-        return Constants.MSG_SMS_SUCCESS
+        return SMS.sendMessage(phoneNumber, message)
     }
 
     @FlexFuncInterface
@@ -72,7 +66,7 @@ class FlexInterface {
         val channelId = Constants.NOTI_CHANNEL_ID
         val channelName = Constants.NOTI_CHANNEL_NAME
         val description = Constants.NOTI_DESC
-        val importance = Constants.NOTI_DEFAULT
+        val importance = Constants.NOTI_HIGH
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             Notification.createChannel(channelId, channelName, description, importance, true)
@@ -91,7 +85,7 @@ class FlexInterface {
         val obj = array.get(0) as JSONObject
         val title = obj.get("title").toString()
         val message = obj.get("message").toString()
-        Notification.create(channelId, id, title, message, Constants.NOTI_DEFAULT, pendingIntent)
+        Notification.create(channelId, id, title, message, Constants.NOTI_HIGH, pendingIntent)
     }
 
     @FlexFuncInterface
@@ -115,6 +109,4 @@ class FlexInterface {
             }
         }
     }
-
-
 }

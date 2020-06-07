@@ -2,7 +2,6 @@ package com.example.hybridapp.util.module
 
 import android.content.IntentFilter
 import android.telephony.SmsManager
-import android.util.Log
 import com.example.hybridapp.App
 import com.example.hybridapp.util.Constants
 import com.example.hybridapp.util.Utils
@@ -22,60 +21,60 @@ import com.google.android.gms.auth.api.phone.SmsRetriever
 
 object SMS {
 
+    /** SMS Receiver 등록 */
     fun registerReceiver(receiver: SMSReceiver?) {
+        Constants.LOGD("Call registerReceiver() in SMS object.")
         val filter = IntentFilter()
         filter.addAction(receiver!!.SMSRetrievedAction)
-
         App.activity.registerReceiver(receiver, filter)
     }
 
+    /** SMS Receiver 해제 */
     fun unregisterReceiver(receiver: SMSReceiver?) {
+        Constants.LOGD("Call unregisterReceiver() in SMS object.")
+
         if(receiver != null) {
             App.activity.unregisterReceiver(receiver)
         } else {
-            Log.e(Constants.TAG_MAIN, "smsReceiver is null in onPause().")
+            Constants.LOGD("SMS Receiver is null.")
         }
     }
 
     /** 문자 메시지를 보냄  */
     fun sendMessage(phoneNumber: String, message: String): String {
-        Constants.LOGE("sendMessage", Constants.TAG_SMS)
+        Constants.LOGD("Call sendMessage() in SMS object.")
 
-        var result: String?
-
-        if(Utils.existAllPermission(arrayOf(Constants.PERM_SEND_SMS))) {
+        return if(Utils.existAllPermission(arrayOf(Constants.PERM_SEND_SMS))) {
             val smsManager = SmsManager.getDefault()
-            smsManager.sendTextMessage(phoneNumber,
-                null, message, null, null)
+            smsManager.sendTextMessage(phoneNumber, null, message,
+                null, null)
 
-            result = Constants.MSG_SMS_SUCCESS
+            Constants.MSG_SMS_SUCCESS
         } else {
             Utils.checkDangerousPermissions(arrayOf(Constants.PERM_SEND_SMS),
                 Constants.REQ_PERM_CODE_SEND_SMS)
 
-            result = ""
+            ""
         }
-
-        return result
     }
 
-    /** Receive message */
+    /** 문자 메시지를 받음 */
     fun receiveMessage() {
-        Constants.LOGE("receiveMessage", Constants.TAG_SMS)
+        Constants.LOGD("Call receiveMessage() in SMS object.")
 
         val client = SmsRetriever.getClient(App.activity)
         val task = client.startSmsRetriever()
         task.addOnCompleteListener {
-            Log.e(Constants.TAG_SMS, "SMS task is completed.")
+            Constants.LOGD("Call addOnCompleteListener in SMS object.")
         }
         task.addOnSuccessListener {
-            Log.e(Constants.TAG_SMS, "SMS task success.")
+            Constants.LOGD("Call addOnSuccessListener in SMS object.")
         }
         task.addOnFailureListener {
-            Log.e(Constants.TAG_SMS, "SMS task fail.")
+            Constants.LOGD("Call addOnFailureListener in SMS object.")
         }
         task.addOnCanceledListener {
-            Log.e(Constants.TAG_SMS, "SMS task is canceled.")
+            Constants.LOGD("Call addOnCanceledListener in SMS object.")
         }
     }
 }

@@ -16,6 +16,7 @@ class Constants {
     annotation class types
 
    companion object {
+
        /** WebView Url */
        const val BASE_URL = "file:///android_asset"
        const val URL = "file:///android_asset/demo/index.html"
@@ -31,7 +32,6 @@ class Constants {
        const val PERM_READ_EXTERNAL_STORAGE = Manifest.permission.READ_EXTERNAL_STORAGE
        const val PERM_ACCESS_FINE_LOCATION = Manifest.permission.ACCESS_FINE_LOCATION
        const val PERM_ACCESS_COARSE_LOCATION = Manifest.permission.ACCESS_COARSE_LOCATION
-       const val PERM_RECORD_AUDIO = Manifest.permission.RECORD_AUDIO
        const val PERM_SEND_SMS = Manifest.permission.SEND_SMS
 
        /** 인터페이스, 액션 이름 */
@@ -46,7 +46,6 @@ class Constants {
        const val TYPE_QR_CODE_SCAN = "QRCodeScan"
        const val TYPE_LOCATION = "Location"
        const val TYPE_BIO_AUTHENTICATION = "BioAuthentication"
-       const val TYPE_RECORD = "Record"
        const val TYPE_LOCAL_REPO = "LocalRepository"
        const val TYPE_POP_UP = "WebPopup"
 
@@ -58,21 +57,13 @@ class Constants {
        const val TAG_SNACKBAR = "Snackbar class"
        const val TAG_DIALOG = "Dialog class"
        const val TAG_NETWORK = "Network class"
-       const val TAG_CAMERA = "Camera class"
        const val TAG_PHOTO = "Photo class"
-       const val TAG_SMS = "SMS class"
        const val TAG_BIO_AUTH = "BioAuth class"
-       const val TAG_NOTI = "Notification class"
        const val TAG_SHARED = "SharedPreferences class"
-
-       const val TAG_INTERFACE = "FlexInterface"
-       const val TAG_SMS_RECEIVER = "SMSReceiver"
        const val TAG_FCM_SERVICE = "FCM"
 
        /** Function LOG TAG */
        const val TAG_PERMISSION = "PERMISSION"
-       const val TAG_IDENTIFIER = "IDENTIFIER"
-       const val TAG_NFC = "NFC"
 
        /** 다이얼로그 텍스트 */
        const val DIAL_TITLE = "알림"
@@ -84,7 +75,6 @@ class Constants {
        const val DIAL_MSG_WRITE = "앱을 사용하기 위해 저장소 쓰기 권한이 필요합니다."
        const val DIAL_MSG_READ_WRITE = "앱을 사용하기 위해 저장소 읽기/쓰기 권한이 필요합니다."
        const val DIAL_MSG_LOCATION = "앱을 사용하기 위해 위치 권한이 필요합니다."
-       const val DIAL_MSG_RECORD_AUDIO = "앱을 사용하기 위해 음성 녹음 권한이 필요합니다."
        const val DIAL_MSG_SEND_SMS = "앱을 사용하기 위해 SMS 보내기 권한이 필요합니다."
 
        const val DENIED_DIAL_TITLE = "알림"
@@ -109,6 +99,7 @@ class Constants {
        const val NOTI_CHANNEL_NAME = "롯데정보통신"
        const val NOTI_DESC = "롯데정보통신 알림 채널입니다."
        const val NOTI_DEFAULT: Int = NotificationManagerCompat.IMPORTANCE_DEFAULT
+       const val NOTI_HIGH: Int = NotificationManagerCompat.IMPORTANCE_HIGH
        const val NOTIFICATION_ID = 101
 
        /** SharedPreferences */
@@ -132,6 +123,10 @@ class Constants {
 
        /** SMS 텍스트 */
        const val MSG_SMS_SUCCESS = "문자 메시지를 전송하였습니다."
+       const val LOG_MSG_SMS_SUCCESS = "SMS Status: SUCCESS."
+       const val LOG_MSG_SMS_CANCELED = "SMS Status: CANCELED."
+       const val LOG_MSG_SMS_ERROR = "SMS Status: ERROR."
+       const val LOG_MSG_SMS_TIMEOUT = "SMS Status: TIMEOUT."
 
        /** INTENT REQUEST CODE */
        const val REQ_CODE_CAMERA_DEVICE_RATIO = 10001
@@ -141,16 +136,14 @@ class Constants {
        const val REQ_CODE_MULTI_PHOTO_DEVICE_RATIO = 10005
        const val REQ_CODE_MULTI_PHOTO_RATIO = 10006
        const val REQ_CODE_FILE_UPLOAD = 10007
-       const val REQ_CODE_QR =  IntentIntegrator.REQUEST_CODE
-       const val REQ_CODE_RECORD = 10008
+       const val REQ_CODE_QR = IntentIntegrator.REQUEST_CODE
 
        /** PERMISSION CODE */
        const val REQ_PERM_CODE_CAMERA = 1001
        const val REQ_PERM_CODE_WRITE = 1002
        const val REQ_PERM_CODE_READ_WRITE = 1003
        const val REQ_PERM_CODE_LOCATION = 1004
-       const val REQ_PERM_CODE_RECORD_AUDIO = 1005
-       const val REQ_PERM_CODE_SEND_SMS = 1006
+       const val REQ_PERM_CODE_SEND_SMS = 1005
 
        const val LOG_PERM_GRANTED_CAMERA = "CAMERA permission is granted."
        const val LOG_PERM_GRANTED_WRITE = "WRITE EXTERNAL STORAGE permission is granted."
@@ -158,8 +151,9 @@ class Constants {
                = "READ/WRITE EXTERNAL STORAGE permission is granted."
        const val LOG_PERM_GRANTED_LOCATION
                = "ACCESS FINE/COARSE LOCATION permission is granted."
-       const val LOG_PERM_GRANTED_RECORD_AUDIO = "RECORD AUDIO permission is granted."
        const val LOG_PERM_GRANTED_SEND_SMS = "SEND SMS permission is granted."
+
+       /** Function */
 
        fun LOGD(message: String) = Log.d(TAG, message)
 

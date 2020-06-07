@@ -13,10 +13,10 @@ object Camera {
 
     /** 카메라 호출 */
     fun request(action: FlexAction?, ratio: Double?, isWidthRatio: Boolean?) {
-        Constants.LOGE("request", Constants.TAG_CAMERA)
+        Constants.LOGD("Call request() in Camera object.")
 
         if(Utils.existAllPermission(arrayOf(Constants.PERM_CAMERA)) && action != null) {
-            Log.e(Constants.TAG_CAMERA, "Camera permission exists.")
+            Constants.LOGD("Camera permission exists.")
 
             val cameraIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
             val packageManager = App.INSTANCE.packageManager

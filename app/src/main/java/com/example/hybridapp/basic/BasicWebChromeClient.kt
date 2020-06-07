@@ -14,10 +14,12 @@ class BasicWebChromeClient(activity: BasicActivity): FlexWebChromeClient(activit
 
     private var mFilePatCallback: ValueCallback<Array<Uri>>? = null
 
+    /** 웹뷰 파일 다운로드시 호출 */
     override fun onShowFileChooser(
         webView: WebView?, filePathCallback: ValueCallback<Array<Uri>>?,
-        fileChooserParams: WebChromeClient.FileChooserParams?): Boolean
-    {
+        fileChooserParams: WebChromeClient.FileChooserParams?): Boolean {
+        Constants.LOGD("Call function onShowFileChooser() in BasicWebChromeClient class.")
+
         mFilePatCallback = filePathCallback
 
         val intent = Intent(Intent.ACTION_GET_CONTENT)

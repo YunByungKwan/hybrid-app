@@ -2,12 +2,15 @@ package com.example.hybridapp
 
 import android.app.Activity
 import android.app.DownloadManager
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.location.LocationManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Environment
+import android.os.Looper
 import android.util.Log
 import android.view.View
 import android.view.animation.AnimationUtils
@@ -15,6 +18,7 @@ import android.webkit.ValueCallback
 import android.webkit.WebChromeClient
 import android.webkit.WebView
 import android.widget.Button
+import android.widget.TextView
 import com.example.hybridapp.data.LogUrlRepository
 import com.example.hybridapp.data.LogUrlRoomDatabase
 import com.example.hybridapp.util.*
@@ -22,6 +26,12 @@ import com.example.hybridapp.basic.BasicActivity
 import com.example.hybridapp.basic.BasicWebChromeClient
 import com.example.hybridapp.basic.BasicWebViewClient
 import com.example.hybridapp.util.module.*
+import android.location.Location
+import com.google.android.gms.common.stats.ConnectionTracker
+import com.google.android.gms.location.*
+import com.google.android.gms.maps.GoogleMap
+import com.google.android.gms.maps.OnMapReadyCallback
+import com.google.android.gms.maps.SupportMapFragment
 import com.google.zxing.integration.android.IntentIntegrator
 import com.google.zxing.integration.android.IntentResult
 import kotlinx.android.synthetic.main.activity_main.*
@@ -69,51 +79,13 @@ class MainActivity : BasicActivity() {
         setFlexWebViewSettings()
         setInterface()
         setActions()
-
-        /** File Download */
-        flex_web_view.setDownloadListener { url, userAgent, contentDisposition, mimetype, contentLength ->
-            if(Utils.existsPermission(Constants.PERM_WRITE_EXTERNAL_STORAGE)) {
-                try {
-                    val request = DownloadManager.Request(Uri.parse(url))
-                    val downloadManager
-                            = getSystemService(DOWNLOAD_SERVICE) as DownloadManager
-
-                    val decodedContentDisposition
-                            = URLDecoder.decode(contentDisposition,"UTF-8")
-
-                    val fileName = decodedContentDisposition
-                        .replace("attachment; filename=", "")
-
-                    request.setMimeType(mimetype)
-                    request.addRequestHeader("User-Agent", userAgent)
-                    request.setDescription("Downloading File")
-                    request.setAllowedOverMetered(true)
-                    request.setAllowedOverRoaming(true)
-                    request.setTitle(fileName)
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                        request.setRequiresCharging(false)
-                    }
-                    request.allowScanningByMediaScanner()
-                    request.setAllowedOverMetered(true)
-                    request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
-                    request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, fileName)
-                    downloadManager.enqueue(request)
-
-                    Toast.showLongText("파일이 다운로드됩니다.")
-                }
-                catch (e: Exception) {
-                    Log.e(Constants.TAG_MAIN, e.toString())
-                }
-            } else {
-                Utils.requestPermissions(arrayOf(Constants.PERM_WRITE_EXTERNAL_STORAGE), 1234)
-            }
-        }
+        setWebViewDownloadListener()
     }
 
     private fun setFlexWebViewSettings() {
         flex_pop_up_web_view.setBaseUrl(Constants.BASE_URL)
         flex_web_view.setBaseUrl(Constants.BASE_URL)
-        flex_web_view.loadUrl("file:///android_asset/demo/index.html")
+        flex_web_view.loadUrl(Constants.URL)
         flex_web_view.addFlexInterface(FlexInterface())
         flex_web_view.settings.setSupportMultipleWindows(true)
         WebView.setWebContentsDebuggingEnabled(true)
@@ -183,6 +155,47 @@ class MainActivity : BasicActivity() {
         flex_web_view.setAction(Constants.TYPE_LOCAL_REPO, Action.localRepository)
     }
 
+    private fun setWebViewDownloadListener() {
+        /** File Download */
+        flex_web_view.setDownloadListener { url, userAgent, contentDisposition, mimetype, contentLength ->
+            if(Utils.existsPermission(Constants.PERM_WRITE_EXTERNAL_STORAGE)) {
+                try {
+                    val request = DownloadManager.Request(Uri.parse(url))
+                    val downloadManager
+                            = getSystemService(DOWNLOAD_SERVICE) as DownloadManager
+
+                    val decodedContentDisposition
+                            = URLDecoder.decode(contentDisposition,"UTF-8")
+
+                    val fileName = decodedContentDisposition
+                        .replace("attachment; filename=", "")
+
+                    request.setMimeType(mimetype)
+                    request.addRequestHeader("User-Agent", userAgent)
+                    request.setDescription("Downloading File")
+                    request.setAllowedOverMetered(true)
+                    request.setAllowedOverRoaming(true)
+                    request.setTitle(fileName)
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                        request.setRequiresCharging(false)
+                    }
+                    request.allowScanningByMediaScanner()
+                    request.setAllowedOverMetered(true)
+                    request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
+                    request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, fileName)
+                    downloadManager.enqueue(request)
+
+                    Toast.showLongText("파일이 다운로드됩니다.")
+                }
+                catch (e: Exception) {
+                    Log.e(Constants.TAG_MAIN, e.toString())
+                }
+            } else {
+                Utils.requestPermissions(arrayOf(Constants.PERM_WRITE_EXTERNAL_STORAGE), 1234)
+            }
+        }
+    }
+
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
@@ -194,12 +207,10 @@ class MainActivity : BasicActivity() {
                     val imageUri = data?.data
 
                     if(imageUri != null) {
-                        val bitmap = Photo.convertUriToBitmap(imageUri)
-                        val resizedBitmap = Photo.resizeBitmapByDeviceRatio(bitmap,
-                            ratio!!, isWidthRatio!!)
-                        val base64 = Photo.convertBitmapToBase64(resizedBitmap)
+                        val base64 = Constants.BASE64_URL +
+                                Photo.convertUriToResizingBase64(imageUri, ratio, isWidthRatio)
 
-                        cameraDeviceAction?.promiseReturn("data:image/jpeg;base64,$base64")
+                        cameraDeviceAction?.promiseReturn(base64)
                         ratio = null
                         isWidthRatio = null
                     } else {
@@ -214,11 +225,9 @@ class MainActivity : BasicActivity() {
                     val imageUri = data?.data
 
                     if(imageUri != null) {
-                        val bitmap = Photo.convertUriToBitmap(imageUri)
-                        val resizedBitmap = Photo.resizeBitmapByRatio(bitmap, ratio!!)
-                        val base64 = Photo.convertBitmapToBase64(resizedBitmap)
-
-                        cameraAction?.promiseReturn("data:image/jpeg;base64,$base64")
+                        val base64 = Constants.BASE64_URL +
+                                Photo.convertUriToResizingBase64(imageUri, ratio, isWidthRatio)
+                        cameraAction?.promiseReturn(base64)
                         ratio = null
                     } else {
                         cameraAction?.promiseReturn(null)
@@ -232,10 +241,10 @@ class MainActivity : BasicActivity() {
                     val imageUri = data?.data
 
                     if(imageUri != null) {
-                        val base64 = Photo.convertUriToResizingBase64(imageUri,
-                            ratio, isWidthRatio)
+                        val base64 = Constants.BASE64_URL +
+                                Photo.convertUriToResizingBase64(imageUri, ratio, isWidthRatio)
 
-                        photoDeviceAction?.promiseReturn("data:image/jpeg;base64,$base64")
+                        photoDeviceAction?.promiseReturn(base64)
                         ratio = null
                         isWidthRatio = null
                     } else {
@@ -250,10 +259,10 @@ class MainActivity : BasicActivity() {
                     val imageUri = data?.data
 
                     if(imageUri != null) {
-                        val base64 = Photo.convertUriToResizingBase64(imageUri,
-                            ratio, isWidthRatio)
+                        val base64 = Constants.BASE64_URL +
+                                Photo.convertUriToResizingBase64(imageUri, ratio, isWidthRatio)
 
-                        photoAction?.promiseReturn("data:image/jpeg;base64,$base64")
+                        photoAction?.promiseReturn(base64)
                         ratio = null
                     } else {
                         photoAction?.promiseReturn(null)
@@ -271,9 +280,9 @@ class MainActivity : BasicActivity() {
                         if(clipData.itemCount in 1..9) {
                             for(idx in 0 until clipData.itemCount) {
                                 val imageUri = clipData.getItemAt(idx).uri
-                                val base64 = Photo.convertUriToResizingBase64(imageUri,
-                                    ratio, isWidthRatio)
-                                base64Images.add("data:image/jpeg;base64,$base64")
+                                val base64 = Constants.BASE64_URL +
+                                        Photo.convertUriToResizingBase64(imageUri, ratio, isWidthRatio)
+                                base64Images.add(base64)
                             }
                             multiplePhotoDeviceAction?.promiseReturn(base64Images.toTypedArray())
                             ratio = null
@@ -299,9 +308,9 @@ class MainActivity : BasicActivity() {
                         if(clipData.itemCount in 1..9) {
                             for(idx in 0 until clipData.itemCount) {
                                 val imageUri = clipData.getItemAt(idx).uri
-                                val base64 = Photo.convertUriToResizingBase64(imageUri,
-                                    ratio, isWidthRatio)
-                                base64Images.add("data:image/jpeg;base64,$base64")
+                                val base64 = Constants.BASE64_URL +
+                                        Photo.convertUriToResizingBase64(imageUri, ratio, isWidthRatio)
+                                base64Images.add(base64)
                             }
                             multiplePhotosAction?.promiseReturn(base64Images.toTypedArray())
                             ratio = null

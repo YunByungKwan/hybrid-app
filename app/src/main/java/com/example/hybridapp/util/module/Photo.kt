@@ -7,7 +7,6 @@ import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
 import android.util.Base64
-import android.util.DisplayMetrics
 import android.util.Log
 import app.dvkyun.flexhybridand.FlexAction
 import com.example.hybridapp.App
@@ -113,7 +112,14 @@ object Photo {
     /** 비트맵 리사이징 후 base64로 변환 */
     fun convertUriToResizingBase64(imageUri: Uri?, ratio: Double?, isWidthRatio: Boolean?): String {
         val bitmap = convertUriToBitmap(imageUri!!)
-        val resizedBitmap = resizeBitmapByDeviceRatio(bitmap, ratio!!, isWidthRatio!!)
+
+        // isWidthRatio가 널일 경우 이미지 비율에 맞게 리사이즈
+        val resizedBitmap = if(isWidthRatio == null) {
+            resizeBitmapByRatio(bitmap, ratio!!)
+        } else {
+            // isWidthRatio가 널이 아닐 경우 디바이스에 맞게 리사이즈
+            resizeBitmapByDeviceRatio(bitmap, ratio!!, isWidthRatio)
+        }
 
         return convertBitmapToBase64(resizedBitmap)
     }
@@ -153,11 +159,8 @@ object Photo {
 
     /** 디바이스 화면 비율에 맞게 리사이즈 */
     fun resizeBitmapByDeviceRatio(bitmap: Bitmap, ratio: Double, isWidthRatio: Boolean?): Bitmap {
-        val displayMetrics = DisplayMetrics()
-        App.activity.windowManager.defaultDisplay.getMetrics(displayMetrics)
-
-        val screenWidth = displayMetrics.widthPixels
-        val screenHeight = displayMetrics.heightPixels
+        val screenWidth = Utils.getScreenSize(App.activity).getValue(Constants.SCREEN_WIDTH)
+        val screenHeight = Utils.getScreenSize(App.activity).getValue(Constants.SCREEN_HEIGHT)
 
         return if(isWidthRatio!!) {
             val resizeWidth = (screenWidth * ratio).toInt()
@@ -173,9 +176,9 @@ object Photo {
     }
 
     /** 이미지 비율에 맞게 리사이즈 */
-    fun resizeBitmapByRatio(bitmap: Bitmap, aspectRatio: Double): Bitmap {
-        val width = (bitmap.width * aspectRatio).toInt()
-        val height = (bitmap.height * aspectRatio).toInt()
+    fun resizeBitmapByRatio(bitmap: Bitmap, ratio: Double): Bitmap {
+        val width = (bitmap.width * ratio).toInt()
+        val height = (bitmap.height * ratio).toInt()
 
         return Bitmap.createScaledBitmap(bitmap, width, height, false)
     }

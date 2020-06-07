@@ -17,7 +17,7 @@ object Dialog {
              negativeListener: DialogInterface.OnClickListener?,
              cancelListener: () -> Unit?)
     {
-        Constants.LOGE("show", Constants.TAG_DIALOG)
+        Constants.LOGD("Call show() in Dialog object.")
 
         val dialog = AlertDialog.Builder(App.activity)
 
@@ -37,8 +37,11 @@ object Dialog {
 
     /** 권한 거부 시 다이얼로그 */
     fun showDenialPermissionText() {
+        Constants.LOGD("Call showDenialPermissionText() in Dialog object.")
+
         show(Constants.DENIED_DIAL_TITLE, Constants.DENIED_DIAL_MSG, Constants.DENIED_DIAL_POS,
             null, null, null, null,
-            null, {})
+            null
+        ) {}
     }
 }

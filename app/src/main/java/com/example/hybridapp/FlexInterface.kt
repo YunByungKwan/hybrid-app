@@ -14,6 +14,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.json.JSONArray
+import org.json.JSONObject
 
 class FlexInterface {
 
@@ -87,8 +88,9 @@ class FlexInterface {
 
         // 알림 생성
         val id = Constants.NOTIFICATION_ID
-        val title = array.getString(0)
-        val message = array.getString(2)
+        val obj = array.get(0) as JSONObject
+        val title = obj.get("title").toString()
+        val message = obj.get("message").toString()
         Notification.create(channelId, id, title, message, Constants.NOTI_DEFAULT, pendingIntent)
     }
 

@@ -18,6 +18,7 @@ class Constants {
    companion object {
        /** WebView Url */
        const val BASE_URL = "file:///android_asset"
+       const val URL = "file:///android_asset/demo/index.html"
        const val SHARED_FILE_NAME = "prefs"
 
        /** 화면 정보 */
@@ -50,6 +51,7 @@ class Constants {
        const val TYPE_POP_UP = "WebPopup"
 
        /** Class or Activity LOG TAG */
+       const val TAG = "Hybrid App"
        const val TAG_UTILS = "Utils class"
        const val TAG_MAIN = "MainActivity class"
        const val TAG_TOAST = "Toast class"
@@ -99,6 +101,8 @@ class Constants {
        const val BIOMETRIC_ERROR_HW_UNAVAILABLE = "Biometric features are currently unavailable."
        const val BIOMETRIC_ERROR_NONE_ENROLLED
                = "The user hasn't associated any biometric credentials with their account."
+
+       const val BASE64_URL = "data:image/jpeg;base64,"
 
        /** 알림 텍스트 */
        const val NOTI_CHANNEL_ID = "com.example.hybridapp"
@@ -156,6 +160,8 @@ class Constants {
                = "ACCESS FINE/COARSE LOCATION permission is granted."
        const val LOG_PERM_GRANTED_RECORD_AUDIO = "RECORD AUDIO permission is granted."
        const val LOG_PERM_GRANTED_SEND_SMS = "SEND SMS permission is granted."
+
+       fun LOGD(message: String) = Log.d(TAG, message)
 
        fun LOGE(functionName: String, className: String) {
            Log.e(className, "call $functionName() in $className")

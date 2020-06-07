@@ -26,11 +26,11 @@ object Network {
      * 2 : 와이파이 연결됨
      */
     fun getStatus(context: Context): Int {
-        Constants.LOGE("getStatus", Constants.TAG_NETWORK)
+        Constants.LOGD("Call getStatus() in Network object.")
 
         val manager = getConnectivityManager(context)
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            Log.e(Constants.TAG_NETWORK, "Build version is greater than Marshmallow.")
+            Constants.LOGD("Build version is greater than Marshmallow.")
 
             val network = manager.activeNetwork ?: return Constants.STATUS_DISCONNECTED
             val capabilities = manager.getNetworkCapabilities(network)
@@ -47,7 +47,7 @@ object Network {
                 }
             }
         } else {
-            Log.e(Constants.TAG_NETWORK, "Build version is smaller than Marshmallow.")
+            Constants.LOGD("Build version is smaller than Marshmallow.")
 
             val network = manager.activeNetworkInfo
                 ?: return Constants.STATUS_DISCONNECTED

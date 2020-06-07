@@ -130,15 +130,8 @@ object Action {
 
     val location: (FlexAction?, JSONArray?) -> Unit = { locationAction, _->
         CoroutineScope(Dispatchers.Main).launch {
-            val locationPermissions = arrayOf(Constants.PERM_ACCESS_FINE_LOCATION,
-                Constants.PERM_ACCESS_COARSE_LOCATION)
-
-            if(Utils.existAllPermission(locationPermissions)) {
-                Location.getCurrent(locationAction)
-            } else {
-                Utils.checkDangerousPermissions(locationPermissions,
-                    Constants.REQ_PERM_CODE_LOCATION)
-            }
+            Constants.LOGD("Call location action.")
+            Location.getCurrent(locationAction)
         }
     }
 
@@ -146,10 +139,7 @@ object Action {
         CoroutineScope(Dispatchers.Main).launch {
             val fragmentActivity = App.activity as FragmentActivity
             if(BioAuth.canAuthenticate()) {
-                BioAuth.showPrompt(
-                    fragmentActivity,
-                    bioAuthAction
-                )
+                BioAuth.showPrompt(fragmentActivity, bioAuthAction)
             } else {
 
             }

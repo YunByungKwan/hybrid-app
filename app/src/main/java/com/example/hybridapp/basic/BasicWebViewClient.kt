@@ -1,6 +1,5 @@
 package com.example.hybridapp.basic
 
-import android.util.Log
 import android.webkit.WebView
 import app.dvkyun.flexhybridand.FlexWebViewClient
 import com.example.hybridapp.App
@@ -14,16 +13,21 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class BasicWebViewClient: FlexWebViewClient() {
-    override fun doUpdateVisitedHistory(view: WebView?, url: String?, isReload: Boolean) {
 
+    /** 웹뷰 url 변경시 호출됨 */
+    override fun doUpdateVisitedHistory(view: WebView?, url: String?, isReload: Boolean) {
         CoroutineScope(Dispatchers.Default).launch {
+            Constants.LOGD("Call function doUpdateVisitedHistory() in BasicWebViewClient class.")
+
             val currentDateTime = Utils.getCurrentDateAndTime()
 
             if(url != null) {
+                Constants.LOGD("($currentDateTime)접속 URL: $url")
+
                 val logUrlDao = LogUrlRoomDatabase.getDatabase(App.INSTANCE).logUrlDao()
                 val repository = LogUrlRepository(logUrlDao)
-                Log.e(Constants.TAG_MAIN, "($currentDateTime)접속 URL: $url")
                 val logUrl = LogUrl(0, currentDateTime, url)
+
                 repository.insert(logUrl)
             }
         }

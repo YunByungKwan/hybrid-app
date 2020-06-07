@@ -5,6 +5,7 @@ import android.telephony.SmsManager
 import android.util.Log
 import com.example.hybridapp.App
 import com.example.hybridapp.util.Constants
+import com.example.hybridapp.util.Utils
 import com.google.android.gms.auth.api.phone.SmsRetriever
 
 /**
@@ -37,12 +38,25 @@ object SMS {
     }
 
     /** 문자 메시지를 보냄  */
-    fun sendMessage(phoneNumber: String, message: String) {
+    fun sendMessage(phoneNumber: String, message: String): String {
         Constants.LOGE("sendMessage", Constants.TAG_SMS)
 
-        val smsManager = SmsManager.getDefault()
-        smsManager.sendTextMessage(phoneNumber,
-            null, message, null, null)
+        var result: String?
+
+        if(Utils.existAllPermission(arrayOf(Constants.PERM_SEND_SMS))) {
+            val smsManager = SmsManager.getDefault()
+            smsManager.sendTextMessage(phoneNumber,
+                null, message, null, null)
+
+            result = Constants.MSG_SMS_SUCCESS
+        } else {
+            Utils.checkDangerousPermissions(arrayOf(Constants.PERM_SEND_SMS),
+                Constants.REQ_PERM_CODE_SEND_SMS)
+
+            result = ""
+        }
+
+        return result
     }
 
     /** Receive message */

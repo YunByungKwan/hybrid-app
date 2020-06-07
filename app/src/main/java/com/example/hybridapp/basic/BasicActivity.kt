@@ -7,6 +7,7 @@ import app.dvkyun.flexhybridand.FlexAction
 @SuppressLint("Registered")
 open class BasicActivity: AppCompatActivity() {
 
+    /** 액션 인스턴스 */
     var cameraDeviceAction: FlexAction? = null
     var cameraAction: FlexAction? = null
     var photoDeviceAction: FlexAction? = null
@@ -14,9 +15,11 @@ open class BasicActivity: AppCompatActivity() {
     var multiplePhotoDeviceAction: FlexAction? = null
     var multiplePhotosAction: FlexAction? = null
     var qrCodeScanAction: FlexAction? = null
+    var locationAction: FlexAction? = null
     var bioAuthAction: FlexAction? = null
     var recordAction: FlexAction? = null
 
+    /** 이미지 리사이징 정보 */
     var ratio: Double? = null
     var isWidthRatio: Boolean? = null
 }

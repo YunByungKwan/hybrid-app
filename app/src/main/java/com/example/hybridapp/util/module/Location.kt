@@ -1,5 +1,6 @@
 package com.example.hybridapp.util.module
 
+import android.app.ProgressDialog
 import android.content.Context
 import android.location.Location
 import android.location.LocationManager

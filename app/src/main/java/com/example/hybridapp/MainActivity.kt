@@ -2,15 +2,13 @@ package com.example.hybridapp
 
 import android.app.Activity
 import android.app.DownloadManager
-import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.location.LocationManager
+import android.media.ExifInterface
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Environment
-import android.os.Looper
 import android.util.Log
 import android.view.View
 import android.view.animation.AnimationUtils
@@ -18,7 +16,6 @@ import android.webkit.ValueCallback
 import android.webkit.WebChromeClient
 import android.webkit.WebView
 import android.widget.Button
-import android.widget.TextView
 import com.example.hybridapp.data.LogUrlRepository
 import com.example.hybridapp.data.LogUrlRoomDatabase
 import com.example.hybridapp.util.*
@@ -26,12 +23,6 @@ import com.example.hybridapp.basic.BasicActivity
 import com.example.hybridapp.basic.BasicWebChromeClient
 import com.example.hybridapp.basic.BasicWebViewClient
 import com.example.hybridapp.util.module.*
-import android.location.Location
-import com.google.android.gms.common.stats.ConnectionTracker
-import com.google.android.gms.location.*
-import com.google.android.gms.maps.GoogleMap
-import com.google.android.gms.maps.OnMapReadyCallback
-import com.google.android.gms.maps.SupportMapFragment
 import com.google.zxing.integration.android.IntentIntegrator
 import com.google.zxing.integration.android.IntentResult
 import kotlinx.android.synthetic.main.activity_main.*
@@ -204,7 +195,12 @@ class MainActivity : BasicActivity() {
             Constants.REQ_CODE_CAMERA_DEVICE_RATIO -> {
                 if(resultOk) {
                     val imageUri = data?.data
-
+                    //
+                    val exif = ExifInterface(imageUri?.path)
+                    val rotationAngle = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION,
+                        ExifInterface.ORIENTATION_NORMAL)
+                    Log.e("TAG", "Rotation Angle: ${rotationAngle}")
+                    //
                     if(imageUri != null) {
                         val base64 = Constants.BASE64_URL +
                                 Photo.convertUriToResizingBase64(imageUri, ratio, isWidthRatio)
@@ -238,6 +234,8 @@ class MainActivity : BasicActivity() {
             Constants.REQ_CODE_PHOTO_DEVICE_RATIO -> {
                 if(resultOk) {
                     val imageUri = data?.data
+
+                    Log.e("TAG", "ImageUri: ${imageUri?.path}")
 
                     if(imageUri != null) {
                         val base64 = Constants.BASE64_URL +

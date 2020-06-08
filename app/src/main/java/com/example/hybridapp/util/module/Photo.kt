@@ -3,6 +3,7 @@ package com.example.hybridapp.util.module
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.ImageDecoder
+import android.media.ExifInterface
 import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
@@ -137,6 +138,14 @@ object Photo {
     fun convertUriToBitmap(uri: Uri): Bitmap {
         Constants.LOGE("convertUriToBitmap", Constants.TAG_PHOTO)
 
+        //
+        val exif = ExifInterface(uri.path!!)
+        val orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION,
+            ExifInterface.ORIENTATION_NORMAL)
+        val degree = exifOrientationToDegree(orientation)
+        Log.e("TAG", "Degree: $degree")
+        //
+
         return if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             val source
                     = ImageDecoder.createSource(App.INSTANCE.contentResolver, uri)
@@ -181,5 +190,23 @@ object Photo {
         val height = (bitmap.height * ratio).toInt()
 
         return Bitmap.createScaledBitmap(bitmap, width, height, false)
+    }
+
+    /** exif -> degree */
+    private fun exifOrientationToDegree(orientation: Int): Int {
+        return when(orientation) {
+            ExifInterface.ORIENTATION_ROTATE_90 -> {
+                90
+            }
+            ExifInterface.ORIENTATION_ROTATE_180 -> {
+                180
+            }
+            ExifInterface.ORIENTATION_ROTATE_270 -> {
+                270
+            }
+            else -> {
+                0
+            }
+        }
     }
 }

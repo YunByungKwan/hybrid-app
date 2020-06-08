@@ -1,7 +1,6 @@
 //
 // Created by ybk on 2020-05-22.
 //
-
 #include <android_native_app_glue.h>
 #include <jni.h>
 #include <android/log.h>
@@ -19,7 +18,6 @@ bool canRunSuCommand();
 bool existSuspectedRootingFiles();
 char* getSignature(JNIEnv*, jobject);
 void startActivityAndFinish(JNIEnv*, jobject, const char*);
-
 
 void android_main(struct android_app *state) {
 

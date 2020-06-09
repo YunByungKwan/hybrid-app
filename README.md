@@ -60,11 +60,11 @@ fun takeMultiplePhotosIntent(): Intent
 
 fun existsReceiveActivity(intent: Intent, packageManager: PackageManager): Boolean
 
-internal fun convertUriToBase64(uri: Uri): String
+internal fun getBase64FromUri(uri: Uri): String
 
-private fun convertUriToBitmap(uri: Uri): Bitmap
+private fun getBitmapFromUri(uri: Uri): Bitmap
 
-internal fun convertBitmapToBase64(bitmap: Bitmap): String
+internal fun getBase64FromBitmap(bitmap: Bitmap): String
 
 fun takeAppSettingsIntent(): Intent
 

@@ -39,7 +39,7 @@ object Location {
                 action?.promiseReturn(null)
             }
         } else {
-            Utils.checkDangerousPermissions(locationPermissions, Constants.REQ_PERM_CODE_LOCATION)
+            Utils.checkDangerousPermissions(locationPermissions, Constants.PERM_LOCATION_REQ_CODE)
             action?.promiseReturn(null)
         }
     }

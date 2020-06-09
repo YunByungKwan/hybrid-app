@@ -20,7 +20,7 @@ class SMSReceiver: BroadcastReceiver() {
 
             when (status.statusCode) {
                 CommonStatusCodes.SUCCESS -> {
-                    Constants.LOGD(Constants.LOG_MSG_SMS_SUCCESS)
+                    Constants.LOGD(Constants.LOG_LOG_MSG_SMS_SUCCESS)
 
                     val message = extras.get(SmsRetriever.EXTRA_SMS_MESSAGE) as String
                     Constants.LOGD("Message: $message")

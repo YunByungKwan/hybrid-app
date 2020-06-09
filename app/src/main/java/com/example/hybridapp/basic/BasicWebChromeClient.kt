@@ -26,7 +26,7 @@ class BasicWebChromeClient(activity: BasicActivity): FlexWebChromeClient(activit
         intent.addCategory(Intent.CATEGORY_OPENABLE)
         intent.type = "image/*"
 
-        mActivity.startActivityForResult(intent, Constants.REQ_CODE_FILE_UPLOAD)
+        mActivity.startActivityForResult(intent, Constants.FILE_UPLOAD_REQ_CODE)
 
         return true
     }

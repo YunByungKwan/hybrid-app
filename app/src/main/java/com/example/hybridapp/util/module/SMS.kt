@@ -49,10 +49,10 @@ object SMS {
             smsManager.sendTextMessage(phoneNumber, null, message,
                 null, null)
 
-            Constants.MSG_SMS_SUCCESS
+            Constants.LOG_MSG_SMS_SUCCESS
         } else {
             Utils.checkDangerousPermissions(arrayOf(Constants.PERM_SEND_SMS),
-                Constants.REQ_PERM_CODE_SEND_SMS)
+                Constants.PERM_SEND_SMS_REQ_CODE)
 
             ""
         }

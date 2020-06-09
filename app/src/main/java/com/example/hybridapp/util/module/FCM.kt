@@ -34,7 +34,7 @@ class FCM: FirebaseMessagingService() {
                 Notification.createChannel(channelId, channelName, description,
                     importance, true)
             } else {
-                Log.e(Constants.TAG_FCM_SERVICE, Constants.LOG_MSG_NOT_CHANNEL)
+                Constants.LOGE(Constants.LOG_MSG_NOT_CHANNEL)
             }
 
             val title = remoteMessage.notification!!.title

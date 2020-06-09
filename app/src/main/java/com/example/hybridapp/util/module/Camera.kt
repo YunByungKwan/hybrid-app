@@ -13,7 +13,7 @@ object Camera {
 
     /** 카메라 호출 */
     fun request(action: FlexAction?, ratio: Double?, isWidthRatio: Boolean?) {
-        Constants.LOGD("Call request() in Camera object.")
+        Constants.LOGD("Call request()")
 
         if(Utils.existAllPermission(arrayOf(Constants.PERM_CAMERA)) && action != null) {
             Constants.LOGD("Camera permission exists.")
@@ -30,20 +30,20 @@ object Camera {
                     basicActivity.isWidthRatio = isWidthRatio
 
                     basicActivity.startActivityForResult(cameraIntent,
-                        Constants.REQ_CODE_CAMERA_DEVICE_RATIO)
+                        Constants.CAMERA_DEVICE_RATIO_REQ_CODE)
                 } else { // 이미지 기준으로 resize
                     basicActivity.cameraAction = action
 
                     basicActivity.startActivityForResult(cameraIntent,
-                        Constants.REQ_CODE_CAMERA_RATIO)
+                        Constants.CAMERA_RATIO_REQ_CODE)
                 }
             } else {
-                Log.e(Constants.TAG_UTILS, Constants.LOG_MSG_CAMERA)
+                Constants.LOGE(Constants.LOG_MSG_CAMERA)
                 action.promiseReturn(null)
             }
         } else { // 권한이 없을 경우
             Utils.checkDangerousPermissions(arrayOf(Constants.PERM_CAMERA),
-                Constants.REQ_PERM_CODE_CAMERA)
+                Constants.PERM_CAMERA_REQ_CODE)
             action?.promiseReturn(null)
         }
     }

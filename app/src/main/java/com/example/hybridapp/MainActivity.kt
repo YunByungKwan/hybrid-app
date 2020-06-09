@@ -192,7 +192,7 @@ class MainActivity : BasicActivity() {
         val resultOk = (resultCode == Activity.RESULT_OK)
 
         when(requestCode) {
-            Constants.REQ_CODE_CAMERA_DEVICE_RATIO -> {
+            Constants.CAMERA_DEVICE_RATIO_REQ_CODE -> {
                 if(resultOk) {
                     val imageUri = data?.data
                     //
@@ -215,7 +215,7 @@ class MainActivity : BasicActivity() {
                     cameraDeviceAction?.promiseReturn(null)
                 }
             }
-            Constants.REQ_CODE_CAMERA_RATIO -> {
+            Constants.CAMERA_RATIO_REQ_CODE -> {
                 if(resultOk) {
                     val imageUri = data?.data
 
@@ -231,7 +231,7 @@ class MainActivity : BasicActivity() {
                     cameraAction?.promiseReturn(null)
                 }
             }
-            Constants.REQ_CODE_PHOTO_DEVICE_RATIO -> {
+            Constants.PHOTO_DEVICE_RATIO_REQ_CODE -> {
                 if(resultOk) {
                     val imageUri = data?.data
 
@@ -251,7 +251,7 @@ class MainActivity : BasicActivity() {
                     photoDeviceAction?.promiseReturn(null)
                 }
             }
-            Constants.REQ_CODE_PHOTO_RATIO -> {
+            Constants.PHOTO_RATIO_REQ_CODE -> {
                 if(resultOk) {
                     val imageUri = data?.data
 
@@ -268,7 +268,7 @@ class MainActivity : BasicActivity() {
                     photoAction?.promiseReturn(null)
                 }
             }
-            Constants.REQ_CODE_MULTI_PHOTO_DEVICE_RATIO -> {
+            Constants.MULTI_PHOTO_DEVICE_RATIO_REQ_CODE -> {
                 if(resultOk) {
                     val base64Images = ArrayList<String>()
                     val clipData = data?.clipData
@@ -296,7 +296,7 @@ class MainActivity : BasicActivity() {
                     multiplePhotoDeviceAction?.promiseReturn(null)
                 }
             }
-            Constants.REQ_CODE_MULTI_PHOTO_RATIO -> {
+            Constants.MULTI_PHOTO_RATIO_REQ_CODE -> {
                 if(resultOk) {
                     val base64Images = ArrayList<String>()
                     val clipData = data?.clipData
@@ -323,7 +323,9 @@ class MainActivity : BasicActivity() {
                     multiplePhotosAction?.promiseReturn(null)
                 }
             }
-            Constants.REQ_CODE_QR -> {
+            Constants.QR_REQ_CODE -> {
+                Constants.LOGE("QR REQ CODE: ${Constants.QR_REQ_CODE}")
+
                 if(resultOk) {
                     val result: IntentResult? =
                         IntentIntegrator.parseActivityResult(requestCode, resultCode, data)
@@ -339,14 +341,14 @@ class MainActivity : BasicActivity() {
                     qrCodeScanAction?.promiseReturn(null)
                 }
             }
-            Constants.REQ_PERM_CODE_SEND_SMS -> {
+            Constants.PERM_SEND_SMS_REQ_CODE -> {
                 if(resultOk) {
 
                 } else {
 
                 }
             }
-            Constants.REQ_CODE_FILE_UPLOAD -> {
+            Constants.FILE_UPLOAD_REQ_CODE -> {
                 if(resultOk) {
                     if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                         mFilePatCallback?.onReceiveValue(WebChromeClient.FileChooserParams.parseResult(resultCode, data))
@@ -370,19 +372,19 @@ class MainActivity : BasicActivity() {
 
         if(isNotEmpty && isGranted) {
             when(requestCode) {
-                Constants.REQ_PERM_CODE_CAMERA -> {
+                Constants.PERM_CAMERA_REQ_CODE -> {
                     Log.e(Constants.TAG_MAIN, Constants.LOG_PERM_GRANTED_CAMERA)
                 }
-                Constants.REQ_PERM_CODE_WRITE -> {
+                Constants.PERM_WRITE_REQ_CODE -> {
                     Log.e(Constants.TAG_MAIN, Constants.LOG_PERM_GRANTED_WRITE)
                 }
-                Constants.REQ_PERM_CODE_READ_WRITE -> {
+                Constants.PERM_READ_WRITE_REQ_CODE -> {
                     Log.e(Constants.TAG_MAIN, Constants.LOG_PERM_GRANTED_READ_WRITE)
                 }
-                Constants.REQ_PERM_CODE_LOCATION -> {
+                Constants.PERM_LOCATION_REQ_CODE -> {
                     Log.e(Constants.TAG_MAIN, Constants.LOG_PERM_GRANTED_LOCATION)
                 }
-                Constants.REQ_PERM_CODE_SEND_SMS -> {
+                Constants.PERM_SEND_SMS_REQ_CODE -> {
                     Log.e(Constants.TAG_MAIN, Constants.LOG_PERM_GRANTED_SEND_SMS)
                 }
             }

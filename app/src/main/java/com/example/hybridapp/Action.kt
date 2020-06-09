@@ -54,10 +54,10 @@ object Action {
     val network: (FlexAction?, JSONArray?) -> Unit = { networkAction, _ ->
         CoroutineScope(Dispatchers.Main).launch {
             when(Network.getStatus(App.activity)) {
-                Constants.STATUS_CELLULAR -> {
+                Constants.NET_STAT_CELLULAR -> {
                     networkAction?.promiseReturn(Constants.MSG_CELLULAR)
                 }
-                Constants.STATUS_WIFI -> {
+                Constants.NET_STAT_WIFI -> {
                     networkAction?.promiseReturn(Constants.MSG_WIFI)
                 }
                 else -> {
@@ -123,7 +123,7 @@ object Action {
             QRCode.startScan(qrCodeAction)
         } else {
             Utils.checkDangerousPermissions(arrayOf(Constants.PERM_CAMERA),
-                Constants.REQ_PERM_CODE_CAMERA)
+                Constants.PERM_CAMERA_REQ_CODE)
         }
     }
 

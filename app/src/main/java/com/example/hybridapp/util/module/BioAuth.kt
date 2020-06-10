@@ -1,6 +1,5 @@
 package com.example.hybridapp.util.module
 
-import android.util.Log
 import androidx.biometric.BiometricManager
 import androidx.biometric.BiometricPrompt
 import androidx.fragment.app.FragmentActivity

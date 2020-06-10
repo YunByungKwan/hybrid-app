@@ -137,10 +137,11 @@ object Action {
     val bioAuth: (FlexAction?, JSONArray?) -> Unit = { bioAuthAction, _->
         CoroutineScope(Dispatchers.Main).launch {
             val fragmentActivity = App.activity as FragmentActivity
+
             if(BioAuth.canAuthenticate()) {
                 BioAuth.showPrompt(fragmentActivity, bioAuthAction)
             } else {
-
+                Constants.LOGE("You can't call biometric prompt.")
             }
         }
     }

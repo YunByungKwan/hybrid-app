@@ -29,7 +29,7 @@ class Constants {
 
        /** WebView Url */
        const val BASE_URL = "file:///android_asset"
-       const val URL = "file:///android_asset/demo/index.html"
+       const val URL = "file:///android_asset/html/test.html"
        const val SHARED_FILE_NAME = "prefs"
 
        /** 화면 정보 */

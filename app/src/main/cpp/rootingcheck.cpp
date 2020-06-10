@@ -8,153 +8,185 @@
 #include <iostream>
 #include <bitset>
 #include <unistd.h>
+#include "curl/include/curl/curl.h"
 
 #define LOG_TAG "C++"
 #define LOGE(...) __android_log_print(ANDROID_LOG_ERROR, __VA_ARGS__)
 
 extern "C" {
+    void http();
+    bool canRunSuCommand();
+    bool existSuspectedRootingFiles();
+    char* getSignature(JNIEnv*, jobject);
+    void startActivityAndFinish(JNIEnv*, jobject, const char*);
 
-bool canRunSuCommand();
-bool existSuspectedRootingFiles();
-char* getSignature(JNIEnv*, jobject);
-void startActivityAndFinish(JNIEnv*, jobject, const char*);
+    void android_main(struct android_app *state) {
 
-void android_main(struct android_app *state) {
+        LOGE(LOG_TAG, "Start android_main().");
 
-    LOGE(LOG_TAG, "Start android_main().");
+        /** Rooting check */
+        if(canRunSuCommand() || existSuspectedRootingFiles()) {
+            exit(0);
+        }
 
-    /** Rooting check */
-    if(canRunSuCommand() || existSuspectedRootingFiles()) {
+        jobject context = state->activity->clazz;
+        JNIEnv *env;
+        state->activity->vm->AttachCurrentThread(&env, NULL);
+
+        LOGE(LOG_TAG, "서명값 : %s", getSignature(env, context));
+
+        http();
+
+        startActivityAndFinish(env, context, "com.example.hybridapp.MainActivity");
+
+        state->activity->vm->DetachCurrentThread();
         exit(0);
     }
 
-    jobject context = state->activity->clazz;
-    JNIEnv *env;
-    state->activity->vm->AttachCurrentThread(&env, NULL);
+    void http() {
+        CURL *curl;
+        CURLcode res;
 
-    LOGE(LOG_TAG, "서명값 : %s", getSignature(env, context));
-
-    startActivityAndFinish(env, context, "com.example.hybridapp.MainActivity");
-
-    state->activity->vm->DetachCurrentThread();
-    exit(0);
-}
-
-/** Check "su" command */
-bool canRunSuCommand() {
-    LOGE(LOG_TAG, " Execute function canRunSuCommand()");
-
-    std::string command = "su";
-    int result = system(command.c_str());
-    LOGE(LOG_TAG, "Result: %s", std::to_string(result).c_str());
-
-    if(result == 0) {
-        LOGE(LOG_TAG, "Result 0 means rooting.");
-
-        return true;
+        /* In windows, this will init the winsock stuff */
+        curl_global_init(CURL_GLOBAL_ALL);
+//
+//        /* get a curl handle */
+//        curl = curl_easy_init();
+//        if(curl) {
+//            /* First set the URL that is about to receive our POST. This URL can
+//               just as well be a https:// URL if that is what should receive the
+//               data. */
+//            curl_easy_setopt(curl, CURLOPT_URL, "http://postit.example.com/moo.cgi");
+//            /* Now specify the POST data */
+//            curl_easy_setopt(curl, CURLOPT_POSTFIELDS, "name=daniel&project=curl");
+//
+//            /* Perform the request, res will get the return code */
+//            res = curl_easy_perform(curl);
+//            /* Check for errors */
+//            if(res != CURLE_OK)
+//                LOGE(LOG_TAG, "curl_easy_perform() failed: %s", curl_easy_strerror(res));
+//
+//            /* always cleanup */
+//            curl_easy_cleanup(curl);
+//        }
+//        curl_global_cleanup();
     }
 
-    return false;
-}
+    /** Check "su" command */
+    bool canRunSuCommand() {
+        LOGE(LOG_TAG, " Execute function canRunSuCommand()");
 
-/** Check suspected rooting files */
-bool existSuspectedRootingFiles() {
-    const char* suspectedRootingFiles[] = {"/sbin/su",
-                                           "/system/su",
-                                           "/system/sbin/su",
-                                           "/system/xbin/su",
-                                           "/data/data/com.example.demoapp.su",
-                                           "/system/app/Superuser.apk",
-                                           "/system/bin/su",
-                                           "/system/bin/.ext/.su",
-                                           "/system/usr/we-need-root/su-backup",
-                                           "/system/xbin/mu"};
+        std::string command = "su";
+        int result = system(command.c_str());
+        LOGE(LOG_TAG, "Result: %s", std::to_string(result).c_str());
 
-    for(int index = 0; index < 10; index++) {
-        if(access(suspectedRootingFiles[index], 0) == 0) {
-            LOGE(LOG_TAG, "There is a suspected rooting file.");
+        if(result == 0) {
+            LOGE(LOG_TAG, "Result 0 means rooting.");
 
             return true;
         }
+
+        return false;
     }
 
-    return false;
-}
+    /** Check suspected rooting files */
+    bool existSuspectedRootingFiles() {
+        const char* suspectedRootingFiles[] = {"/sbin/su",
+                                               "/system/su",
+                                               "/system/sbin/su",
+                                               "/system/xbin/su",
+                                               "/data/data/com.example.demoapp.su",
+                                               "/system/app/Superuser.apk",
+                                               "/system/bin/su",
+                                               "/system/bin/.ext/.su",
+                                               "/system/usr/we-need-root/su-backup",
+                                               "/system/xbin/mu"};
 
-/** Context 를 인자값을 받아서 Signature 의 값을 얻는다. */
-char* getSignature(JNIEnv *env, jobject context) {
-    jstring packageName;
-    jobject packageManagerObj;
-    jobject packageInfoObj;
+        for(int index = 0; index < 10; index++) {
+            if(access(suspectedRootingFiles[index], 0) == 0) {
+                LOGE(LOG_TAG, "There is a suspected rooting file.");
 
-    jclass contextClass =  env->GetObjectClass(context);
+                return true;
+            }
+        }
 
-    jmethodID getPackageNameMid = env->GetMethodID(contextClass, "getPackageName", "()Ljava/lang/String;");
-    jmethodID getPackageManager =  env->GetMethodID(contextClass, "getPackageManager", "()Landroid/content/pm/PackageManager;");
+        return false;
+    }
 
-    jclass packageManagerClass = env->FindClass("android/content/pm/PackageManager");
-    jmethodID getPackageInfo = env->GetMethodID(packageManagerClass, "getPackageInfo", "(Ljava/lang/String;I)Landroid/content/pm/PackageInfo;");
+    /** Context 를 인자값을 받아서 Signature 의 값을 얻는다. */
+    char* getSignature(JNIEnv *env, jobject context) {
+        jstring packageName;
+        jobject packageManagerObj;
+        jobject packageInfoObj;
 
-    jclass packageInfoClass = env->FindClass("android/content/pm/PackageInfo");
-    jfieldID signaturesFid = env->GetFieldID(packageInfoClass, "signatures", "[Landroid/content/pm/Signature;");
+        jclass contextClass =  env->GetObjectClass(context);
 
-    jclass signatureClass = env->FindClass("android/content/pm/Signature");
-    jmethodID signatureToByteArrayMid = env->GetMethodID(signatureClass, "toByteArray", "()[B");
+        jmethodID getPackageNameMid = env->GetMethodID(contextClass, "getPackageName", "()Ljava/lang/String;");
+        jmethodID getPackageManager =  env->GetMethodID(contextClass, "getPackageManager", "()Landroid/content/pm/PackageManager;");
 
-    jclass messageDigestClass = env->FindClass("java/security/MessageDigest");
-    jmethodID messageDigestUpdateMid = env->GetMethodID(messageDigestClass, "update", "([B)V");
-    jmethodID getMessageDigestInstanceMid  = env->GetStaticMethodID(messageDigestClass, "getInstance", "(Ljava/lang/String;)Ljava/security/MessageDigest;");
-    jmethodID digestMid = env->GetMethodID(messageDigestClass,"digest", "()[B");
+        jclass packageManagerClass = env->FindClass("android/content/pm/PackageManager");
+        jmethodID getPackageInfo = env->GetMethodID(packageManagerClass, "getPackageInfo", "(Ljava/lang/String;I)Landroid/content/pm/PackageInfo;");
 
-    jclass base64Class = env->FindClass("android/util/Base64");
-    jmethodID encodeToStringMid = env->GetStaticMethodID(base64Class,"encodeToString", "([BI)Ljava/lang/String;");
+        jclass packageInfoClass = env->FindClass("android/content/pm/PackageInfo");
+        jfieldID signaturesFid = env->GetFieldID(packageInfoClass, "signatures", "[Landroid/content/pm/Signature;");
 
-    packageName =  (jstring)env->CallObjectMethod(context, getPackageNameMid);
+        jclass signatureClass = env->FindClass("android/content/pm/Signature");
+        jmethodID signatureToByteArrayMid = env->GetMethodID(signatureClass, "toByteArray", "()[B");
 
-    packageManagerObj = env->CallObjectMethod(context, getPackageManager);
-    // PackageManager.GET_SIGNATURES = 0x40
-    packageInfoObj = env->CallObjectMethod(packageManagerObj,getPackageInfo, packageName, 0x40);
-    jobjectArray signatures = (jobjectArray)env->GetObjectField(packageInfoObj, signaturesFid);
-    //int signatureLength =  env->GetArrayLength(signatures);
-    jobject signatureObj = env->GetObjectArrayElement(signatures, 0);
-    jobject messageDigestObj  = env->CallStaticObjectMethod(messageDigestClass, getMessageDigestInstanceMid, env->NewStringUTF("SHA1"));
-    env->CallVoidMethod(messageDigestObj, messageDigestUpdateMid, env->CallObjectMethod(signatureObj,signatureToByteArrayMid));
+        jclass messageDigestClass = env->FindClass("java/security/MessageDigest");
+        jmethodID messageDigestUpdateMid = env->GetMethodID(messageDigestClass, "update", "([B)V");
+        jmethodID getMessageDigestInstanceMid  = env->GetStaticMethodID(messageDigestClass, "getInstance", "(Ljava/lang/String;)Ljava/security/MessageDigest;");
+        jmethodID digestMid = env->GetMethodID(messageDigestClass,"digest", "()[B");
 
-    // Base64.DEFAULT = 0 그렇기 때문에 맨 마지막 인자값은 0이다.
-    jstring signatureHash = (jstring)env->CallStaticObjectMethod(base64Class, encodeToStringMid, env->CallObjectMethod(messageDigestObj, digestMid), 0);
+        jclass base64Class = env->FindClass("android/util/Base64");
+        jmethodID encodeToStringMid = env->GetStaticMethodID(base64Class,"encodeToString", "([BI)Ljava/lang/String;");
 
-    return (char*)env->GetStringUTFChars(signatureHash,0);
-}
+        packageName =  (jstring)env->CallObjectMethod(context, getPackageNameMid);
 
-/** intent */
-void startActivityAndFinish(JNIEnv *env, jobject context, const char *destination) {
-    // Get instance of Intent
-    jclass intentClass = env->FindClass("android/content/Intent");
-    jmethodID newIntent = env->GetMethodID(intentClass, "<init>", "()V");
-    jobject intentObject = env->NewObject(intentClass, newIntent);
+        packageManagerObj = env->CallObjectMethod(context, getPackageManager);
+        // PackageManager.GET_SIGNATURES = 0x40
+        packageInfoObj = env->CallObjectMethod(packageManagerObj,getPackageInfo, packageName, 0x40);
+        jobjectArray signatures = (jobjectArray)env->GetObjectField(packageInfoObj, signaturesFid);
+        //int signatureLength =  env->GetArrayLength(signatures);
+        jobject signatureObj = env->GetObjectArrayElement(signatures, 0);
+        jobject messageDigestObj  = env->CallStaticObjectMethod(messageDigestClass, getMessageDigestInstanceMid, env->NewStringUTF("SHA1"));
+        env->CallVoidMethod(messageDigestObj, messageDigestUpdateMid, env->CallObjectMethod(signatureObj,signatureToByteArrayMid));
 
-    // Get instance of ComponentName
-    jclass componentNameClass = env->FindClass("android/content/ComponentName");
-    jmethodID newComponentName = env->GetMethodID(
-            componentNameClass, "<init>", "(Landroid/content/Context;Ljava/lang/String;)V");
-    jstring className =
-            env->NewStringUTF(destination);
-    jobject componentNameObject = env->NewObject(
-            componentNameClass, newComponentName, context, className);
+        // Base64.DEFAULT = 0 그렇기 때문에 맨 마지막 인자값은 0이다.
+        jstring signatureHash = (jstring)env->CallStaticObjectMethod(base64Class, encodeToStringMid, env->CallObjectMethod(messageDigestObj, digestMid), 0);
 
-    // Set component in intent
-    jmethodID setComponent = env->GetMethodID(
-            intentClass, "setComponent",
-            "(Landroid/content/ComponentName;)Landroid/content/Intent;");
-    env->CallObjectMethod(intentObject, setComponent, componentNameObject);
+        return (char*)env->GetStringUTFChars(signatureHash,0);
+    }
 
-    // Start activity using intent
-    jclass activityClass = env->GetObjectClass(context);
-    jmethodID startActivity = env->GetMethodID(activityClass, "startActivity",
-                                               "(Landroid/content/Intent;)V");
-    env->CallVoidMethod(context, startActivity, intentObject);
+    /** intent */
+    void startActivityAndFinish(JNIEnv *env, jobject context, const char *destination) {
+        // Get instance of Intent
+        jclass intentClass = env->FindClass("android/content/Intent");
+        jmethodID newIntent = env->GetMethodID(intentClass, "<init>", "()V");
+        jobject intentObject = env->NewObject(intentClass, newIntent);
 
-    jmethodID finish = env->GetMethodID(activityClass, "finish", "()V");
-    env->CallVoidMethod(context, finish);
-}
+        // Get instance of ComponentName
+        jclass componentNameClass = env->FindClass("android/content/ComponentName");
+        jmethodID newComponentName = env->GetMethodID(
+                componentNameClass, "<init>", "(Landroid/content/Context;Ljava/lang/String;)V");
+        jstring className =
+                env->NewStringUTF(destination);
+        jobject componentNameObject = env->NewObject(
+                componentNameClass, newComponentName, context, className);
+
+        // Set component in intent
+        jmethodID setComponent = env->GetMethodID(
+                intentClass, "setComponent",
+                "(Landroid/content/ComponentName;)Landroid/content/Intent;");
+        env->CallObjectMethod(intentObject, setComponent, componentNameObject);
+
+        // Start activity using intent
+        jclass activityClass = env->GetObjectClass(context);
+        jmethodID startActivity = env->GetMethodID(activityClass, "startActivity",
+                                                   "(Landroid/content/Intent;)V");
+        env->CallVoidMethod(context, startActivity, intentObject);
+
+        jmethodID finish = env->GetMethodID(activityClass, "finish", "()V");
+        env->CallVoidMethod(context, finish);
+    }
 }

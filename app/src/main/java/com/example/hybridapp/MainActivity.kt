@@ -195,12 +195,7 @@ class MainActivity : BasicActivity() {
             Constants.CAMERA_DEVICE_RATIO_REQ_CODE -> {
                 if(resultOk) {
                     val imageUri = data?.data
-                    //
-                    val exif = ExifInterface(imageUri?.path)
-                    val rotationAngle = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION,
-                        ExifInterface.ORIENTATION_NORMAL)
-                    Log.e("TAG", "Rotation Angle: ${rotationAngle}")
-                    //
+
                     if(imageUri != null) {
                         val base64 = Constants.BASE64_URL +
                                 Photo.convertUriToResizingBase64(imageUri, ratio, isWidthRatio)
@@ -234,8 +229,6 @@ class MainActivity : BasicActivity() {
             Constants.PHOTO_DEVICE_RATIO_REQ_CODE -> {
                 if(resultOk) {
                     val imageUri = data?.data
-
-                    Log.e("TAG", "ImageUri: ${imageUri?.path}")
 
                     if(imageUri != null) {
                         val base64 = Constants.BASE64_URL +

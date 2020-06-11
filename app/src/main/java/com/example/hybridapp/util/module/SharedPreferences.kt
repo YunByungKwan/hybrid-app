@@ -8,7 +8,7 @@ object SharedPreferences {
     
     /** 데이터 저장 */
     fun putData(fileName: String, key: String, value: Any?) {
-        Constants.LOGE("putData", Constants.TAG_SHARED)
+        Constants.logE("putData", Constants.TAG_SHARED)
 
         val prefs = App.activity.getSharedPreferences(fileName, Context.MODE_PRIVATE)
         val editor = prefs.edit()
@@ -73,7 +73,7 @@ object SharedPreferences {
     }
 
     fun getStringSet(fileName: String, key: String) {
-        Constants.LOGE("getStringSet", Constants.TAG_SHARED)
+        Constants.logE("getStringSet", Constants.TAG_SHARED)
         TODO("구현 필요")
     }
 

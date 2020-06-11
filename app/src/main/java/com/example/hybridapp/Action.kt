@@ -18,36 +18,28 @@ object Action {
         CoroutineScope(Dispatchers.Main).launch {
             val title = array?.getString(0)
             val message = array?.getString(1)
-
-
             val jsonObject: JSONObject? = array?.get(2) as JSONObject
-            val basic: String? =
-                if(jsonObject?.has("basic")!!)
-                    jsonObject.get("basic").toString()
-                else null
-            val destructive: String? =
-                if(jsonObject.has("destructive"))
-                    jsonObject.get("destructive").toString()
-                else null
-            val cancel: String? =
-                if(jsonObject.has("cancel"))
-                    jsonObject.get("cancel").toString()
-                else null
 
-            val posListener = DialogInterface.OnClickListener { _, _ ->
-                dialogAction?.promiseReturn(basic)
-            }
-            val negListener = DialogInterface.OnClickListener { _, _ ->
-                dialogAction?.promiseReturn(cancel)
-            }
-            val cancelListener = {
-                dialogAction?.promiseReturn(Constants.RESULT_CANCELED)
-            }
+            jsonObject?.let {
+                val basic: String? = Utils.getJsonObjectValue("basic", it)
+                val destructive: String? = Utils.getJsonObjectValue("destructive", it)
+                val cancel: String? = Utils.getJsonObjectValue("cancel", it)
 
-            Dialog.show(
-                title, message, basic, destructive, cancel,
-                posListener, null, negListener, cancelListener
-            )
+                val posListener = DialogInterface.OnClickListener { _, _ ->
+                    dialogAction?.promiseReturn(basic)
+                }
+                val negListener = DialogInterface.OnClickListener { _, _ ->
+                    dialogAction?.promiseReturn(cancel)
+                }
+                val cancelListener = {
+                    dialogAction?.promiseReturn(Constants.RESULT_CANCELED)
+                }
+
+                Dialog.show(
+                    title, message, basic, destructive, cancel,
+                    posListener, null, negListener, cancelListener
+                )
+            }
         }
     }
 
@@ -71,7 +63,6 @@ object Action {
         CoroutineScope(Dispatchers.Main).launch {
             val ratio = array?.getDouble(0)
             val isWidthRatio = array?.getBoolean(1)
-
             Camera.request(cameraDeviceAction, ratio, isWidthRatio)
         }
     }
@@ -118,7 +109,7 @@ object Action {
         }
     }
 
-    val qrcode: (FlexAction?, JSONArray?) -> Unit = { qrCodeAction, _->
+    val qrCode: (FlexAction?, JSONArray?) -> Unit = { qrCodeAction, _->
         if(Utils.existAllPermission(arrayOf(Constants.PERM_CAMERA))) {
             QRCode.startScan(qrCodeAction)
         } else {
@@ -129,7 +120,7 @@ object Action {
 
     val location: (FlexAction?, JSONArray?) -> Unit = { locationAction, _->
         CoroutineScope(Dispatchers.Main).launch {
-            Constants.LOGD("Call location action.")
+            Constants.logD("Call location action.")
             Location.getCurrent(locationAction)
         }
     }

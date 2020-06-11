@@ -42,7 +42,7 @@ object BioAuth {
 
     /** 생체 인증 다이얼로그 띄우기 */
     fun showPrompt(fragmentActivity: FragmentActivity, action: FlexAction?){
-        Constants.LOGE("showPrompt", Constants.TAG_BIO_AUTH)
+        Constants.logE("showPrompt", Constants.TAG_BIO_AUTH)
 
         (App.activity as BasicActivity).bioAuthAction = action
 
@@ -67,13 +67,13 @@ object BioAuth {
         override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
             super.onAuthenticationError(errorCode, errString)
 
-            Constants.LOGE("onAuthenticationError", Constants.TAG_BIO_AUTH)
+            Constants.logE("onAuthenticationError", Constants.TAG_BIO_AUTH)
         }
 
         override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
             super.onAuthenticationSucceeded(result)
 
-            Constants.LOGE("onAuthenticationSucceeded", Constants.TAG_BIO_AUTH)
+            Constants.logE("onAuthenticationSucceeded", Constants.TAG_BIO_AUTH)
 
             val cryptoObject = result.cryptoObject
             if(cryptoObject != null) {
@@ -84,7 +84,7 @@ object BioAuth {
 
         override fun onAuthenticationFailed() {
             super.onAuthenticationFailed()
-            Constants.LOGE("onAuthenticationFailed", Constants.TAG_BIO_AUTH)
+            Constants.logE("onAuthenticationFailed", Constants.TAG_BIO_AUTH)
         }
     }
 }

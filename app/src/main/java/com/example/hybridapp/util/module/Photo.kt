@@ -19,7 +19,7 @@ object Photo {
 
     /** 갤러리 호출 (1장) */
     fun requestImage(action: FlexAction?, ratio: Double?, isWidthRatio: Boolean?) {
-        Constants.LOGE("requestImage", Constants.TAG_PHOTO)
+        Constants.logE("requestImage", Constants.TAG_PHOTO)
 
         val storagePermissions = arrayOf(Constants.PERM_WRITE_EXTERNAL_STORAGE,
             Constants.PERM_READ_EXTERNAL_STORAGE)
@@ -57,7 +57,7 @@ object Photo {
 
     /** 갤러리 호출 (여러 장) */
     fun requestMultipleImages(action: FlexAction?, ratio: Double, isWidthRatio: Boolean?) {
-        Constants.LOGE("requestMultipleImages", Constants.TAG_PHOTO)
+        Constants.logE("requestMultipleImages", Constants.TAG_PHOTO)
 
         val storagePermissions =
             arrayOf(Constants.PERM_WRITE_EXTERNAL_STORAGE,
@@ -95,7 +95,8 @@ object Photo {
     private fun getSinglePhotoIntent(): Intent {
         val galleryIntent = Intent(Intent.ACTION_PICK)
         galleryIntent.type = MediaStore.Images.Media.CONTENT_TYPE
-
+//        galleryIntent.setDataAndType(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+//            MediaStore.Images.Media.CONTENT_TYPE)
         return galleryIntent
     }
 
@@ -126,7 +127,7 @@ object Photo {
 
     /** Uri->Base64로 변환 */
     fun convertUriToBase64(uri: Uri): String {
-        Constants.LOGE("convertUriToBase64", Constants.TAG_PHOTO)
+        Constants.logE("convertUriToBase64", Constants.TAG_PHOTO)
 
         val bitmap = convertUriToBitmap(uri)
 
@@ -135,7 +136,7 @@ object Photo {
 
     /** Uri->Bitmap으로 변환 */
     fun convertUriToBitmap(uri: Uri): Bitmap {
-        Constants.LOGE("convertUriToBitmap", Constants.TAG_PHOTO)
+        Constants.logE("convertUriToBitmap", Constants.TAG_PHOTO)
 
         return if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             val source
@@ -148,7 +149,7 @@ object Photo {
 
     /** Bitmap->Base64 로 변환 */
     fun convertBitmapToBase64(bitmap: Bitmap): String {
-        Constants.LOGE("convertBitmapToBase64", Constants.TAG_PHOTO)
+        Constants.logE("convertBitmapToBase64", Constants.TAG_PHOTO)
 
         val byteArrayOutputStream = ByteArrayOutputStream()
         bitmap.compress(Bitmap.CompressFormat.JPEG, 100, byteArrayOutputStream)
@@ -158,10 +159,11 @@ object Photo {
     }
 
     /** 디바이스 화면 비율에 맞게 리사이즈 */
-    fun resizeBitmapByDeviceRatio(bitmap: Bitmap, ratio: Double, isWidthRatio: Boolean?): Bitmap {
-        val screenWidth = Utils.getScreenSize(App.activity).getValue(Constants.SCREEN_WIDTH)
-        val screenHeight = Utils.getScreenSize(App.activity).getValue(Constants.SCREEN_HEIGHT)
+    private fun resizeBitmapByDeviceRatio(bitmap: Bitmap, ratio: Double, isWidthRatio: Boolean?): Bitmap {
+        val screenWidth = Utils.getScreenSize().getValue(Constants.SCREEN_WIDTH)
+        val screenHeight = Utils.getScreenSize().getValue(Constants.SCREEN_HEIGHT)
 
+        Log.d("dlgodnjs", ratio.toString())
         return if(isWidthRatio!!) {
             val resizeWidth = (screenWidth * ratio).toInt()
             val resizeHeight = (bitmap.height * ((screenWidth * ratio) / bitmap.width)).toInt()
@@ -176,7 +178,7 @@ object Photo {
     }
 
     /** 이미지 비율에 맞게 리사이즈 */
-    fun resizeBitmapByRatio(bitmap: Bitmap, ratio: Double): Bitmap {
+    private fun resizeBitmapByRatio(bitmap: Bitmap, ratio: Double): Bitmap {
         val width = (bitmap.width * ratio).toInt()
         val height = (bitmap.height * ratio).toInt()
 

@@ -1,0 +1,4 @@
+<paths xmlns:android="http://schemas.android.com/apk/res/android">
+    <files-path name="cameraTest" path="test/"/>
+    <files-path name="my_docs" path="docs/"/>
+</paths>

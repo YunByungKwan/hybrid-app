@@ -155,9 +155,9 @@ class Constants {
 
        /** Function */
 
-       fun LOGD(message: String) = Log.d(TAG, message)
+       fun logD(message: String) = Log.d(TAG, message)
 
-       fun LOGE(functionName: String, className: String) {
+       fun logE(functionName: String, className: String) {
            Log.e(className, "call $functionName() in $className")
        }
    }

@@ -2,15 +2,16 @@ package com.example.hybridapp
 
 import android.app.Activity
 import android.app.DownloadManager
-import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.location.LocationManager
+import android.graphics.Bitmap
+import android.graphics.ImageDecoder
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Environment
-import android.os.Looper
+import android.os.Handler
+import android.provider.MediaStore
 import android.util.Log
 import android.view.View
 import android.view.animation.AnimationUtils
@@ -18,7 +19,8 @@ import android.webkit.ValueCallback
 import android.webkit.WebChromeClient
 import android.webkit.WebView
 import android.widget.Button
-import android.widget.TextView
+import android.widget.ImageView
+import app.dvkyun.flexhybridand.FlexFuncInterface
 import com.example.hybridapp.data.LogUrlRepository
 import com.example.hybridapp.data.LogUrlRoomDatabase
 import com.example.hybridapp.util.*
@@ -26,18 +28,13 @@ import com.example.hybridapp.basic.BasicActivity
 import com.example.hybridapp.basic.BasicWebChromeClient
 import com.example.hybridapp.basic.BasicWebViewClient
 import com.example.hybridapp.util.module.*
-import android.location.Location
-import com.google.android.gms.common.stats.ConnectionTracker
-import com.google.android.gms.location.*
-import com.google.android.gms.maps.GoogleMap
-import com.google.android.gms.maps.OnMapReadyCallback
-import com.google.android.gms.maps.SupportMapFragment
 import com.google.zxing.integration.android.IntentIntegrator
 import com.google.zxing.integration.android.IntentResult
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import org.json.JSONArray
 import java.net.URLDecoder
 import kotlin.collections.ArrayList
 
@@ -47,8 +44,15 @@ class MainActivity : BasicActivity() {
     private lateinit var repository: LogUrlRepository
     private var smsReceiver: SMSReceiver? = null
     private var mFilePatCallback: ValueCallback<Array<Uri>>? = null
-    var backgroundView: View? = null
-    var popupCloseButton: Button? = null
+    private lateinit var backgroundView: View
+    private lateinit var popupCloseButton: Button
+
+    external fun stringFromJNI() : String
+    companion object {
+        init {
+            System.loadLibrary("HelloJni")
+        }
+    }
 
     override fun onResume() {
         super.onResume()
@@ -70,75 +74,36 @@ class MainActivity : BasicActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        init()
+    }
+
+    /** 시작 시 기본 초기화 함수 */
+    private fun init() {
         /** Room Database default settings */
         scope.launch {
             val logUrlDao = LogUrlRoomDatabase.getDatabase(this@MainActivity).logUrlDao()
             repository = LogUrlRepository(logUrlDao)
         }
 
-        setFlexWebViewSettings()
-        setInterface()
+        setFlexWebView()
         setActions()
         setWebViewDownloadListener()
     }
 
-    private fun setFlexWebViewSettings() {
+    /** 기본, 팝업 FlexView 설정 */
+    private fun setFlexWebView() {
         flex_pop_up_web_view.setBaseUrl(Constants.BASE_URL)
         flex_web_view.setBaseUrl(Constants.BASE_URL)
         flex_web_view.loadUrl(Constants.URL)
-        flex_web_view.addFlexInterface(FlexInterface())
         flex_web_view.settings.setSupportMultipleWindows(true)
         WebView.setWebContentsDebuggingEnabled(true)
         flex_web_view.webChromeClient = BasicWebChromeClient(this)
         flex_web_view.webViewClient = BasicWebViewClient()
+        flex_web_view.addFlexInterface(FlexActionInterface())
+        flex_web_view.addFlexInterface(FlexPopupInterface())
     }
 
-    /** FlexWebView Interface 셋팅 */
-    private fun setInterface() {
-        /** 팝업 */
-        flex_web_view.setInterface(Constants.TYPE_POP_UP) {array ->
-            CoroutineScope(Dispatchers.Main).launch {
-
-                // 뒷배경 뷰 생성
-                val mInflater = Utils.getLayoutInflater(this@MainActivity)
-                backgroundView = mInflater.inflate(R.layout.background_popup, null)
-                constraintLayout.addView(backgroundView)
-
-                val url = array.getString(0)
-                val ratio = array.getDouble(1)
-
-                val screenSize = Utils.getScreenSize(this@MainActivity)
-                val popupWidth = (ratio * screenSize.getValue(Constants.SCREEN_WIDTH)).toInt()
-                val popupHeight = (ratio * screenSize.getValue(Constants.SCREEN_HEIGHT)).toInt()
-
-                flex_pop_up_web_view.loadUrl(url)
-                flex_pop_up_web_view.visibility = View.VISIBLE
-                flex_pop_up_web_view.layoutParams = Utils.getParamsAlignCenterInConstraintLayout(
-                    popupWidth, popupHeight, R.id.constraintLayout)
-
-                val bottomUp = AnimationUtils.loadAnimation(this@MainActivity, R.anim.open)
-                flex_pop_up_web_view.startAnimation(bottomUp)
-                flex_pop_up_web_view.bringToFront()
-
-                // 닫기 버튼 생성
-                popupCloseButton = Utils.createCloseButton(this@MainActivity, R.id.constraintLayout)
-                constraintLayout.addView(popupCloseButton)
-
-                popupCloseButton!!.setOnClickListener {
-                    val closeAnimation = AnimationUtils.loadAnimation(
-                        this@MainActivity, R.anim.close)
-                    flex_pop_up_web_view.startAnimation(closeAnimation)
-                    flex_pop_up_web_view.visibility = View.GONE
-                    constraintLayout.removeView(backgroundView)
-                    constraintLayout.removeView(popupCloseButton)
-                }
-            }
-
-            null
-        }
-    }
-
-    /** FlexWebView Action 셋팅 */
+    /** FlexWebView Action 설정 */
     private fun setActions() {
         flex_web_view.setAction(Constants.TYPE_DIALOG, Action.dialog)
         flex_web_view.setAction(Constants.TYPE_NETWORK, Action.network)
@@ -148,7 +113,7 @@ class MainActivity : BasicActivity() {
         flex_web_view.setAction(Constants.TYPE_PHOTO_RATIO, Action.photoByRatio)
         flex_web_view.setAction(Constants.TYPE_MULTI_PHOTO_DEVICE_RATIO, Action.multiPhotoByDeviceRatio)
         flex_web_view.setAction(Constants.TYPE_MULTI_PHOTO_RATIO, Action.multiPhotoByRatio)
-        flex_web_view.setAction(Constants.TYPE_QR_CODE_SCAN, Action.qrcode)
+        flex_web_view.setAction(Constants.TYPE_QR_CODE_SCAN, Action.qrCode)
         flex_web_view.setAction(Constants.TYPE_LOCATION, Action.location)
         flex_web_view.setAction(Constants.TYPE_BIO_AUTHENTICATION, Action.bioAuth)
         flex_web_view.setAction(Constants.TYPE_LOCAL_REPO, Action.localRepository)
@@ -156,7 +121,7 @@ class MainActivity : BasicActivity() {
 
     private fun setWebViewDownloadListener() {
         /** File Download */
-        flex_web_view.setDownloadListener { url, userAgent, contentDisposition, mimetype, contentLength ->
+        flex_web_view.setDownloadListener { url, userAgent, contentDisposition, mimeType, _ ->
             if(Utils.existsPermission(Constants.PERM_WRITE_EXTERNAL_STORAGE)) {
                 try {
                     val request = DownloadManager.Request(Uri.parse(url))
@@ -169,7 +134,7 @@ class MainActivity : BasicActivity() {
                     val fileName = decodedContentDisposition
                         .replace("attachment; filename=", "")
 
-                    request.setMimeType(mimetype)
+                    request.setMimeType(mimeType)
                     request.addRequestHeader("User-Agent", userAgent)
                     request.setDescription("Downloading File")
                     request.setAllowedOverMetered(true)
@@ -179,7 +144,6 @@ class MainActivity : BasicActivity() {
                         request.setRequiresCharging(false)
                     }
                     request.allowScanningByMediaScanner()
-                    request.setAllowedOverMetered(true)
                     request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
                     request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, fileName)
                     downloadManager.enqueue(request)
@@ -201,145 +165,148 @@ class MainActivity : BasicActivity() {
         val resultOk = (resultCode == Activity.RESULT_OK)
 
         when(requestCode) {
+            /** 카메라 테스트 관련 */
             Constants.REQ_CODE_CAMERA_DEVICE_RATIO -> {
                 if(resultOk) {
-                    val imageUri = data?.data
-
-                    if(imageUri != null) {
-                        val base64 = Constants.BASE64_URL +
-                                Photo.convertUriToResizingBase64(imageUri, ratio, isWidthRatio)
-
-                        cameraDeviceAction?.promiseReturn(base64)
-                        ratio = null
-                        isWidthRatio = null
-                    } else {
-                        cameraDeviceAction?.promiseReturn(null)
+                    var bitmap: Bitmap = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                        ImageDecoder.decodeBitmap(ImageDecoder.createSource(Utils.getOutputMediaFile()!!))
                     }
-                } else {
-                    cameraDeviceAction?.promiseReturn(null)
+                    else {
+                        MediaStore.Images.Media.getBitmap(contentResolver, Uri.fromFile(Utils.getOutputMediaFile()))
+                    }
+
+                    val base64 = Constants.BASE64_URL +
+                            Photo.convertBitmapToBase64(bitmap)
+
+                    cameraDeviceAction?.promiseReturn(base64)
+                    ratio = null
+                    isWidthRatio = null
+
+
+                    // 카메라 촬영 이미지 출력을 위한 임시 코드
+//                    val mInflater = Utils.getLayoutInflater(this@MainActivity)
+//                    var tempView: View = mInflater.inflate(R.layout.test, null)
+//                    var imgView : ImageView = tempView.findViewById(R.id.test)
+//                    imgView.setImageBitmap(bitmap)
+//                    constraintLayout.addView(tempView)
                 }
+
+                cameraDeviceAction?.promiseReturn(null)
             }
             Constants.REQ_CODE_CAMERA_RATIO -> {
                 if(resultOk) {
-                    val imageUri = data?.data
-
-                    if(imageUri != null) {
-                        val base64 = Constants.BASE64_URL +
-                                Photo.convertUriToResizingBase64(imageUri, ratio, isWidthRatio)
-                        cameraAction?.promiseReturn(base64)
-                        ratio = null
-                    } else {
-                        cameraAction?.promiseReturn(null)
+                    var bitmap: Bitmap = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                        ImageDecoder.decodeBitmap(ImageDecoder.createSource(Utils.getOutputMediaFile()!!))
                     }
-                } else {
-                    cameraAction?.promiseReturn(null)
+                    else {
+                        MediaStore.Images.Media.getBitmap(contentResolver, Uri.fromFile(Utils.getOutputMediaFile()))
+                    }
+
+                    val base64 = Constants.BASE64_URL +
+                            Photo.convertBitmapToBase64(bitmap)
+
+                    cameraAction?.promiseReturn(base64)
+                    ratio = null
                 }
+
+                cameraAction?.promiseReturn(null)
             }
+            /** 한 개의 이미지 선택 관련 */
             Constants.REQ_CODE_PHOTO_DEVICE_RATIO -> {
                 if(resultOk) {
-                    val imageUri = data?.data
+                    data?.data?.let {
+//                    val mInflater = Utils.getLayoutInflater(this@MainActivity)
+//                    var tempView: View = mInflater.inflate(R.layout.test, null)
+//                    var imgView : ImageView = tempView.findViewById(R.id.test)
+//                    imgView.setImageBitmap(Photo.convertUriToBitmap(it))
+//                    constraintLayout.addView(tempView)
 
-                    if(imageUri != null) {
                         val base64 = Constants.BASE64_URL +
-                                Photo.convertUriToResizingBase64(imageUri, ratio, isWidthRatio)
+                                Photo.convertUriToBase64(it)
 
                         photoDeviceAction?.promiseReturn(base64)
                         ratio = null
                         isWidthRatio = null
-                    } else {
-                        photoDeviceAction?.promiseReturn(null)
                     }
-                } else {
-                    photoDeviceAction?.promiseReturn(null)
                 }
+
+                photoDeviceAction?.promiseReturn(null)
             }
             Constants.REQ_CODE_PHOTO_RATIO -> {
                 if(resultOk) {
-                    val imageUri = data?.data
-
-                    if(imageUri != null) {
+                    data?.data?.let {
                         val base64 = Constants.BASE64_URL +
-                                Photo.convertUriToResizingBase64(imageUri, ratio, isWidthRatio)
+                                Photo.convertUriToResizingBase64(it, ratio, isWidthRatio)
 
                         photoAction?.promiseReturn(base64)
                         ratio = null
-                    } else {
-                        photoAction?.promiseReturn(null)
                     }
-                } else {
-                    photoAction?.promiseReturn(null)
                 }
+                photoAction?.promiseReturn(null)
             }
+            /** 멀티(다중) 이미지 선택 관련 */
             Constants.REQ_CODE_MULTI_PHOTO_DEVICE_RATIO -> {
                 if(resultOk) {
                     val base64Images = ArrayList<String>()
-                    val clipData = data?.clipData
-
-                    if(clipData != null) {
-                        if(clipData.itemCount in 1..9) {
-                            for(idx in 0 until clipData.itemCount) {
-                                val imageUri = clipData.getItemAt(idx).uri
+                    data?.clipData?.let {
+                        if(it.itemCount in 1..9) {
+                            for(idx in 0 until it.itemCount) {
+                                val imageUri = it.getItemAt(idx).uri
                                 val base64 = Constants.BASE64_URL +
-                                        Photo.convertUriToResizingBase64(imageUri, ratio, isWidthRatio)
+                                        Photo.convertUriToBase64(imageUri)
                                 base64Images.add(base64)
                             }
+
                             multiplePhotoDeviceAction?.promiseReturn(base64Images.toTypedArray())
                             ratio = null
                             isWidthRatio = null
                         } else {
+                            Toast.showLongText("10장 이상의 사진을 첨부할 수 없습니다.")
                             Log.e(Constants.TAG_MAIN, "10장 이상의 사진을 첨부할 수 없습니다.")
-                            multiplePhotoDeviceAction?.promiseReturn(null)
                         }
-                    } else {
-                        Log.e(Constants.TAG_MAIN, "ClipData is null.")
-                        multiplePhotoDeviceAction?.promiseReturn(null)
                     }
-                } else {
-                    multiplePhotoDeviceAction?.promiseReturn(null)
                 }
+
+                multiplePhotoDeviceAction?.promiseReturn(null)
             }
+
             Constants.REQ_CODE_MULTI_PHOTO_RATIO -> {
                 if(resultOk) {
                     val base64Images = ArrayList<String>()
-                    val clipData = data?.clipData
 
-                    if(clipData != null) {
-                        if(clipData.itemCount in 1..9) {
-                            for(idx in 0 until clipData.itemCount) {
-                                val imageUri = clipData.getItemAt(idx).uri
+                    data?.clipData?.let {
+                        if(it.itemCount in 1..9) {
+                            for(idx in 0 until it.itemCount) {
+                                val imageUri = it.getItemAt(idx).uri
                                 val base64 = Constants.BASE64_URL +
                                         Photo.convertUriToResizingBase64(imageUri, ratio, isWidthRatio)
                                 base64Images.add(base64)
                             }
+
                             multiplePhotosAction?.promiseReturn(base64Images.toTypedArray())
                             ratio = null
                         } else {
+                            Toast.showLongText("10장 이상의 사진을 첨부할 수 없습니다.")
                             Log.e(Constants.TAG_MAIN, "10장 이상의 사진을 첨부할 수 없습니다.")
-                            multiplePhotosAction?.promiseReturn(null)
                         }
-                    } else {
-                        Log.e(Constants.TAG_MAIN, "ClipData is null.")
-                        multiplePhotosAction?.promiseReturn(null)
                     }
-                } else {
-                    multiplePhotosAction?.promiseReturn(null)
                 }
+
+                multiplePhotosAction?.promiseReturn(null)
             }
+            /** QR코드 인증 */
             Constants.REQ_CODE_QR -> {
                 if(resultOk) {
                     val result: IntentResult? =
                         IntentIntegrator.parseActivityResult(requestCode, resultCode, data)
 
-                    if(result != null) {
-                        Constants.LOGD("Result: ${result.contents}")
+                    result?.let {
+                        Constants.logD("Result: ${result.contents}")
                         qrCodeScanAction?.promiseReturn(result.contents)
-                    } else {
-                        Constants.LOGD("QR Code result is null.")
-                        qrCodeScanAction?.promiseReturn(null)
                     }
-                } else {
-                    qrCodeScanAction?.promiseReturn(null)
                 }
+
+                qrCodeScanAction?.promiseReturn(null)
             }
             Constants.REQ_PERM_CODE_SEND_SMS -> {
                 if(resultOk) {
@@ -372,6 +339,7 @@ class MainActivity : BasicActivity() {
 
         if(isNotEmpty && isGranted) {
             when(requestCode) {
+                // TODO : 허용 버튼 클릭 시 바로 해당 기능 진행되도록 구현
                 Constants.REQ_PERM_CODE_CAMERA -> {
                     Log.e(Constants.TAG_MAIN, Constants.LOG_PERM_GRANTED_CAMERA)
                 }
@@ -395,16 +363,66 @@ class MainActivity : BasicActivity() {
 
     /** 뒤로 가기 버튼 클릭 이벤트 */
     override fun onBackPressed() {
-        if(flex_pop_up_web_view.visibility == View.VISIBLE) {
-            val closeAnimation = AnimationUtils.loadAnimation(
-                this@MainActivity, R.anim.close)
-            flex_pop_up_web_view.startAnimation(closeAnimation)
-            flex_pop_up_web_view.visibility = View.GONE
+        if(flex_pop_up_web_view.visibility == View.VISIBLE)
+            Utils.closePopup(this@MainActivity, constraintLayout, backgroundView, popupCloseButton, flex_pop_up_web_view)
+        else
+            backPressedTwice()
+    }
 
-            constraintLayout.removeView(backgroundView)
-            constraintLayout.removeView(popupCloseButton)
-        } else {
+    /** 뒤로가기 두 번 클릭 이벤트  */
+    private fun backPressedTwice() {
+        // 두 번 뒤로가기 누를 시 종료
+        if(backPressedTwice) {
             super.onBackPressed()
+            return
+        }
+
+        backPressedTwice = true
+        Toast.showLongText("뒤로가기 버튼을 한 번 더 누르시면 종료됩니다.")
+        Handler().postDelayed({
+            backPressedTwice = false
+        }, 2000)
+    }
+
+
+    /*
+    * 인터페이스
+    * */
+    inner class FlexPopupInterface{
+
+        @FlexFuncInterface
+        fun WebPopup(array: JSONArray) {
+            CoroutineScope(Dispatchers.Main).launch {
+
+                // 뒷배경 뷰 생성
+                val mInflater = Utils.getLayoutInflater(this@MainActivity)
+                backgroundView = mInflater.inflate(R.layout.background_popup, null)
+                constraintLayout.addView(backgroundView)
+
+                val url = array.getString(0)
+                val ratio = array.getDouble(1)
+
+                val screenSize = Utils.getScreenSize()
+                val popupWidth = (ratio * screenSize.getValue(Constants.SCREEN_WIDTH)).toInt()
+                val popupHeight = (ratio * screenSize.getValue(Constants.SCREEN_HEIGHT)).toInt()
+
+                flex_pop_up_web_view.loadUrl(url)
+                flex_pop_up_web_view.visibility = View.VISIBLE
+                flex_pop_up_web_view.layoutParams = Utils.getParamsAlignCenterInConstraintLayout(
+                    popupWidth, popupHeight, R.id.constraintLayout)
+
+                val bottomUp = AnimationUtils.loadAnimation(this@MainActivity, R.anim.open)
+                flex_pop_up_web_view.startAnimation(bottomUp)
+                flex_pop_up_web_view.bringToFront()
+
+                // 닫기 버튼 생성
+                popupCloseButton = Utils.createCloseButton(this@MainActivity, R.id.constraintLayout)
+                constraintLayout.addView(popupCloseButton)
+
+                popupCloseButton.setOnClickListener {
+                    Utils.closePopup(this@MainActivity, constraintLayout, backgroundView, popupCloseButton, flex_pop_up_web_view)
+                }
+            }
         }
     }
 }

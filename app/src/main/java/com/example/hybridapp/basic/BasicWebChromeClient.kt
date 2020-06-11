@@ -18,7 +18,7 @@ class BasicWebChromeClient(activity: BasicActivity): FlexWebChromeClient(activit
     override fun onShowFileChooser(
         webView: WebView?, filePathCallback: ValueCallback<Array<Uri>>?,
         fileChooserParams: WebChromeClient.FileChooserParams?): Boolean {
-        Constants.LOGD("Call function onShowFileChooser() in BasicWebChromeClient class.")
+        Constants.logD("Call function onShowFileChooser() in BasicWebChromeClient class.")
 
         mFilePatCallback = filePathCallback
 

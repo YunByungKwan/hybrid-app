@@ -52,11 +52,11 @@ object Photo {
                 }
             } else {
                 Constants.LOGE(Constants.LOG_MSG_GALLERY)
-                action.promiseReturn(null)
+                action.resolveVoid()
             }
         } else {
             Utils.checkDangerousPermissions(storagePerms, Constants.PERM_READ_WRITE_REQ_CODE)
-            action?.promiseReturn(null)
+            action?.resolveVoid()
         }
     }
 
@@ -87,11 +87,11 @@ object Photo {
                 }
             } else {
                 Constants.LOGE(Constants.LOG_MSG_GALLERY)
-                action.promiseReturn(null)
+                action.resolveVoid()
             }
         } else {
             Utils.checkDangerousPermissions(storagePerms, Constants.PERM_READ_WRITE_REQ_CODE)
-            action?.promiseReturn(null)
+            action?.resolveVoid()
         }
     }
 
@@ -248,7 +248,7 @@ object Photo {
     }
 
     /** Bitmap --> Base64 */
-    private fun getBase64FromBitmap(bitmap: Bitmap): String {
+    fun getBase64FromBitmap(bitmap: Bitmap): String {
         Constants.LOGD("Call getBase64FromBitmap()")
 
         val byteArrayOutputStream = ByteArrayOutputStream()

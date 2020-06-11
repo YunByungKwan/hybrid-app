@@ -8,7 +8,6 @@
 #include <iostream>
 #include <bitset>
 #include <unistd.h>
-#include "curl/include/curl/curl.h"
 
 #define LOG_TAG "C++"
 #define LOGE(...) __android_log_print(ANDROID_LOG_ERROR, __VA_ARGS__)
@@ -44,11 +43,11 @@ extern "C" {
     }
 
     void http() {
-        CURL *curl;
-        CURLcode res;
+        //CURL *curl;
+        //CURLcode res;
 
         /* In windows, this will init the winsock stuff */
-        curl_global_init(CURL_GLOBAL_ALL);
+  //      curl_global_init(CURL_GLOBAL_ALL);
 //
 //        /* get a curl handle */
 //        curl = curl_easy_init();

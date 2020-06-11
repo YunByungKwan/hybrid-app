@@ -21,7 +21,7 @@ object QRCode {
         } else {
             Utils.checkDangerousPermissions(arrayOf(Constants.PERM_CAMERA),
                 Constants.PERM_CAMERA_REQ_CODE)
-            action?.promiseReturn(null)
+            action?.resolveVoid()
         }
     }
 }

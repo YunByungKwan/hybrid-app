@@ -48,10 +48,9 @@ class MainActivity : BasicActivity() {
     private lateinit var backgroundView: View
     private lateinit var popupCloseButton: Button
 
-    external fun stringFromJNI() : String
     companion object {
         init {
-            System.loadLibrary("HelloJni")
+            //System.loadLibrary("HelloJni")
         }
     }
 
@@ -167,7 +166,7 @@ class MainActivity : BasicActivity() {
 
         when(requestCode) {
             /** 카메라 테스트 관련 */
-            Constants.REQ_CODE_CAMERA_DEVICE_RATIO -> {
+            Constants.CAMERA_DEVICE_RATIO_REQ_CODE -> {
                 if(resultOk) {
                     var bitmap: Bitmap = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
                         ImageDecoder.decodeBitmap(ImageDecoder.createSource(Utils.getOutputMediaFile()!!))
@@ -177,7 +176,7 @@ class MainActivity : BasicActivity() {
                     }
 
                     val base64 = Constants.BASE64_URL +
-                            Photo.convertBitmapToBase64(bitmap)
+                            Photo.getBase64FromBitmap(bitmap)
 
                     cameraDeviceAction?.promiseReturn(base64)
                     ratio = null
@@ -192,7 +191,7 @@ class MainActivity : BasicActivity() {
 //                    constraintLayout.addView(tempView)
                 }
 
-                cameraDeviceAction?.promiseReturn(null)
+                cameraDeviceAction?.resolveVoid()
             }
             Constants.CAMERA_RATIO_REQ_CODE -> {
                 if(resultOk) {
@@ -204,16 +203,16 @@ class MainActivity : BasicActivity() {
                     }
 
                     val base64 = Constants.BASE64_URL +
-                            Photo.convertBitmapToBase64(bitmap)
+                            Photo.getBase64FromBitmap(bitmap)
 
                     cameraAction?.promiseReturn(base64)
                     ratio = null
                 }
 
-                cameraAction?.promiseReturn(null)
+                cameraAction?.resolveVoid()
             }
             /** 한 개의 이미지 선택 관련 */
-            Constants.REQ_CODE_PHOTO_DEVICE_RATIO -> {
+            Constants.PHOTO_DEVICE_RATIO_REQ_CODE -> {
                 if(resultOk) {
                     data?.data?.let {
 //                    val mInflater = Utils.getLayoutInflater(this@MainActivity)
@@ -223,7 +222,7 @@ class MainActivity : BasicActivity() {
 //                    constraintLayout.addView(tempView)
 
                         val base64 = Constants.BASE64_URL +
-                                Photo.convertUriToBase64(it)
+                                Photo.getBase64FromUri(it)
 
                         photoDeviceAction?.promiseReturn(base64)
                         ratio = null
@@ -231,7 +230,7 @@ class MainActivity : BasicActivity() {
                     }
                 }
 
-                photoDeviceAction?.promiseReturn(null)
+                photoDeviceAction?.resolveVoid()
             }
             Constants.PHOTO_RATIO_REQ_CODE -> {
                 if(resultOk) {
@@ -243,10 +242,10 @@ class MainActivity : BasicActivity() {
                         ratio = null
                     }
                 }
-                photoAction?.promiseReturn(null)
+                photoAction?.resolveVoid()
             }
             /** 멀티(다중) 이미지 선택 관련 */
-            Constants.REQ_CODE_MULTI_PHOTO_DEVICE_RATIO -> {
+            Constants.MULTI_PHOTO_DEVICE_RATIO_REQ_CODE -> {
                 if(resultOk) {
                     val base64Images = ArrayList<String>()
                     data?.clipData?.let {
@@ -254,11 +253,11 @@ class MainActivity : BasicActivity() {
                             for(idx in 0 until it.itemCount) {
                                 val imageUri = it.getItemAt(idx).uri
                                 val base64 = Constants.BASE64_URL +
-                                        Photo.convertUriToBase64(imageUri)
+                                        Photo.getBase64FromUri(imageUri)
                                 base64Images.add(base64)
                             }
 
-                            multiplePhotoDeviceAction?.promiseReturn(base64Images.toTypedArray())
+                            multiplePhotoDeviceAction?.promiseReturn(base64Images)
                             ratio = null
                             isWidthRatio = null
                         } else {
@@ -268,7 +267,7 @@ class MainActivity : BasicActivity() {
                     }
                 }
 
-                multiplePhotoDeviceAction?.promiseReturn(null)
+                multiplePhotoDeviceAction?.resolveVoid()
             }
             Constants.MULTI_PHOTO_RATIO_REQ_CODE -> {
                 if(resultOk) {
@@ -283,7 +282,7 @@ class MainActivity : BasicActivity() {
                                 base64Images.add(base64)
                             }
 
-                            multiplePhotosAction?.promiseReturn(base64Images.toTypedArray())
+                            multiplePhotosAction?.promiseReturn(base64Images)
                             ratio = null
                         } else {
                             Toast.showLongText("10장 이상의 사진을 첨부할 수 없습니다.")
@@ -292,7 +291,7 @@ class MainActivity : BasicActivity() {
                     }
                 }
 
-                multiplePhotosAction?.promiseReturn(null)
+                multiplePhotosAction?.resolveVoid()
             }
                         /** QR코드 인증 */
 
@@ -303,12 +302,12 @@ class MainActivity : BasicActivity() {
                         IntentIntegrator.parseActivityResult(requestCode, resultCode, data)
 
                     result?.let {
-                        Constants.logD("Result: ${result.contents}")
+                        Constants.LOGD("Result: ${result.contents}")
                         qrCodeScanAction?.promiseReturn(result.contents)
                     }
                 }
 
-                qrCodeScanAction?.promiseReturn(null)
+                qrCodeScanAction?.resolveVoid()
             }
             Constants.PERM_SEND_SMS_REQ_CODE -> {
                 if(resultOk) {

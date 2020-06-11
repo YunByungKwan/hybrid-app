@@ -26,10 +26,18 @@ object Action {
                 val cancel: String? = Utils.getJsonObjectValue("cancel", it)
 
                 val posListener = DialogInterface.OnClickListener { _, _ ->
-                    dialogAction?.promiseReturn(basic)
+                    if (basic != null) {
+                        dialogAction?.promiseReturn(basic)
+                    } else {
+                        dialogAction?.resolveVoid()
+                    }
                 }
                 val negListener = DialogInterface.OnClickListener { _, _ ->
-                    dialogAction?.promiseReturn(cancel)
+                    if (cancel != null) {
+                        dialogAction?.promiseReturn(cancel)
+                    } else {
+                        dialogAction?.resolveVoid()
+                    }
                 }
                 val cancelListener = {
                     dialogAction?.promiseReturn(Constants.RESULT_CANCELED)
@@ -120,7 +128,7 @@ object Action {
 
     val location: (FlexAction?, JSONArray?) -> Unit = { locationAction, _->
         CoroutineScope(Dispatchers.Main).launch {
-            Constants.logD("Call location action.")
+            Constants.LOGD("Call location action.")
             Location.getCurrent(locationAction)
         }
     }

@@ -20,17 +20,17 @@ object Camera {
         Constants.LOGD("Call request()")
 
         if(Utils.existAllPermission(arrayOf(Constants.PERM_CAMERA)) && action != null) {
-            Constants.logD("Camera permission exists.")
+            Constants.LOGD("Camera permission exists.")
 
             val cameraIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
 
             if(Utils.getOutputMediaFile() == null) {
-                return action?.promiseReturn(null)
+                return action.resolveVoid()
             }
 
             // 카메라 촬영 시 저장할 임시 파일 경로 생성 및 인텐트에 적용
-            var newFile= Utils.getOutputMediaFile()!!
-            var contentUri = getUriForFile(App.context(), Utils.getAppId() + ".fileprovider", newFile)
+            val newFile= Utils.getOutputMediaFile()!!
+            val contentUri = getUriForFile(App.context(), Utils.getAppId() + ".fileprovider", newFile)
             cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, contentUri)
 
             val packageManager = App.INSTANCE.packageManager
@@ -51,12 +51,12 @@ object Camera {
                 }
             } else {
                 Constants.LOGE(Constants.LOG_MSG_CAMERA)
-                action.promiseReturn(null)
+                action.resolveVoid()
             }
         } else { // 권한이 없을 경우
-            action?.promiseReturn(null)
+            action?.resolveVoid()
             Utils.checkDangerousPermissions(arrayOf(Constants.PERM_CAMERA),
-                Constants.REQ_PERM_CODE_CAMERA)
+                Constants.PERM_CAMERA_REQ_CODE)
         }
     }
 }

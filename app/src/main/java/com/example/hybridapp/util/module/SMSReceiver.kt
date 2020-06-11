@@ -12,7 +12,7 @@ class SMSReceiver: BroadcastReceiver() {
     val smsRetrievedAction = "com.google.android.gms.auth.api.phone.SMS_RETRIEVED"
 
     override fun onReceive(context: Context, intent: Intent) {
-        Constants.logD("Call onReceive() in SMSReceiver.")
+        Constants.LOGD("Call onReceive() in SMSReceiver.")
 
         if (SmsRetriever.SMS_RETRIEVED_ACTION == intent.action) {
             val extras = intent.extras
@@ -23,16 +23,16 @@ class SMSReceiver: BroadcastReceiver() {
                     Constants.LOGD(Constants.LOG_LOG_MSG_SMS_SUCCESS)
 
                     val message = extras.get(SmsRetriever.EXTRA_SMS_MESSAGE) as String
-                    Constants.logD("Message: $message")
+                    Constants.LOGD("Message: $message")
                 }
                 CommonStatusCodes.CANCELED -> {
-                    Constants.logD(Constants.LOG_MSG_SMS_CANCELED)
+                    Constants.LOGD(Constants.LOG_MSG_SMS_CANCELED)
                 }
                 CommonStatusCodes.ERROR -> {
-                    Constants.logD(Constants.LOG_MSG_SMS_ERROR)
+                    Constants.LOGD(Constants.LOG_MSG_SMS_ERROR)
                 }
                 CommonStatusCodes.TIMEOUT-> {
-                    Constants.logD(Constants.LOG_MSG_SMS_TIMEOUT)
+                    Constants.LOGD(Constants.LOG_MSG_SMS_TIMEOUT)
                 }
             }
         }

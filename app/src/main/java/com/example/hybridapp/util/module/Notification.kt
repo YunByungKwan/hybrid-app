@@ -21,7 +21,7 @@ object Notification {
     fun createChannel(channelId: String, name: String, description: String, importance: Int,
                        showBadge: Boolean)
     {
-        Constants.logD("Create Notification Channel.")
+        Constants.LOGD("Create Notification Channel.")
 
         val mChannel = NotificationChannel(channelId, name, importance)
         mChannel.description = description
@@ -39,7 +39,7 @@ object Notification {
     /** 알림 생성 */
     fun create(channelId: String, notificationId: Int, title: String, message: String,
                importance: Int, pendingIntent: PendingIntent) {
-        Constants.logD("Create Notification.")
+        Constants.LOGD("Create Notification.")
 
         val builder = NotificationCompat.Builder(App.activity, channelId)
         builder.setContentTitle(title)

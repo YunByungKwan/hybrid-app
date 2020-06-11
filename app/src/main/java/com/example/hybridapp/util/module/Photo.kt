@@ -99,7 +99,8 @@ object Photo {
     private fun getSinglePhotoIntent(): Intent {
         val galleryIntent = Intent(Intent.ACTION_PICK)
         galleryIntent.type = MediaStore.Images.Media.CONTENT_TYPE
-
+//        galleryIntent.setDataAndType(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+//            MediaStore.Images.Media.CONTENT_TYPE)
         return galleryIntent
     }
 
@@ -259,9 +260,10 @@ object Photo {
 
     /** 디바이스 화면 비율에 맞게 리사이즈 */
     private fun resizeBitmapByDeviceRatio(bitmap: Bitmap, ratio: Double, isWidthRatio: Boolean?): Bitmap {
-        val screenWidth = Utils.getScreenSize(App.activity).getValue(Constants.SCREEN_WIDTH)
-        val screenHeight = Utils.getScreenSize(App.activity).getValue(Constants.SCREEN_HEIGHT)
+        val screenWidth = Utils.getScreenSize().getValue(Constants.SCREEN_WIDTH)
+        val screenHeight = Utils.getScreenSize().getValue(Constants.SCREEN_HEIGHT)
 
+        Log.d("dlgodnjs", ratio.toString())
         return if(isWidthRatio!!) {
             Constants.LOGD("Resize bitmap by device width ratio(${ratio*100}%)")
 

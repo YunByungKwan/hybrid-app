@@ -14,13 +14,17 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.AnimationUtils
 import android.widget.Button
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.example.hybridapp.App
+import com.example.hybridapp.BuildConfig
 import com.example.hybridapp.R
 import com.example.hybridapp.util.module.Dialog
+import org.json.JSONObject
+import java.io.File
 import java.nio.charset.StandardCharsets
 import java.security.MessageDigest
 import java.security.NoSuchAlgorithmException
@@ -39,20 +43,23 @@ object Utils {
     fun existAllPermission(permissions: Array<out String>): Boolean {
         for(permissionName in permissions) {
             if(!existsPermission(permissionName)) {
+                Log.d("dlgodnjs", "zzz")
                 return false
             }
         }
 
+        Log.d("dlgodnjs", "zzzsf24")
         return true
     }
 
     /** permissionName이 거절되었는지 확인 */
-    internal fun isDenialPermission(permissionName: String): Boolean =
+    private fun isDenialPermission(permissionName: String): Boolean =
         ActivityCompat.shouldShowRequestPermissionRationale(App.activity, permissionName)
 
     /** 위험 권한이 없을 경우 */
     fun checkDangerousPermissions(permissions: Array<out String>, permissionCode: Int) {
         if (existsDenialPermission(permissions)) {
+            Log.d("dlgodnjss", "aasg22 ,, " + permissionCode)
             Dialog.show(Constants.DIAL_TITLE,
                 getDialogMessage(permissionCode),
                 Constants.DIAL_POS,
@@ -65,6 +72,7 @@ object Utils {
                 null,
                 {})
         } else {
+            Log.d("dlgodnjss", "aasg2zzzz2")
             val permissionsToRequest = getPermissionsToRequest(permissions)
             requestPermissions(permissionsToRequest, permissionCode)
         }
@@ -72,11 +80,14 @@ object Utils {
 
     /** 거절한 권한이 하나라도 있는지 확인 */
     private fun existsDenialPermission(permissions: Array<out String>): Boolean {
+        Log.d("dlgodnjs", "adsf")
         for(permissionName in permissions) {
             if(isDenialPermission(permissionName)) {
+                Log.d("dlgodnjs", "gadgadg")
                 return true
             }
         }
+        Log.d("dlgodnjs", "fff2")
         return false
     }
 
@@ -195,6 +206,11 @@ object Utils {
         return Settings.Secure.getString(context.contentResolver, Settings.Secure.ANDROID_ID)
     }
 
+    /** App id 가져오기 */
+    fun getAppId(): String {
+        return BuildConfig.APPLICATION_ID
+    }
+
     /** 현재 날짜와 시간 반환 */
     fun getCurrentDateAndTime(): String {
         val currentDateTime = Calendar.getInstance().time
@@ -215,7 +231,7 @@ object Utils {
     }
 
     /** 화면 크기 정보 가져오기 */
-    fun getScreenSize(context: Context): Map<String, Int> {
+    fun getScreenSize(): Map<String, Int> {
         val displayMetrics = DisplayMetrics()
         App.activity.windowManager.defaultDisplay.getMetrics(displayMetrics)
         val width = displayMetrics.widthPixels
@@ -227,17 +243,54 @@ object Utils {
     /** 닫기 버튼 동적 생성 */
     fun createCloseButton(context: Context, root: Int): Button {
         val button = Button(context)
-        val params = ConstraintLayout.LayoutParams(70, 70)
+        val params = ConstraintLayout.LayoutParams(90, 90)
         params.topToTop = root
         params.endToEnd = root
         params.startToStart = root
         params.topMargin = 10
         button.text = "X"
+        button.textSize = 12F
         button.background = ContextCompat.getDrawable(context, R.drawable.circle)
         button.textAlignment = View.TEXT_ALIGNMENT_CENTER
         button.layoutParams = params
 
         return button
+    }
+
+    /** 팝업 관련 종료 함수 */
+    fun closePopup(context: Context, layout: ConstraintLayout, backgroundView: View, popupCloseBtn: View, popupView: View) {
+        val closeAnimation = AnimationUtils.loadAnimation(
+            context, R.anim.close)
+        popupView.startAnimation(closeAnimation)
+        popupView.visibility = View.GONE
+        layout.removeView(backgroundView)
+        layout.removeView(popupCloseBtn)
+    }
+
+    /** 카메라 촬영 시 앱 내부에 임시 파일 생성 */
+    fun getOutputMediaFile(): File? {
+        val mediaStorageDir = File(
+            App.context().filesDir,
+            "test"
+        )
+
+        // 디렉토리 생
+        mediaStorageDir.apply {
+            if (!exists()) {
+                if (!mkdirs()) {
+                    return null
+                }
+            }
+        }
+
+//        val timeStamp = Utils.getCurrentDateAndTime()
+        // 경로 : content://com.example.hybridapp.fileprovider/cameraTest/IMG_TEST.jpg
+        return File("${mediaStorageDir.path}${File.separator}IMG_TEST.jpg")
+    }
+
+    /** jsonObject 내 key 파악해서 value 가져오기 */
+    fun getJsonObjectValue(key: String, jsonObject: JSONObject) : String? {
+        return if(jsonObject.has(key)) jsonObject.get(key).toString() else null
     }
 
     fun getParamsAlignCenterInConstraintLayout(

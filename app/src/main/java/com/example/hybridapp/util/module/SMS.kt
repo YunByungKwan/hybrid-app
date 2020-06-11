@@ -2,6 +2,7 @@ package com.example.hybridapp.util.module
 
 import android.content.IntentFilter
 import android.telephony.SmsManager
+import android.util.Log
 import com.example.hybridapp.App
 import com.example.hybridapp.util.Constants
 import com.example.hybridapp.util.Utils
@@ -23,26 +24,26 @@ object SMS {
 
     /** SMS Receiver 등록 */
     fun registerReceiver(receiver: SMSReceiver?) {
-        Constants.LOGD("Call registerReceiver() in SMS object.")
+        Constants.logD("Call registerReceiver() in SMS object.")
         val filter = IntentFilter()
-        filter.addAction(receiver!!.SMSRetrievedAction)
+        filter.addAction(receiver!!.smsRetrievedAction)
         App.activity.registerReceiver(receiver, filter)
     }
 
     /** SMS Receiver 해제 */
     fun unregisterReceiver(receiver: SMSReceiver?) {
-        Constants.LOGD("Call unregisterReceiver() in SMS object.")
+        Constants.logD("Call unregisterReceiver() in SMS object.")
 
         if(receiver != null) {
             App.activity.unregisterReceiver(receiver)
         } else {
-            Constants.LOGD("SMS Receiver is null.")
+            Constants.logD("SMS Receiver is null.")
         }
     }
 
     /** 문자 메시지를 보냄  */
     fun sendMessage(phoneNumber: String, message: String): String {
-        Constants.LOGD("Call sendMessage() in SMS object.")
+        Constants.logD("Call sendMessage() in SMS object.")
 
         return if(Utils.existAllPermission(arrayOf(Constants.PERM_SEND_SMS))) {
             val smsManager = SmsManager.getDefault()
@@ -54,27 +55,28 @@ object SMS {
             Utils.checkDangerousPermissions(arrayOf(Constants.PERM_SEND_SMS),
                 Constants.PERM_SEND_SMS_REQ_CODE)
 
+            Log.d("dlgodnjs", "asggg")
             ""
         }
     }
 
     /** 문자 메시지를 받음 */
     fun receiveMessage() {
-        Constants.LOGD("Call receiveMessage() in SMS object.")
+        Constants.logD("Call receiveMessage() in SMS object.")
 
         val client = SmsRetriever.getClient(App.activity)
         val task = client.startSmsRetriever()
         task.addOnCompleteListener {
-            Constants.LOGD("Call addOnCompleteListener in SMS object.")
+            Constants.logD("Call addOnCompleteListener in SMS object.")
         }
         task.addOnSuccessListener {
-            Constants.LOGD("Call addOnSuccessListener in SMS object.")
+            Constants.logD("Call addOnSuccessListener in SMS object.")
         }
         task.addOnFailureListener {
-            Constants.LOGD("Call addOnFailureListener in SMS object.")
+            Constants.logD("Call addOnFailureListener in SMS object.")
         }
         task.addOnCanceledListener {
-            Constants.LOGD("Call addOnCanceledListener in SMS object.")
+            Constants.logD("Call addOnCanceledListener in SMS object.")
         }
     }
 }

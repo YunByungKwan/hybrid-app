@@ -9,26 +9,24 @@ import com.example.hybridapp.data.LogUrlRepository
 import com.example.hybridapp.data.LogUrlRoomDatabase
 import com.example.hybridapp.util.Constants
 import com.example.hybridapp.util.Utils
-import com.example.hybridapp.util.module.*
+import com.example.hybridapp.util.module.SMS
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.json.JSONArray
 import org.json.JSONObject
 
-class FlexInterface {
-
+class FlexActionInterface {
     @FlexFuncInterface
     fun Toast(array: JSONArray) {
         CoroutineScope(Dispatchers.Main).launch {
             val isShortToast = array.getBoolean(1)
             val message = array.getString(0)
 
-            if(isShortToast) {
-                Toast.showShortText(message)
-            } else {
-                Toast.showLongText(message)
-            }
+            if(isShortToast)
+                com.example.hybridapp.util.module.Toast.showShortText(message)
+            else
+                com.example.hybridapp.util.module.Toast.showLongText(message)
         }
     }
 
@@ -38,18 +36,17 @@ class FlexInterface {
             val isShortSnackbar = array.getBoolean(1)
             val message = array.getString(0)
 
-            if(isShortSnackbar) {
-                Snackbar.showShortText(App.activity.findViewById(R.id.constraintLayout), message)
-            } else {
-                Snackbar.showLongText(App.activity.findViewById(R.id.constraintLayout), message)
-            }
+            if(isShortSnackbar)
+                com.example.hybridapp.util.module.Snackbar.showShortText(App.activity.findViewById(R.id.constraintLayout), message)
+            else
+                com.example.hybridapp.util.module.Snackbar.showLongText(App.activity.findViewById(R.id.constraintLayout), message)
         }
     }
 
     @FlexFuncInterface
     fun SendSMS(array: JSONArray): String {
         // val phoneNumber = array.getString(0)
-        val phoneNumber = "01040501485"
+        val phoneNumber = "01065720153"
         val message = array.getString(1)
 
         return SMS.sendMessage(phoneNumber, message)
@@ -69,7 +66,7 @@ class FlexInterface {
         val importance = Constants.NOTI_HIGH
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            Notification.createChannel(channelId, channelName, description, importance, true)
+            com.example.hybridapp.util.module.Notification.createChannel(channelId, channelName, description, importance, true)
         } else {
             Constants.LOGE(Constants.LOG_MSG_NOT_CHANNEL)
         }
@@ -85,12 +82,12 @@ class FlexInterface {
         val obj = array.get(0) as JSONObject
         val title = obj.get("title").toString()
         val message = obj.get("message").toString()
-        Notification.create(channelId, id, title, message, Constants.NOTI_HIGH, pendingIntent)
+        com.example.hybridapp.util.module.Notification.create(channelId, id, title, message, Constants.NOTI_HIGH, pendingIntent)
     }
 
     @FlexFuncInterface
-    fun UniqueAppID(array: JSONArray) {
-
+    fun UniqueAppID(array: JSONArray): String {
+        return Utils.getAppId()
     }
 
     @FlexFuncInterface

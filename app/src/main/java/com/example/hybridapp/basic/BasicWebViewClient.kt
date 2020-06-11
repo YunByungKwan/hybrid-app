@@ -17,12 +17,12 @@ class BasicWebViewClient: FlexWebViewClient() {
     /** 웹뷰 url 변경시 호출됨 */
     override fun doUpdateVisitedHistory(view: WebView?, url: String?, isReload: Boolean) {
         CoroutineScope(Dispatchers.Default).launch {
-            Constants.LOGD("Call function doUpdateVisitedHistory() in BasicWebViewClient class.")
+            Constants.logD("Call function doUpdateVisitedHistory() in BasicWebViewClient class.")
 
             val currentDateTime = Utils.getCurrentDateAndTime()
 
             if(url != null) {
-                Constants.LOGD("($currentDateTime)접속 URL: $url")
+                Constants.logD("($currentDateTime)접속 URL: $url")
 
                 val logUrlDao = LogUrlRoomDatabase.getDatabase(App.INSTANCE).logUrlDao()
                 val repository = LogUrlRepository(logUrlDao)

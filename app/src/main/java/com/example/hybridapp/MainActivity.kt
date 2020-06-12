@@ -48,10 +48,8 @@ class MainActivity : BasicActivity() {
     private lateinit var backgroundView: View
     private lateinit var popupCloseButton: Button
 
-    companion object {
-        init {
-            //System.loadLibrary("HelloJni")
-        }
+    init {
+        System.loadLibrary("main")
     }
 
     override fun onResume() {

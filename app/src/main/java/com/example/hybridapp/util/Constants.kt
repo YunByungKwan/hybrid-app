@@ -9,10 +9,20 @@ import com.google.zxing.integration.android.IntentIntegrator
 
 class Constants {
     @Retention(AnnotationRetention.SOURCE)
-    @IntDef(REQ_PERM_CODE_CAMERA)
-    @StringDef(TAG_UTILS, TAG_TOAST, TAG_SNACKBAR, TAG_DIALOG, TAG_PERMISSION,
-        PERM_CAMERA, TAG_NETWORK, PERM_WRITE_EXTERNAL_STORAGE, PERM_READ_EXTERNAL_STORAGE
-    )
+    @StringDef()
+    @IntDef(CAMERA_DEVICE_RATIO_REQ_CODE,
+            CAMERA_RATIO_REQ_CODE,
+            PHOTO_DEVICE_RATIO_REQ_CODE,
+            PHOTO_RATIO_REQ_CODE,
+            MULTI_PHOTO_DEVICE_RATIO_REQ_CODE,
+            MULTI_PHOTO_RATIO_REQ_CODE,
+            FILE_UPLOAD_REQ_CODE,
+            QR_REQ_CODE,
+            PERM_CAMERA_REQ_CODE,
+            PERM_WRITE_REQ_CODE,
+            PERM_READ_WRITE_REQ_CODE,
+            PERM_LOCATION_REQ_CODE,
+            PERM_SEND_SMS_REQ_CODE)
     annotation class types
 
    companion object {
@@ -52,21 +62,8 @@ class Constants {
        const val TYPE_LOCAL_REPO = "LocalRepository"
        const val TYPE_POP_UP = "WebPopup"
 
-       /** Class or Activity LOG TAG */
-       const val TAG = "Hybrid App"
-       const val TAG_UTILS = "Utils class"
+       const val TAG = "HybridApp"
        const val TAG_MAIN = "MainActivity class"
-       const val TAG_TOAST = "Toast class"
-       const val TAG_SNACKBAR = "Snackbar class"
-       const val TAG_DIALOG = "Dialog class"
-       const val TAG_NETWORK = "Network class"
-       const val TAG_PHOTO = "Photo class"
-       const val TAG_BIO_AUTH = "BioAuth class"
-       const val TAG_SHARED = "SharedPreferences class"
-       const val TAG_FCM_SERVICE = "FCM"
-
-       /** Function LOG TAG */
-       const val TAG_PERMISSION = "PERMISSION"
 
        /** 다이얼로그 텍스트 */
        const val DIAL_TITLE = "알림"
@@ -103,51 +100,19 @@ class Constants {
        const val NOTI_DESC = "롯데정보통신 알림 채널입니다."
        const val NOTI_DEFAULT: Int = NotificationManagerCompat.IMPORTANCE_DEFAULT
        const val NOTI_HIGH: Int = NotificationManagerCompat.IMPORTANCE_HIGH
-       const val NOTIFICATION_ID = 101
 
-       /** SharedPreferences */
-       const val SET_DATA_SHARED = 0
-       const val GET_DATA_SHARED = 1
-       const val DELETE_DATA_SHARED = 2
-
-       /** 로그 텍스트 */
-       const val LOG_MSG_CAMERA = "Camera app can't be launched."
-       const val LOG_MSG_GALLERY = "Gallery app can't be launched."
-       const val LOG_MSG_NOT_CHANNEL = "No notification channel required."
-       const val RESULT_CANCELED = "Cancel"
 
        /** 네트워크 상태 텍스트 */
        const val MSG_DISCONNECTED = "No Connection!"
        const val MSG_CELLULAR = "Cellular Connection!"
        const val MSG_WIFI = "WIFI Connection!"
-       const val STATUS_DISCONNECTED = 0
-       const val STATUS_CELLULAR = 1
-       const val STATUS_WIFI = 2
 
-       /** SMS 텍스트 */
-       const val MSG_SMS_SUCCESS = "문자 메시지를 전송하였습니다."
-       const val LOG_MSG_SMS_SUCCESS = "SMS Status: SUCCESS."
-       const val LOG_MSG_SMS_CANCELED = "SMS Status: CANCELED."
-       const val LOG_MSG_SMS_ERROR = "SMS Status: ERROR."
-       const val LOG_MSG_SMS_TIMEOUT = "SMS Status: TIMEOUT."
+       const val RESULT_CANCELED = "Cancel"
 
-       /** INTENT REQUEST CODE */
-       const val REQ_CODE_CAMERA_DEVICE_RATIO = 10001
-       const val REQ_CODE_CAMERA_RATIO = 10002
-       const val REQ_CODE_PHOTO_DEVICE_RATIO = 10003
-       const val REQ_CODE_PHOTO_RATIO = 10004
-       const val REQ_CODE_MULTI_PHOTO_DEVICE_RATIO = 10005
-       const val REQ_CODE_MULTI_PHOTO_RATIO = 10006
-       const val REQ_CODE_FILE_UPLOAD = 10007
-       const val REQ_CODE_QR = IntentIntegrator.REQUEST_CODE
-
-       /** PERMISSION CODE */
-       const val REQ_PERM_CODE_CAMERA = 1001
-       const val REQ_PERM_CODE_WRITE = 1002
-       const val REQ_PERM_CODE_READ_WRITE = 1003
-       const val REQ_PERM_CODE_LOCATION = 1004
-       const val REQ_PERM_CODE_SEND_SMS = 1005
-
+       /** 로그 텍스트 */
+       const val LOG_MSG_CAMERA = "Camera app can't be launched."
+       const val LOG_MSG_GALLERY = "Gallery app can't be launched."
+       const val LOG_MSG_NOT_CHANNEL = "No notification channel required."
        const val LOG_PERM_GRANTED_CAMERA = "CAMERA permission is granted."
        const val LOG_PERM_GRANTED_WRITE = "WRITE EXTERNAL STORAGE permission is granted."
        const val LOG_PERM_GRANTED_READ_WRITE
@@ -155,13 +120,45 @@ class Constants {
        const val LOG_PERM_GRANTED_LOCATION
                = "ACCESS FINE/COARSE LOCATION permission is granted."
        const val LOG_PERM_GRANTED_SEND_SMS = "SEND SMS permission is granted."
+       const val LOG_MSG_SMS_SUCCESS = "문자 메시지를 전송하였습니다."
+       const val LOG_LOG_MSG_SMS_SUCCESS = "SMS Status: SUCCESS."
+       const val LOG_MSG_SMS_CANCELED = "SMS Status: CANCELED."
+       const val LOG_MSG_SMS_ERROR = "SMS Status: ERROR."
+       const val LOG_MSG_SMS_TIMEOUT = "SMS Status: TIMEOUT."
+
+       /** NETWORK STATUS CODE */
+       const val NET_STAT_DISCONNECTED = 0
+       const val NET_STAT_CELLULAR = 1
+       const val NET_STAT_WIFI = 2
+
+       /** NOTIFICATION */
+       const val NOTIFICATION_ID = 101
+
+       /** SHAREDPREFERENCES CODE */
+       const val SET_DATA_SHARED = 0
+       const val GET_DATA_SHARED = 1
+       const val DELETE_DATA_SHARED = 2
+
+       /** INTENT REQUEST CODE */
+       const val CAMERA_DEVICE_RATIO_REQ_CODE = 10001
+       const val CAMERA_RATIO_REQ_CODE = 10002
+       const val PHOTO_DEVICE_RATIO_REQ_CODE = 10003
+       const val PHOTO_RATIO_REQ_CODE = 10004
+       const val MULTI_PHOTO_DEVICE_RATIO_REQ_CODE = 10005
+       const val MULTI_PHOTO_RATIO_REQ_CODE = 10006
+       const val FILE_UPLOAD_REQ_CODE = 10007
+       const val QR_REQ_CODE = IntentIntegrator.REQUEST_CODE // 49374
+
+       /** PERMISSION CODE */
+       const val PERM_CAMERA_REQ_CODE = 1001
+       const val PERM_WRITE_REQ_CODE = 1002
+       const val PERM_READ_WRITE_REQ_CODE = 1003
+       const val PERM_LOCATION_REQ_CODE = 1004
+       const val PERM_SEND_SMS_REQ_CODE = 1005
 
        /** Function */
+       fun LOGD(message: String) = Log.d(TAG, message)
 
-       fun logD(message: String) = Log.d(TAG, message)
-
-       fun logE(functionName: String, className: String) {
-           Log.e(className, "call $functionName() in $className")
-       }
+       fun LOGE(message: String) = Log.e(TAG, message)
    }
 }

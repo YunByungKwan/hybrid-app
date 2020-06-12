@@ -4,6 +4,7 @@ import android.app.Activity
 import android.app.DownloadManager
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.media.ExifInterface
 import android.graphics.Bitmap
 import android.graphics.ImageDecoder
 import android.net.Uri
@@ -12,7 +13,6 @@ import android.os.Bundle
 import android.os.Environment
 import android.os.Handler
 import android.provider.MediaStore
-import android.provider.Settings
 import android.util.Log
 import android.view.View
 import android.view.animation.AnimationUtils
@@ -21,7 +21,6 @@ import android.webkit.WebChromeClient
 import android.webkit.WebView
 import android.widget.Button
 import android.widget.ImageView
-import androidx.annotation.RequiresApi
 import app.dvkyun.flexhybridand.FlexFuncInterface
 import com.example.hybridapp.data.LogUrlRepository
 import com.example.hybridapp.data.LogUrlRoomDatabase
@@ -51,11 +50,11 @@ class MainActivity : BasicActivity() {
 
 //    companion object {
 //        init {
-//            System.loadLibrary("http")
+//            System.loadLibrary("main")
 //        }
 //    }
-//
-//    external fun temp() : String
+
+
 
     override fun onResume() {
         super.onResume()
@@ -88,8 +87,6 @@ class MainActivity : BasicActivity() {
             repository = LogUrlRepository(logUrlDao)
         }
 
-        var http = Http()
-        Log.d("dlgodnjs", http.temp())
         setFlexWebView()
         setActions()
         setWebViewDownloadListener()
@@ -164,7 +161,6 @@ class MainActivity : BasicActivity() {
         }
     }
 
-
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
@@ -172,7 +168,7 @@ class MainActivity : BasicActivity() {
 
         when(requestCode) {
             /** 카메라 테스트 관련 */
-            Constants.REQ_CODE_CAMERA_DEVICE_RATIO -> {
+            Constants.CAMERA_DEVICE_RATIO_REQ_CODE -> {
                 if(resultOk) {
                     var bitmap: Bitmap = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
                         ImageDecoder.decodeBitmap(ImageDecoder.createSource(Utils.getOutputMediaFile()!!))
@@ -182,7 +178,7 @@ class MainActivity : BasicActivity() {
                     }
 
                     val base64 = Constants.BASE64_URL +
-                            Photo.convertBitmapToBase64(bitmap)
+                            Photo.getBase64FromBitmap(bitmap)
 
                     cameraDeviceAction?.promiseReturn(base64)
                     ratio = null
@@ -197,9 +193,9 @@ class MainActivity : BasicActivity() {
 //                    constraintLayout.addView(tempView)
                 }
 
-                cameraDeviceAction?.promiseReturn(null)
+                cameraDeviceAction?.resolveVoid()
             }
-            Constants.REQ_CODE_CAMERA_RATIO -> {
+            Constants.CAMERA_RATIO_REQ_CODE -> {
                 if(resultOk) {
                     var bitmap: Bitmap = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
                         ImageDecoder.decodeBitmap(ImageDecoder.createSource(Utils.getOutputMediaFile()!!))
@@ -209,51 +205,36 @@ class MainActivity : BasicActivity() {
                     }
 
                     val base64 = Constants.BASE64_URL +
-                            Photo.convertBitmapToBase64(bitmap)
+                            Photo.getBase64FromBitmap(bitmap)
 
                     cameraAction?.promiseReturn(base64)
                     ratio = null
                 }
 
-                cameraAction?.promiseReturn(null)
+                cameraAction?.resolveVoid()
             }
             /** 한 개의 이미지 선택 관련 */
-            Constants.REQ_CODE_PHOTO_DEVICE_RATIO -> {
+            Constants.PHOTO_DEVICE_RATIO_REQ_CODE -> {
                 if(resultOk) {
                     data?.data?.let {
-                    val mInflater = Utils.getLayoutInflater(this@MainActivity)
-                    var tempView: View = mInflater.inflate(R.layout.test, null)
-                    var imgView : ImageView = tempView.findViewById(R.id.test)
-//                    var temp: Bitmap = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-//                        ImageDecoder.decodeBitmap(ImageDecoder.createSource(contentResolver, it))
-//                    }
-//                    else {
-//                        MediaStore.Images.Media.getBitmap(contentResolver, it)
-//                    }
-                    var temp: Bitmap = Photo.temp64(it, ratio, isWidthRatio)
-                    Log.e("TAG", "temp w: ${temp.width} h: ${temp.height}")
-
-                    imgView.setImageBitmap(temp)
+//                    val mInflater = Utils.getLayoutInflater(this@MainActivity)
+//                    var tempView: View = mInflater.inflate(R.layout.test, null)
+//                    var imgView : ImageView = tempView.findViewById(R.id.test)
+//                    imgView.setImageBitmap(Photo.convertUriToBitmap(it))
 //                    constraintLayout.addView(tempView)
 
                         val base64 = Constants.BASE64_URL +
-<<<<<<< HEAD
-                                Photo.convertUriToBase64(it)
+                                Photo.getBase64FromUri(it)
 
-=======
-                                Photo.convertUriToResizingBase64(it, ratio, isWidthRatio)
-//                        val base64 = Photo.convertUriToResizingBase64(it, ratio, isWidthRatio)
-                        Log.d("dlgodnjs", "$base64")
->>>>>>> f193662... leehaewon
                         photoDeviceAction?.promiseReturn(base64)
                         ratio = null
                         isWidthRatio = null
                     }
                 }
 
-                photoDeviceAction?.promiseReturn(null)
+                photoDeviceAction?.resolveVoid()
             }
-            Constants.REQ_CODE_PHOTO_RATIO -> {
+            Constants.PHOTO_RATIO_REQ_CODE -> {
                 if(resultOk) {
                     data?.data?.let {
                         val base64 = Constants.BASE64_URL +
@@ -263,10 +244,10 @@ class MainActivity : BasicActivity() {
                         ratio = null
                     }
                 }
-                photoAction?.promiseReturn(null)
+                photoAction?.resolveVoid()
             }
             /** 멀티(다중) 이미지 선택 관련 */
-            Constants.REQ_CODE_MULTI_PHOTO_DEVICE_RATIO -> {
+            Constants.MULTI_PHOTO_DEVICE_RATIO_REQ_CODE -> {
                 if(resultOk) {
                     val base64Images = ArrayList<String>()
                     data?.clipData?.let {
@@ -274,11 +255,11 @@ class MainActivity : BasicActivity() {
                             for(idx in 0 until it.itemCount) {
                                 val imageUri = it.getItemAt(idx).uri
                                 val base64 = Constants.BASE64_URL +
-                                        Photo.convertUriToBase64(imageUri)
+                                        Photo.getBase64FromUri(imageUri)
                                 base64Images.add(base64)
                             }
 
-                            multiplePhotoDeviceAction?.promiseReturn(base64Images.toTypedArray())
+                            multiplePhotoDeviceAction?.promiseReturn(base64Images)
                             ratio = null
                             isWidthRatio = null
                         } else {
@@ -288,10 +269,9 @@ class MainActivity : BasicActivity() {
                     }
                 }
 
-                multiplePhotoDeviceAction?.promiseReturn(null)
+                multiplePhotoDeviceAction?.resolveVoid()
             }
-
-            Constants.REQ_CODE_MULTI_PHOTO_RATIO -> {
+            Constants.MULTI_PHOTO_RATIO_REQ_CODE -> {
                 if(resultOk) {
                     val base64Images = ArrayList<String>()
 
@@ -304,7 +284,7 @@ class MainActivity : BasicActivity() {
                                 base64Images.add(base64)
                             }
 
-                            multiplePhotosAction?.promiseReturn(base64Images.toTypedArray())
+                            multiplePhotosAction?.promiseReturn(base64Images)
                             ratio = null
                         } else {
                             Toast.showLongText("10장 이상의 사진을 첨부할 수 없습니다.")
@@ -313,30 +293,32 @@ class MainActivity : BasicActivity() {
                     }
                 }
 
-                multiplePhotosAction?.promiseReturn(null)
+                multiplePhotosAction?.resolveVoid()
             }
             /** QR코드 인증 */
-            Constants.REQ_CODE_QR -> {
+
+            Constants.QR_REQ_CODE -> {
+                Constants.LOGE("QR REQ CODE: ${Constants.QR_REQ_CODE}")
                 if(resultOk) {
                     val result: IntentResult? =
                         IntentIntegrator.parseActivityResult(requestCode, resultCode, data)
 
                     result?.let {
-                        Constants.logD("Result: ${result.contents}")
+                        Constants.LOGD("Result: ${result.contents}")
                         qrCodeScanAction?.promiseReturn(result.contents)
                     }
                 }
 
-                qrCodeScanAction?.promiseReturn(null)
+                qrCodeScanAction?.resolveVoid()
             }
-            Constants.REQ_PERM_CODE_SEND_SMS -> {
+            Constants.PERM_SEND_SMS_REQ_CODE -> {
                 if(resultOk) {
 
                 } else {
 
                 }
             }
-            Constants.REQ_CODE_FILE_UPLOAD -> {
+            Constants.FILE_UPLOAD_REQ_CODE -> {
                 if(resultOk) {
                     if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                         mFilePatCallback?.onReceiveValue(WebChromeClient.FileChooserParams.parseResult(resultCode, data))
@@ -360,20 +342,19 @@ class MainActivity : BasicActivity() {
 
         if(isNotEmpty && isGranted) {
             when(requestCode) {
-                // TODO : 허용 버튼 클릭 시 바로 해당 기능 진행되도록 구현
-                Constants.REQ_PERM_CODE_CAMERA -> {
+                Constants.PERM_CAMERA_REQ_CODE -> {
                     Log.e(Constants.TAG_MAIN, Constants.LOG_PERM_GRANTED_CAMERA)
                 }
-                Constants.REQ_PERM_CODE_WRITE -> {
+                Constants.PERM_WRITE_REQ_CODE -> {
                     Log.e(Constants.TAG_MAIN, Constants.LOG_PERM_GRANTED_WRITE)
                 }
-                Constants.REQ_PERM_CODE_READ_WRITE -> {
+                Constants.PERM_READ_WRITE_REQ_CODE -> {
                     Log.e(Constants.TAG_MAIN, Constants.LOG_PERM_GRANTED_READ_WRITE)
                 }
-                Constants.REQ_PERM_CODE_LOCATION -> {
+                Constants.PERM_LOCATION_REQ_CODE -> {
                     Log.e(Constants.TAG_MAIN, Constants.LOG_PERM_GRANTED_LOCATION)
                 }
-                Constants.REQ_PERM_CODE_SEND_SMS -> {
+                Constants.PERM_SEND_SMS_REQ_CODE -> {
                     Log.e(Constants.TAG_MAIN, Constants.LOG_PERM_GRANTED_SEND_SMS)
                 }
             }

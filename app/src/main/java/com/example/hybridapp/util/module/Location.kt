@@ -28,13 +28,13 @@ object Location {
     /** 현재 위치(위도, 경도) 가져오기 */
     @SuppressLint("MissingPermission")
     fun getCurrent(action: FlexAction?) {
-        Constants.logD("Call getCurrent() in Location object.")
+        Constants.LOGD("Call getCurrent() in Location object.")
 
         val locationPermissions = arrayOf(Constants.PERM_ACCESS_FINE_LOCATION,
             Constants.PERM_ACCESS_COARSE_LOCATION)
 
         if(Utils.existAllPermission(locationPermissions)) {
-            Constants.logD("All location permissions exist.")
+            Constants.LOGD("All location permissions exist.")
 
             val basicActivity = App.activity as BasicActivity
             basicActivity.locationAction = action
@@ -48,17 +48,16 @@ object Location {
                 return
 
             } else {
-                action?.promiseReturn(null)
+                action?.resolveVoid()
             }
         } else {
-            Log.d("dlgodnjs", "zzzzsd2222")
-            Utils.checkDangerousPermissions(locationPermissions, Constants.REQ_PERM_CODE_LOCATION)
-            action?.promiseReturn(null)
+            Utils.checkDangerousPermissions(locationPermissions, Constants.PERM_LOCATION_REQ_CODE)
+            action?.resolveVoid()
         }
 
         // 위치 설정 창 열기
         val gpsOptionsIntent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
-        App.activity.startActivityForResult(gpsOptionsIntent, Constants.REQ_PERM_CODE_LOCATION)
+        App.activity.startActivityForResult(gpsOptionsIntent, Constants.PERM_LOCATION_REQ_CODE)
     }
 
     private fun isLocationEnabled(context: Context): Boolean {
@@ -70,7 +69,7 @@ object Location {
     }
 
     private fun getLocationRequest(): LocationRequest {
-        Constants.logD("Create LocationRequest() in Location object.")
+        Constants.LOGD("Create LocationRequest() in Location object.")
 
         val mLocationRequest = LocationRequest()
         mLocationRequest.priority = LocationRequest.PRIORITY_HIGH_ACCURACY
@@ -84,12 +83,12 @@ object Location {
     private val mLocationCallback = object : LocationCallback() {
         override fun onLocationResult(locationResult: LocationResult) {
             CoroutineScope(Dispatchers.Main).launch {
-                Constants.logD("Call onLocationResult() in LocationCallback object.")
+                Constants.LOGD("Call onLocationResult() in LocationCallback object.")
 
                 var mLastLocation: Location = locationResult.lastLocation
                 val latitude = mLastLocation.latitude.toString()
                 val longitude = mLastLocation.longitude.toString()
-                Constants.logD("Latitude: $latitude, Longitude: $longitude")
+                Constants.LOGD("Latitude: $latitude, Longitude: $longitude")
 
                 (App.activity as BasicActivity).locationAction?.promiseReturn(
                     "Latitude: $latitude, Longitude: $longitude")

@@ -108,7 +108,7 @@ object Utils {
 
     /** 다수 권한 요청 */
     fun requestPermissions(permissions: Array<out String>, requestCode: Int) {
-        Constants.logE("requestPermissions", Constants.TAG_UTILS)
+        Constants.LOGE("requestPermissions")
 
         ActivityCompat.requestPermissions(App.activity, permissions, requestCode)
     }
@@ -123,19 +123,19 @@ object Utils {
     /** 권한 다이얼로그 메시지 */
     private fun getDialogMessage(permissionCode: Int): String {
         when(permissionCode) {
-            Constants.REQ_PERM_CODE_CAMERA -> {
+            Constants.PERM_CAMERA_REQ_CODE -> {
                 return Constants.DIAL_MSG_CAMERA
             }
-            Constants.REQ_PERM_CODE_WRITE -> {
+            Constants.PERM_WRITE_REQ_CODE -> {
                 return Constants.DIAL_MSG_WRITE
             }
-            Constants.REQ_PERM_CODE_READ_WRITE -> {
+            Constants.PERM_READ_WRITE_REQ_CODE -> {
                 return Constants.DIAL_MSG_READ_WRITE
             }
-            Constants.REQ_PERM_CODE_LOCATION -> {
+            Constants.PERM_LOCATION_REQ_CODE -> {
                 return Constants.DIAL_MSG_LOCATION
             }
-            Constants.REQ_PERM_CODE_SEND_SMS -> {
+            Constants.PERM_SEND_SMS_REQ_CODE -> {
                 return Constants.DIAL_MSG_SEND_SMS
             }
         }
@@ -161,12 +161,10 @@ object Utils {
                 if (hash != null) {
                     appCodes.add(String.format("%s", hash))
                 }
-                Log.e(Constants.TAG_UTILS,
-                    String.format("이 값을 SMS 뒤에 써서 보내주면 됩니다 : %s", hash)
-                )
+                Constants.LOGD(String.format("이 값을 SMS 뒤에 써서 보내주면 됩니다 : %s", hash))
             }
         } catch (e: PackageManager.NameNotFoundException) {
-            Log.e(Constants.TAG_UTILS, "Unable to find package to obtain hash. : $e")
+            Constants.LOGE("Unable to find package to obtain hash. : $e")
         }
 
         return appCodes
@@ -174,7 +172,7 @@ object Utils {
 
     /** Hash값 반환 */
     private fun getHash(packageName: String, signature: String): String? {
-        Constants.logE("getHash", Constants.TAG_UTILS)
+        Constants.LOGE("getHash")
         val appInfo = "$packageName $signature"
 
         try {
@@ -189,12 +187,11 @@ object Utils {
 
             var base64Hash = encode11DigitsBase64String(hashSignature)
 
-            Log.e(Constants.TAG_UTILS,
-                String.format("\nPackage : %s\nHash : %s", packageName, base64Hash))
+            Constants.LOGD(String.format("\nPackage : %s\nHash : %s", packageName, base64Hash))
 
             return base64Hash
         } catch (e: NoSuchAlgorithmException) {
-            Log.e(Constants.TAG_UTILS, "hash:NoSuchAlgorithm : $e")
+            Constants.LOGE("hash:NoSuchAlgorithm : $e")
         }
 
         return null

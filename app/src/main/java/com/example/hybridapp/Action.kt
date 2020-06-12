@@ -26,10 +26,18 @@ object Action {
                 val cancel: String? = Utils.getJsonObjectValue("cancel", it)
 
                 val posListener = DialogInterface.OnClickListener { _, _ ->
-                    dialogAction?.promiseReturn(basic)
+                    if (basic != null) {
+                        dialogAction?.promiseReturn(basic)
+                    } else {
+                        dialogAction?.resolveVoid()
+                    }
                 }
                 val negListener = DialogInterface.OnClickListener { _, _ ->
-                    dialogAction?.promiseReturn(cancel)
+                    if (cancel != null) {
+                        dialogAction?.promiseReturn(cancel)
+                    } else {
+                        dialogAction?.resolveVoid()
+                    }
                 }
                 val cancelListener = {
                     dialogAction?.promiseReturn(Constants.RESULT_CANCELED)
@@ -46,10 +54,10 @@ object Action {
     val network: (FlexAction?, JSONArray?) -> Unit = { networkAction, _ ->
         CoroutineScope(Dispatchers.Main).launch {
             when(Network.getStatus(App.activity)) {
-                Constants.STATUS_CELLULAR -> {
+                Constants.NET_STAT_CELLULAR -> {
                     networkAction?.promiseReturn(Constants.MSG_CELLULAR)
                 }
-                Constants.STATUS_WIFI -> {
+                Constants.NET_STAT_WIFI -> {
                     networkAction?.promiseReturn(Constants.MSG_WIFI)
                 }
                 else -> {
@@ -118,13 +126,13 @@ object Action {
             QRCode.startScan(qrCodeAction)
         } else {
             Utils.checkDangerousPermissions(arrayOf(Constants.PERM_CAMERA),
-                Constants.REQ_PERM_CODE_CAMERA)
+                Constants.PERM_CAMERA_REQ_CODE)
         }
     }
 
     val location: (FlexAction?, JSONArray?) -> Unit = { locationAction, _->
         CoroutineScope(Dispatchers.Main).launch {
-            Constants.logD("Call location action.")
+            Constants.LOGD("Call location action.")
             Location.getCurrent(locationAction)
         }
     }
@@ -132,10 +140,11 @@ object Action {
     val bioAuth: (FlexAction?, JSONArray?) -> Unit = { bioAuthAction, _->
         CoroutineScope(Dispatchers.Main).launch {
             val fragmentActivity = App.activity as FragmentActivity
+
             if(BioAuth.canAuthenticate()) {
                 BioAuth.showPrompt(fragmentActivity, bioAuthAction)
             } else {
-
+                Constants.LOGE("You can't call biometric prompt.")
             }
         }
     }

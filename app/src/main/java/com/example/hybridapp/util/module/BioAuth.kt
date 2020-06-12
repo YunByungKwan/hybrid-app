@@ -1,6 +1,5 @@
 package com.example.hybridapp.util.module
 
-import android.util.Log
 import androidx.biometric.BiometricManager
 import androidx.biometric.BiometricPrompt
 import androidx.fragment.app.FragmentActivity
@@ -17,23 +16,19 @@ object BioAuth {
         val biometricManager = BiometricManager.from(App.INSTANCE)
         when (biometricManager.canAuthenticate()) {
             BiometricManager.BIOMETRIC_SUCCESS -> {
-                Log.e(Constants.TAG_BIO_AUTH, Constants.BIOMETRIC_SUCCESS)
-
+                Constants.LOGD(Constants.BIOMETRIC_SUCCESS)
                 return true
             }
             BiometricManager.BIOMETRIC_ERROR_NO_HARDWARE -> {
-                Log.e(Constants.TAG_BIO_AUTH, Constants.BIOMETRIC_ERROR_NO_HARDWARE)
-
+                Constants.LOGD(Constants.BIOMETRIC_ERROR_NO_HARDWARE)
                 return false
             }
             BiometricManager.BIOMETRIC_ERROR_HW_UNAVAILABLE -> {
-                Log.e(Constants.TAG_BIO_AUTH, Constants.BIOMETRIC_ERROR_HW_UNAVAILABLE)
-
+                Constants.LOGD(Constants.BIOMETRIC_ERROR_HW_UNAVAILABLE)
                 return false
             }
             BiometricManager.BIOMETRIC_ERROR_NONE_ENROLLED -> {
-                Log.e(Constants.TAG_BIO_AUTH, Constants.BIOMETRIC_ERROR_NONE_ENROLLED)
-
+                Constants.LOGD(Constants.BIOMETRIC_ERROR_NONE_ENROLLED)
                 return false
             }
         }
@@ -42,7 +37,7 @@ object BioAuth {
 
     /** 생체 인증 다이얼로그 띄우기 */
     fun showPrompt(fragmentActivity: FragmentActivity, action: FlexAction?){
-        Constants.logE("showPrompt", Constants.TAG_BIO_AUTH)
+        Constants.LOGD("Call showPrompt()")
 
         (App.activity as BasicActivity).bioAuthAction = action
 
@@ -66,25 +61,23 @@ object BioAuth {
     private fun getAuthenticationCallback() = object : BiometricPrompt.AuthenticationCallback() {
         override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
             super.onAuthenticationError(errorCode, errString)
-
-            Constants.logE("onAuthenticationError", Constants.TAG_BIO_AUTH)
+            Constants.LOGE("Call onAuthenticationError()")
         }
 
         override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
             super.onAuthenticationSucceeded(result)
-
-            Constants.logE("onAuthenticationSucceeded", Constants.TAG_BIO_AUTH)
+            Constants.LOGD("Call onAuthenticationSucceeded()")
 
             val cryptoObject = result.cryptoObject
             if(cryptoObject != null) {
                 val cipher = cryptoObject.cipher
-                Log.e(Constants.TAG_BIO_AUTH, "cipher: $cipher")
+                Constants.LOGD("Cipher: $cipher")
             }
         }
 
         override fun onAuthenticationFailed() {
             super.onAuthenticationFailed()
-            Constants.logE("onAuthenticationFailed", Constants.TAG_BIO_AUTH)
+            Constants.LOGE("Call onAuthenticationFailed()")
         }
     }
 }

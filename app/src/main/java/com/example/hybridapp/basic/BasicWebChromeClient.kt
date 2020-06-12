@@ -18,7 +18,7 @@ class BasicWebChromeClient(activity: BasicActivity): FlexWebChromeClient(activit
     override fun onShowFileChooser(
         webView: WebView?, filePathCallback: ValueCallback<Array<Uri>>?,
         fileChooserParams: WebChromeClient.FileChooserParams?): Boolean {
-        Constants.logD("Call function onShowFileChooser() in BasicWebChromeClient class.")
+        Constants.LOGD("Call function onShowFileChooser() in BasicWebChromeClient class.")
 
         mFilePatCallback = filePathCallback
 
@@ -26,7 +26,7 @@ class BasicWebChromeClient(activity: BasicActivity): FlexWebChromeClient(activit
         intent.addCategory(Intent.CATEGORY_OPENABLE)
         intent.type = "image/*"
 
-        mActivity.startActivityForResult(intent, Constants.REQ_CODE_FILE_UPLOAD)
+        mActivity.startActivityForResult(intent, Constants.FILE_UPLOAD_REQ_CODE)
 
         return true
     }

@@ -68,7 +68,7 @@ class FlexActionInterface {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             com.example.hybridapp.util.module.Notification.createChannel(channelId, channelName, description, importance, true)
         } else {
-            Log.e(Constants.TAG_FCM_SERVICE, Constants.LOG_MSG_NOT_CHANNEL)
+            Constants.LOGE(Constants.LOG_MSG_NOT_CHANNEL)
         }
 
         val intent = Intent(App.INSTANCE, MainActivity::class.java).apply {

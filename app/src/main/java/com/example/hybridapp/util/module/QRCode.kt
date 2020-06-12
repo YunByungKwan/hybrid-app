@@ -20,8 +20,8 @@ object QRCode {
             intentIntegrator.initiateScan()
         } else {
             Utils.checkDangerousPermissions(arrayOf(Constants.PERM_CAMERA),
-                Constants.REQ_PERM_CODE_CAMERA)
-            action?.promiseReturn(null)
+                Constants.PERM_CAMERA_REQ_CODE)
+            action?.resolveVoid()
         }
     }
 }

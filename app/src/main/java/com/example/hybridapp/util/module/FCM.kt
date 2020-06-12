@@ -17,12 +17,12 @@ import com.google.firebase.messaging.RemoteMessage
 class FCM: FirebaseMessagingService() {
 
     override fun onNewToken(token: String) {
-        Constants.logD("Call onNewToken() in FCM class.")
-        Constants.logD("Token: $token")
+        Constants.LOGD("Call onNewToken() in FCM class.")
+        Constants.LOGD("Token: $token")
     }
 
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
-        Constants.logD("Call onMessageReceived() in FCM class.")
+        Constants.LOGD("Call onMessageReceived() in FCM class.")
 
         if(remoteMessage.notification != null) {
             val channelId = Constants.NOTI_CHANNEL_ID
@@ -34,7 +34,7 @@ class FCM: FirebaseMessagingService() {
                 Notification.createChannel(channelId, channelName, description,
                     importance, true)
             } else {
-                Log.e(Constants.TAG_FCM_SERVICE, Constants.LOG_MSG_NOT_CHANNEL)
+                Constants.LOGE(Constants.LOG_MSG_NOT_CHANNEL)
             }
 
             val title = remoteMessage.notification!!.title
@@ -47,7 +47,7 @@ class FCM: FirebaseMessagingService() {
             Notification.create(channelId, Constants.NOTIFICATION_ID, title!!, message!!,
                 importance, pendingIntent)
 
-            Constants.logD("Notification Title: $title, message: $message")
+            Constants.LOGD("Notification Title: $title, message: $message")
         }
     }
 }

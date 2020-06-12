@@ -26,40 +26,40 @@ object Network {
      * 2 : 와이파이 연결됨
      */
     fun getStatus(context: Context): Int {
-        Constants.logD("Call getStatus() in Network object.")
+        Constants.LOGD("Call getStatus() in Network object.")
 
         val manager = getConnectivityManager(context)
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            Constants.logD("Build version is greater than Marshmallow.")
+            Constants.LOGD("Build version is greater than Marshmallow.")
 
-            val network = manager.activeNetwork ?: return Constants.STATUS_DISCONNECTED
+            val network = manager.activeNetwork ?: return Constants.NET_STAT_DISCONNECTED
             val capabilities = manager.getNetworkCapabilities(network)
-                ?: return Constants.STATUS_DISCONNECTED
+                ?: return Constants.NET_STAT_DISCONNECTED
             return when {
                 capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) -> {
-                    Constants.STATUS_CELLULAR
+                    Constants.NET_STAT_CELLULAR
                 }
                 capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) -> {
-                    Constants.STATUS_WIFI
+                    Constants.NET_STAT_WIFI
                 }
                 else -> {
-                    Constants.STATUS_DISCONNECTED
+                    Constants.NET_STAT_DISCONNECTED
                 }
             }
         } else {
-            Constants.logD("Build version is smaller than Marshmallow.")
+            Constants.LOGD("Build version is smaller than Marshmallow.")
 
             val network = manager.activeNetworkInfo
-                ?: return Constants.STATUS_DISCONNECTED
+                ?: return Constants.NET_STAT_DISCONNECTED
             return when(network.type) {
                 ConnectivityManager.TYPE_MOBILE -> {
-                    Constants.STATUS_CELLULAR
+                    Constants.NET_STAT_CELLULAR
                 }
                 ConnectivityManager.TYPE_WIFI -> {
-                    Constants.STATUS_WIFI
+                    Constants.NET_STAT_WIFI
                 }
                 else -> {
-                    Constants.STATUS_DISCONNECTED
+                    Constants.NET_STAT_DISCONNECTED
                 }
             }
         }

@@ -18,15 +18,15 @@ object Camera {
 
     /** 카메라 호출 */
     fun request(action: FlexAction?, ratio: Double?, isWidthRatio: Boolean?) {
-        Constants.logD("Call request() in Camera object.")
+        Constants.LOGD("Call request()")
 
         if(Utils.existAllPermission(arrayOf(Constants.PERM_CAMERA)) && action != null) {
-            Constants.logD("Camera permission exists.")
+            Constants.LOGD("Camera permission exists.")
 
             val cameraIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
 
             if(Utils.getOutputMediaFile() == null) {
-                return action?.promiseReturn(null)
+                return action.resolveVoid()
             }
 
             // 카메라 촬영 시 저장할 임시 파일 경로 생성 및 인텐트에 적용
@@ -44,20 +44,20 @@ object Camera {
                     basicActivity.cameraDeviceAction = action
                     basicActivity.isWidthRatio = isWidthRatio
                     basicActivity.startActivityForResult(cameraIntent,
-                        Constants.REQ_CODE_CAMERA_DEVICE_RATIO)
+                        Constants.CAMERA_DEVICE_RATIO_REQ_CODE)
                 } else { // 이미지 기준으로 resize
                     basicActivity.cameraAction = action
                     basicActivity.startActivityForResult(cameraIntent,
-                        Constants.REQ_CODE_CAMERA_RATIO)
+                        Constants.CAMERA_RATIO_REQ_CODE)
                 }
             } else {
-                Log.e(Constants.TAG_UTILS, Constants.LOG_MSG_CAMERA)
-                action?.promiseReturn(null)
+                Constants.LOGE(Constants.LOG_MSG_CAMERA)
+                action.resolveVoid()
             }
         } else { // 권한이 없을 경우
-            action?.promiseReturn(null)
+            action?.resolveVoid()
             Utils.checkDangerousPermissions(arrayOf(Constants.PERM_CAMERA),
-                Constants.REQ_PERM_CODE_CAMERA)
+                Constants.PERM_CAMERA_REQ_CODE)
         }
     }
 }

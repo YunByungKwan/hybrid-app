@@ -125,6 +125,22 @@ object Photo {
         return convertBitmapToBase64(resizedBitmap)
     }
 
+    fun temp64 (imageUri: Uri?, ratio: Double?, isWidthRatio: Boolean?): Bitmap {
+        val bitmap = getBitmapFromUri(imageUri!!)
+
+        // isWidthRatio가 널일 경우 이미지 비율에 맞게 리사이즈
+        val resizedBitmap = if(isWidthRatio == null) {
+            Log.d("dlgodnjs", "resized")
+            resizeBitmapByRatio(bitmap!!, ratio!!)
+        } else {
+            // isWidthRatio가 널이 아닐 경우 디바이스에 맞게 리사이즈
+            Log.d("dlgodnjs", "isWidthRatio : $isWidthRatio")
+            resizeBitmapByDeviceRatio(bitmap!!, ratio!!, isWidthRatio)
+        }
+
+        return resizedBitmap
+    }
+
     /** Uri->Base64로 변환 */
     fun convertUriToBase64(uri: Uri): String {
         Constants.logE("convertUriToBase64", Constants.TAG_PHOTO)
@@ -134,9 +150,9 @@ object Photo {
         return convertBitmapToBase64(bitmap)
     }
 
-    /** Uri->Bitmap으로 변환 */
-    fun convertUriToBitmap(uri: Uri): Bitmap {
-        Constants.logE("convertUriToBitmap", Constants.TAG_PHOTO)
+    /** Uri --> Bitmap */
+    fun getBitmapFromUri(uri: Uri): Bitmap? {
+        Constants.LOGD("Call getBitmapFromUri()")
 
         return if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             val source
@@ -147,10 +163,10 @@ object Photo {
         }
     }
 
-    /** Bitmap->Base64 로 변환 */
-    fun convertBitmapToBase64(bitmap: Bitmap): String {
-        Constants.logE("convertBitmapToBase64", Constants.TAG_PHOTO)
-
+    /** Bitmap --> Base64 */
+    fun getBase64FromBitmap(bitmap: Bitmap): String {
+        Constants.LOGD("Call getBase64FromBitmap()")
+        Log.e("TAG", "" + bitmap.width + " , " + bitmap.height)
         val byteArrayOutputStream = ByteArrayOutputStream()
         bitmap.compress(Bitmap.CompressFormat.JPEG, 100, byteArrayOutputStream)
         val byteArray = byteArrayOutputStream.toByteArray()
@@ -163,15 +179,24 @@ object Photo {
         val screenWidth = Utils.getScreenSize().getValue(Constants.SCREEN_WIDTH)
         val screenHeight = Utils.getScreenSize().getValue(Constants.SCREEN_HEIGHT)
 
+        Log.e("TAG", "screenWidth: $screenWidth screenHeight: $screenHeight")
+        Log.e("TAG222222", "bitmap Width: ${bitmap.width} bitmap Height: ${bitmap.height}")
+
         Log.d("dlgodnjs", ratio.toString())
         return if(isWidthRatio!!) {
             val resizeWidth = (screenWidth * ratio).toInt()
             val resizeHeight = (bitmap.height * ((screenWidth * ratio) / bitmap.width)).toInt()
 
+            Log.e("dlgodnjs", "resizeWidth : $resizeWidth resizeHeight : $resizeHeight")
+
             Bitmap.createScaledBitmap(bitmap, resizeWidth, resizeHeight, true)
         } else {
-            val resizeWidth = (bitmap.height * ((screenHeight * ratio) / bitmap.height)).toInt()
+            Constants.LOGD("Resize bitmap by device height ratio(${ratio*100}%)")
+
+            val resizeWidth = (bitmap.width * ((screenHeight * ratio) / bitmap.height)).toInt()
             val resizeHeight = (screenHeight * ratio).toInt()
+
+            Log.e("dlgodnjs", "resizeWidth : $resizeWidth resizeHeight : $resizeHeight")
 
             Bitmap.createScaledBitmap(bitmap, resizeWidth, resizeHeight, true)
         }

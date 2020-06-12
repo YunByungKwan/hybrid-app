@@ -67,7 +67,7 @@ object SharedPreferences {
 
     fun getString(fileName: String, key: String): String {
         val prefs
-                = App.activity.getSharedPreferences(fileName, Context.MODE_PRIVATE)
+                = App.context().getSharedPreferences(fileName, Context.MODE_PRIVATE)
 
         return if(prefs != null) prefs.getString(key, "")!! else ""
     }

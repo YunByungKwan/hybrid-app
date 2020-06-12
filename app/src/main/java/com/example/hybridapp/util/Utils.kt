@@ -8,6 +8,7 @@ import android.content.pm.Signature
 import android.net.Uri
 import android.os.Build
 import android.provider.Settings
+import android.text.TextUtils
 import android.util.Base64
 import android.util.DisplayMetrics
 import android.util.Log
@@ -23,6 +24,7 @@ import com.example.hybridapp.App
 import com.example.hybridapp.BuildConfig
 import com.example.hybridapp.R
 import com.example.hybridapp.util.module.Dialog
+import com.example.hybridapp.util.module.SharedPreferences
 import org.json.JSONObject
 import java.io.File
 import java.nio.charset.StandardCharsets
@@ -211,7 +213,17 @@ object Utils {
 
     /** App id 가져오기 */
     fun getAppId(): String {
-        return BuildConfig.APPLICATION_ID
+        val appId : String = SharedPreferences.getString(Constants.SHARED_APPID_FILE_NAME, Constants.SHARED_APPID_KEY)
+        return if(appId.isNullOrEmpty()) {
+            val str: String = UUID.randomUUID().toString()
+            SharedPreferences.putData(Constants.SHARED_APPID_FILE_NAME, Constants.SHARED_APPID_KEY, str)
+
+            str
+        }
+        else {
+            appId
+        }
+
     }
 
     /** 현재 날짜와 시간 반환 */

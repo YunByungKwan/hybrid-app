@@ -16,6 +16,9 @@ class Constants {
     annotation class types
 
    companion object {
+       /** AppId SharedPreferences filepath */
+       const val SHARED_APPID_FILE_NAME = "pref_appid"
+       const val SHARED_APPID_KEY = "appId"
 
        /** WebView Url */
        const val BASE_URL = "file:///android_asset"

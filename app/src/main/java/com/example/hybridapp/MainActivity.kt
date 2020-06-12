@@ -12,6 +12,7 @@ import android.os.Bundle
 import android.os.Environment
 import android.os.Handler
 import android.provider.MediaStore
+import android.provider.Settings
 import android.util.Log
 import android.view.View
 import android.view.animation.AnimationUtils
@@ -20,6 +21,7 @@ import android.webkit.WebChromeClient
 import android.webkit.WebView
 import android.widget.Button
 import android.widget.ImageView
+import androidx.annotation.RequiresApi
 import app.dvkyun.flexhybridand.FlexFuncInterface
 import com.example.hybridapp.data.LogUrlRepository
 import com.example.hybridapp.data.LogUrlRoomDatabase
@@ -47,12 +49,13 @@ class MainActivity : BasicActivity() {
     private lateinit var backgroundView: View
     private lateinit var popupCloseButton: Button
 
-    external fun stringFromJNI() : String
-    companion object {
-        init {
-            System.loadLibrary("HelloJni")
-        }
-    }
+//    companion object {
+//        init {
+//            System.loadLibrary("http")
+//        }
+//    }
+//
+//    external fun temp() : String
 
     override fun onResume() {
         super.onResume()
@@ -85,6 +88,8 @@ class MainActivity : BasicActivity() {
             repository = LogUrlRepository(logUrlDao)
         }
 
+        var http = Http()
+        Log.d("dlgodnjs", http.temp())
         setFlexWebView()
         setActions()
         setWebViewDownloadListener()
@@ -159,6 +164,7 @@ class MainActivity : BasicActivity() {
         }
     }
 
+
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
@@ -215,15 +221,30 @@ class MainActivity : BasicActivity() {
             Constants.REQ_CODE_PHOTO_DEVICE_RATIO -> {
                 if(resultOk) {
                     data?.data?.let {
-//                    val mInflater = Utils.getLayoutInflater(this@MainActivity)
-//                    var tempView: View = mInflater.inflate(R.layout.test, null)
-//                    var imgView : ImageView = tempView.findViewById(R.id.test)
-//                    imgView.setImageBitmap(Photo.convertUriToBitmap(it))
+                    val mInflater = Utils.getLayoutInflater(this@MainActivity)
+                    var tempView: View = mInflater.inflate(R.layout.test, null)
+                    var imgView : ImageView = tempView.findViewById(R.id.test)
+//                    var temp: Bitmap = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+//                        ImageDecoder.decodeBitmap(ImageDecoder.createSource(contentResolver, it))
+//                    }
+//                    else {
+//                        MediaStore.Images.Media.getBitmap(contentResolver, it)
+//                    }
+                    var temp: Bitmap = Photo.temp64(it, ratio, isWidthRatio)
+                    Log.e("TAG", "temp w: ${temp.width} h: ${temp.height}")
+
+                    imgView.setImageBitmap(temp)
 //                    constraintLayout.addView(tempView)
 
                         val base64 = Constants.BASE64_URL +
+<<<<<<< HEAD
                                 Photo.convertUriToBase64(it)
 
+=======
+                                Photo.convertUriToResizingBase64(it, ratio, isWidthRatio)
+//                        val base64 = Photo.convertUriToResizingBase64(it, ratio, isWidthRatio)
+                        Log.d("dlgodnjs", "$base64")
+>>>>>>> f193662... leehaewon
                         photoDeviceAction?.promiseReturn(base64)
                         ratio = null
                         isWidthRatio = null

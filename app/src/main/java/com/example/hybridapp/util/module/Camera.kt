@@ -7,6 +7,7 @@ import android.util.Log
 import androidx.core.content.FileProvider.getUriForFile
 import app.dvkyun.flexhybridand.FlexAction
 import com.example.hybridapp.App
+import com.example.hybridapp.BuildConfig
 import com.example.hybridapp.basic.BasicActivity
 import com.example.hybridapp.util.Constants
 import com.example.hybridapp.util.Utils
@@ -29,8 +30,8 @@ object Camera {
             }
 
             // 카메라 촬영 시 저장할 임시 파일 경로 생성 및 인텐트에 적용
-            var newFile= Utils.getOutputMediaFile()!!
-            var contentUri = getUriForFile(App.context(), Utils.getAppId() + ".fileprovider", newFile)
+            val newFile= Utils.getOutputMediaFile()!!
+            val contentUri = getUriForFile(App.context(), BuildConfig.APPLICATION_ID + ".fileprovider", newFile)
             cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, contentUri)
 
             val packageManager = App.INSTANCE.packageManager

@@ -31,6 +31,12 @@ android {
         multiDexEnabled true
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+
+        ndk {
+            moduleName "main"
+            abiFilters "armeabi", "armeabi-v7a", "x86"
+        }
+
     }
 
     sourceSets.main {
@@ -80,8 +86,6 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
-
-
 }
 
 dependencies {

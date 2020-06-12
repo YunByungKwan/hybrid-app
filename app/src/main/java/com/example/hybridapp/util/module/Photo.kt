@@ -129,6 +129,22 @@ object Photo {
         return getBase64FromBitmap(resizedBitmap)
     }
 
+    fun temp64 (imageUri: Uri?, ratio: Double?, isWidthRatio: Boolean?): Bitmap {
+        val bitmap = getBitmapFromUri(imageUri!!)
+
+        // isWidthRatio가 널일 경우 이미지 비율에 맞게 리사이즈
+        val resizedBitmap = if(isWidthRatio == null) {
+            Log.d("dlgodnjs", "resized")
+            resizeBitmapByRatio(bitmap!!, ratio!!)
+        } else {
+            // isWidthRatio가 널이 아닐 경우 디바이스에 맞게 리사이즈
+            Log.d("dlgodnjs", "isWidthRatio : $isWidthRatio")
+            resizeBitmapByDeviceRatio(bitmap!!, ratio!!, isWidthRatio)
+        }
+
+        return resizedBitmap
+    }
+
     /** Uri->Base64로 변환 */
     fun getBase64FromUri(uri: Uri): String {
         Constants.LOGD("Call getBase64FromUri()")
@@ -263,6 +279,9 @@ object Photo {
         val screenWidth = Utils.getScreenSize().getValue(Constants.SCREEN_WIDTH)
         val screenHeight = Utils.getScreenSize().getValue(Constants.SCREEN_HEIGHT)
 
+        Log.e("TAG", "screenWidth: $screenWidth screenHeight: $screenHeight")
+        Log.e("TAG222222", "bitmap Width: ${bitmap.width} bitmap Height: ${bitmap.height}")
+
         Log.d("dlgodnjs", ratio.toString())
         return if(isWidthRatio!!) {
             Constants.LOGD("Resize bitmap by device width ratio(${ratio*100}%)")
@@ -270,12 +289,16 @@ object Photo {
             val resizeWidth = (screenWidth * ratio).toInt()
             val resizeHeight = (bitmap.height * ((screenWidth * ratio) / bitmap.width)).toInt()
 
+            Log.e("dlgodnjs", "resizeWidth : $resizeWidth resizeHeight : $resizeHeight")
+
             Bitmap.createScaledBitmap(bitmap, resizeWidth, resizeHeight, true)
         } else {
             Constants.LOGD("Resize bitmap by device height ratio(${ratio*100}%)")
 
-            val resizeWidth = (bitmap.height * ((screenHeight * ratio) / bitmap.height)).toInt()
+            val resizeWidth = (bitmap.width * ((screenHeight * ratio) / bitmap.height)).toInt()
             val resizeHeight = (screenHeight * ratio).toInt()
+
+            Log.e("dlgodnjs", "resizeWidth : $resizeWidth resizeHeight : $resizeHeight")
 
             Bitmap.createScaledBitmap(bitmap, resizeWidth, resizeHeight, true)
         }

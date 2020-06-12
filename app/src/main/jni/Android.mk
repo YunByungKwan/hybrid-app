@@ -8,6 +8,7 @@ LOCAL_SRC_FILES := curl/$(TARGET_ARCH_ABI)/libcrypto.a
 LOCAL_EXPORT_LDLIBS := -lz
 include $(PREBUILT_STATIC_LIBRARY)
 # --------------- ssl ---------------
+include $(CLEAR_VARS)
 LOCAL_MODULE := ssl
 LOCAL_MODULE_FILENAME := ssl
 LOCAL_SRC_FILES := curl/$(TARGET_ARCH_ABI)/libssl.a
@@ -22,11 +23,18 @@ LOCAL_STATIC_LIBRARIES += ssl
 LOCAL_STATIC_LIBRARIES += crypto
 include $(PREBUILT_STATIC_LIBRARY)
 # -----------
+
 include $(CLEAR_VARS)
-LOCAL_MODULE    := main
-LOCAL_SRC_FILES := main.cpp
+LOCAL_MODULE        := main
+LOCAL_CPPFLAGS += -std=c++14
+LOCAL_SRC_FILES     := main.cpp
 LOCAL_STATIC_LIBRARIES += android_native_app_glue
 LOCAL_STATIC_LIBRARIES  += curl
+
 include $(BUILD_SHARED_LIBRARY)
 
 $(call import-module,android/native_app_glue)
+
+# LOCAL_STATIC_LIBRARIES += android_native_app_glue
+# $(call import-module,android/native_app_glue)
+

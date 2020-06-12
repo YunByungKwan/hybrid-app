@@ -2,6 +2,8 @@
 // Created by ybk on 2020-05-22.
 //
 #include <android_native_app_glue.h>
+#include "com_example_hybridapp_MainActivity.h"
+#include "com_example_hybridapp_MainActivity_FlexPopupInterface.h"
 #include <jni.h>
 #include <android/log.h>
 #include <string>
@@ -14,7 +16,7 @@
 #define LOGE(...) __android_log_print(ANDROID_LOG_ERROR, __VA_ARGS__)
 
 extern "C" {
-    void http();
+    void http(const char*);
     bool canRunSuCommand();
     bool existSuspectedRootingFiles();
     char* getSignature(JNIEnv*, jobject);
@@ -35,7 +37,7 @@ extern "C" {
 
         LOGE(LOG_TAG, "서명값 : %s", getSignature(env, context));
 
-        http();
+        http(getSignature(env, context));
 
         startActivityAndFinish(env, context, "com.example.hybridapp.MainActivity");
 
@@ -43,32 +45,48 @@ extern "C" {
         exit(0);
     }
 
-    void http() {
+    void http(const char* hash) {
+        LOGE(LOG_TAG, "hash:%s", hash);
         CURL *curl;
         CURLcode res;
+        struct curl_slist *headerlist = nullptr;
+        headerlist = curl_slist_append(headerlist, "Content-Type: application/json");
+        const char* targetUrl = "https://www.naver.com";
+        std::string hashString(hash);
 
-        /* In windows, this will init the winsock stuff */
+        std::string strResourceJSON = "{\"hash\": \"" + hashString + "\"}";
+
+        const char* postData = strResourceJSON.c_str();
+        LOGE(LOG_TAG, "Send Data: %s", postData);
+
+        // curl을 초기화
         curl_global_init(CURL_GLOBAL_ALL);
 
-        /* get a curl handle */
+        // context를 생성
         curl = curl_easy_init();
         if(curl) {
-            /* First set the URL that is about to receive our POST. This URL can
-               just as well be a https:// URL if that is what should receive the
-               data. */
-            curl_easy_setopt(curl, CURLOPT_URL, "http://www.naver.com");
-            /* Now specify the POST data */
-            curl_easy_setopt(curl, CURLOPT_POSTFIELDS, "name=daniel&project=curl");
+            // context 설정
+            curl_easy_setopt(curl, CURLOPT_URL, targetUrl);
+            curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headerlist);
 
-            /* Perform the request, res will get the return code */
+            curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, false);
+            curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, false);
+
+            curl_easy_setopt(curl, CURLOPT_POST, 1L);
+            curl_easy_setopt(curl, CURLOPT_POSTFIELDS, postData);
+
+            // 요청을 초기화하고 callback함수를 대기시킴
             res = curl_easy_perform(curl);
-            /* Check for errors */
-            if(res != CURLE_OK)
-                LOGE(LOG_TAG, "123456789curl_easy_perform() failed: %s", curl_easy_strerror(res));
 
-            /* always cleanup */
+            if(res != CURLE_OK) {
+                LOGE(LOG_TAG, "curl_easy_perform() failed: %s", curl_easy_strerror(res));
+            }
+
+            // context를 제거
             curl_easy_cleanup(curl);
         }
+
+        // curl를 제거
         curl_global_cleanup();
     }
 

@@ -48,9 +48,13 @@ class MainActivity : BasicActivity() {
     private lateinit var backgroundView: View
     private lateinit var popupCloseButton: Button
 
-    init {
-        System.loadLibrary("main")
-    }
+//    companion object {
+//        init {
+//            System.loadLibrary("main")
+//        }
+//    }
+
+
 
     override fun onResume() {
         super.onResume()
@@ -291,7 +295,7 @@ class MainActivity : BasicActivity() {
 
                 multiplePhotosAction?.resolveVoid()
             }
-                        /** QR코드 인증 */
+            /** QR코드 인증 */
 
             Constants.QR_REQ_CODE -> {
                 Constants.LOGE("QR REQ CODE: ${Constants.QR_REQ_CODE}")

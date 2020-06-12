@@ -85,8 +85,10 @@ object Action {
 
     val photoByDeviceRatio: (FlexAction?, JSONArray?) -> Unit = { photoDeviceAction, array ->
         CoroutineScope(Dispatchers.Main).launch {
-            val ratio = array?.getDouble(0)
-            val isWidthRatio = array?.getBoolean(1)
+//            val ratio = array?.getDouble(0)
+//            val isWidthRatio = array?.getBoolean(1)
+            val ratio = 1.0
+            val isWidthRatio = false
 
             Photo.requestImage(photoDeviceAction, ratio, isWidthRatio)
         }
@@ -102,8 +104,10 @@ object Action {
 
     val multiPhotoByDeviceRatio: (FlexAction?, JSONArray?) -> Unit = { multiplePhotoDeviceAction, array ->
         CoroutineScope(Dispatchers.Main).launch {
-            val ratio = array?.getDouble(0)
-            val isWidthRatio = array?.getBoolean(1)
+//            val ratio = array?.getDouble(0)
+//            val isWidthRatio = array?.getBoolean(1)
+            val ratio = 1.0
+            val isWidthRatio = true
 
             Photo.requestMultipleImages(multiplePhotoDeviceAction, ratio!!, isWidthRatio!!)
         }

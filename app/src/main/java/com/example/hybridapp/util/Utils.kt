@@ -8,7 +8,6 @@ import android.content.pm.Signature
 import android.net.Uri
 import android.os.Build
 import android.provider.Settings
-import android.text.TextUtils
 import android.util.Base64
 import android.util.DisplayMetrics
 import android.util.Log
@@ -21,7 +20,6 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.example.hybridapp.App
-import com.example.hybridapp.BuildConfig
 import com.example.hybridapp.R
 import com.example.hybridapp.util.module.Dialog
 import com.example.hybridapp.util.module.SharedPreferences

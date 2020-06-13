@@ -4,7 +4,6 @@ import android.app.Activity
 import android.app.DownloadManager
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.media.ExifInterface
 import android.graphics.Bitmap
 import android.graphics.ImageDecoder
 import android.net.Uri
@@ -20,7 +19,6 @@ import android.webkit.ValueCallback
 import android.webkit.WebChromeClient
 import android.webkit.WebView
 import android.widget.Button
-import android.widget.ImageView
 import app.dvkyun.flexhybridand.FlexFuncInterface
 import com.example.hybridapp.data.LogUrlRepository
 import com.example.hybridapp.data.LogUrlRoomDatabase
@@ -41,10 +39,8 @@ import kotlin.collections.ArrayList
 
 class MainActivity : BasicActivity() {
 
-    private val scope = CoroutineScope(Dispatchers.Default)
     private lateinit var repository: LogUrlRepository
     private var smsReceiver: SMSReceiver? = null
-    private var mFilePatCallback: ValueCallback<Array<Uri>>? = null
     private lateinit var backgroundView: View
     private lateinit var popupCloseButton: Button
 
@@ -53,8 +49,6 @@ class MainActivity : BasicActivity() {
 //            System.loadLibrary("main")
 //        }
 //    }
-
-
 
     override fun onResume() {
         super.onResume()
@@ -82,7 +76,7 @@ class MainActivity : BasicActivity() {
     /** 시작 시 기본 초기화 함수 */
     private fun init() {
         /** Room Database default settings */
-        scope.launch {
+        CoroutineScope(Dispatchers.Default).launch {
             val logUrlDao = LogUrlRoomDatabase.getDatabase(this@MainActivity).logUrlDao()
             repository = LogUrlRepository(logUrlDao)
         }
@@ -319,6 +313,7 @@ class MainActivity : BasicActivity() {
                 }
             }
             Constants.FILE_UPLOAD_REQ_CODE -> {
+                var mFilePatCallback: ValueCallback<Array<Uri>>? = null
                 if(resultOk) {
                     if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                         mFilePatCallback?.onReceiveValue(WebChromeClient.FileChooserParams.parseResult(resultCode, data))

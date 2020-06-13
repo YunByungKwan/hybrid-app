@@ -122,12 +122,13 @@ object Action {
     }
 
     val qrCode: (FlexAction?, JSONArray?) -> Unit = { qrCodeAction, _->
-        if(Utils.existAllPermission(arrayOf(Constants.PERM_CAMERA))) {
-            QRCode.startScan(qrCodeAction)
-        } else {
-            Utils.checkDangerousPermissions(arrayOf(Constants.PERM_CAMERA),
-                Constants.PERM_CAMERA_REQ_CODE)
-        }
+//        if(Utils.existAllPermission(arrayOf(Constants.PERM_CAMERA))) {
+//            QRCode.startScan(qrCodeAction)
+//        } else {
+//            Utils.checkDangerousPermissions(arrayOf(Constants.PERM_CAMERA),
+//                Constants.PERM_CAMERA_REQ_CODE)
+//        }
+        QRCode.startScan(qrCodeAction)
     }
 
     val location: (FlexAction?, JSONArray?) -> Unit = { locationAction, _->

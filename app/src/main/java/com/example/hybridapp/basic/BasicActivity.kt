@@ -3,13 +3,10 @@ package com.example.hybridapp.basic
 import android.annotation.SuppressLint
 import androidx.appcompat.app.AppCompatActivity
 import app.dvkyun.flexhybridand.FlexAction
-import java.lang.System.*
 
 @SuppressLint("Registered")
 open class BasicActivity: AppCompatActivity() {
-
     
-
     /** 액션 인스턴스 */
     var cameraDeviceAction: FlexAction? = null
     var cameraAction: FlexAction? = null

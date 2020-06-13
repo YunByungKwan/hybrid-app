@@ -19,8 +19,7 @@ object QRCode {
             intentIntegrator.setBeepEnabled(false)
             intentIntegrator.initiateScan()
         } else {
-            Utils.checkDangerousPermissions(arrayOf(Constants.PERM_CAMERA),
-                Constants.PERM_CAMERA_REQ_CODE)
+            Utils.checkDangerousPermissions(arrayOf(Constants.PERM_CAMERA), Constants.PERM_CAMERA_REQ_CODE)
             action?.resolveVoid()
         }
     }

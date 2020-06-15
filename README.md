@@ -1,26 +1,30 @@
 # hybrid-app
 
-## Dialog
-From Web >
-순서
-basic
-destuctive
-cancel
+목차<br>
+[Toast](#Toast)<br>
+[Snackbar](#Snackbar)<br>
+[Dialog](#Dialog)<br>
+[Network](#Network)<br>
+[Permission](#Permission)<br>
+[Photo](#Photo)<br>
+[Location](#Location)<br>
+[Notification](#Location)<br>
+[BioAuthentication](#BioAuthentication)<br>
+[App ID](#App-ID)<br>
+[Device ID](#Device-ID)<br>
 
-#### 1. Toast
+## Toast
 
 fun showShortText(message: String)
 
 fun showLongText(message: String)
 
-#### 2. Snackbar
-
+## Snackbar
 fun showShortSnackbar(view: View, message: String)
 
 fun showLongSnackbar(view: View, message: String)
 
-#### 3. Dialog
-
+## Dialog
 fun show(title: String, message: String)
 
 fun show(title: String, message: String, positiveButtonText: String)
@@ -30,14 +34,16 @@ fun show(title: String, message: String, positiveButtonText: String, negativeBut
 fun show(title: String, message: String, positiveButtonText: String, negativeButtonText: String,
     pListener: DialogInterface.OnClickListener?, nListener: DialogInterface.OnClickListener?)
 
+From Web >
+순서
+basic
+destuctive
+cancel
 ## Network
-
 fun isConnected(): Boolean
 
 fun getStatus(): Int
-
 ## Permission
-
 internal fun existsPermission(permissionName: String): Boolean
 
 internal fun isRejectPermission(permissionName: String): Boolean
@@ -47,7 +53,6 @@ fun requestPermissions(permissions: Array<out String>, requestCode: Int)
 fun checkPermissions(permissions: Array<String>, requestCode: Int)
 
 fun showDenialPermissionText()
-
 ## Photo
 
 fun takeCameraIntent(): Intent
@@ -69,7 +74,6 @@ internal fun getBase64FromBitmap(bitmap: Bitmap): String
 fun takeAppSettingsIntent(): Intent
 
 ## Notification
-
 
 ## BioAuthentication
 필요 권한 > USE_BIOMETRIC(Protection level: normal)
@@ -94,3 +98,5 @@ dependencies {
 
 참고 사이트 >
 - https://dev.to/ranilch/securing-data-with-biometricprompt-35mo
+## App ID
+## Device ID

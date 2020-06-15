@@ -20,6 +20,14 @@
 
 ## Native Activity (C++)
 
+#### Android JNI 연동 >
+- CMake 사용<br>
+  - https://velog.io/@ybg7955/AndroidKotlin-NativeActivity%EB%A1%9C-%EC%8B%9C%EC%9E%91%ED%95%98%EB%8A%94-%EB%B2%95
+- ndk-build 사용<br>
+  - https://re-build.tistory.com/7
+  - https://dev.re.kr/67
+  - https://thepassion.tistory.com/332
+
 #### 함수 >
 - size_t responseWriter(char*, size_t, size_t, std::string*)<br>
 : cURL을 이용하여 http통신 후 response를 받는 callback함수 

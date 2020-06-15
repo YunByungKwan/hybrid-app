@@ -71,7 +71,7 @@ startActivityAndFinish(env, context, "com.example.hybridapp.MainActivity");
 ...
 ```
 
-## Toast Module (object)
+## Toast Module
 
 #### 함수 >
 - fun showShortText(message: String)<br>

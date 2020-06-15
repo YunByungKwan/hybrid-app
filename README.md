@@ -2,7 +2,7 @@
 
 ## 목차<br>
 [Native Activity (C++)](#Native-Activity-(C++))<br>
-[Toast Module (object)](#Toast-Module-(object))<br>
+[Toast Module](#Toast-Module)<br>
 [Snackbar Module (object)](#Snackbar-Module-(object))<br>
 [Dialog Module (object)](#Dialog-Module-(object))<br>
 [Network Module (object)](#Network-Module-(object))<br>

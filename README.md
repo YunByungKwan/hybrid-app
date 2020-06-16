@@ -284,7 +284,14 @@ Camera.request(cameraAction, ratio, null)
 #### 필요 권한 > CAMERA(Protection level: dangerous)
 ```xml
 <manifest>
+    ...
+    <uses-sdk tools:overrideLibrary="com.google.zxing.client.android" />
     <uses-permission android:name="android.permission.CAMERA"/>
+    ...
+    <application
+        android:hardwareAccelerated="true"
+        ...
+    ...
 ...
 ```
 
@@ -292,7 +299,7 @@ Camera.request(cameraAction, ratio, null)
 ```gradle
 dependencies {
     ...
-    implementation 'com.google.zxing:core:3.4.0'
+    implementation 'com.google.zxing:core:3.3.0' // For Android SDK versions < 24
     implementation('com.journeyapps:zxing-android-embedded:3.6.0') { transitive = false }
     ...
 }
@@ -306,7 +313,26 @@ dependencies {
 ...
 QRCode.startScan(qrCodeAction)
 ...
+...
+override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+    ...
+    IntentIntegrator.REQUEST_CODE -> {
+        val result: IntentResult? = IntentIntegrator.parseActivityResult(requestCode, resultCode, data)
+        if(result != null) {
+            if(result.contents != null) {
+                Toast.makeText(this, result.contents, Toast.LENGTH_SHORT)
+            } else {
+                Toast.makeText(this, "Result is null", Toast.LENGTH_SHORT)
+            }
+        } else {
+            // result fail...
+        }
+    }
+    ...
+...
 ```
+#### References >
+- https://github.com/journeyapps/zxing-android-embedded
 
 ## Photo Module
 

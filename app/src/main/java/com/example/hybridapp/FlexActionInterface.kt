@@ -10,6 +10,9 @@ import com.example.hybridapp.data.LogUrlRoomDatabase
 import com.example.hybridapp.util.Constants
 import com.example.hybridapp.util.Utils
 import com.example.hybridapp.util.module.SMS
+import com.example.hybridapp.util.module.Toast
+import com.example.hybridapp.util.module.Snackbar
+import com.example.hybridapp.util.module.Notification
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -24,9 +27,9 @@ class FlexActionInterface {
             val message = array.getString(0)
 
             if(isShortToast)
-                com.example.hybridapp.util.module.Toast.showShortText(message)
+                Toast.showShortText(message)
             else
-                com.example.hybridapp.util.module.Toast.showLongText(message)
+                Toast.showLongText(message)
         }
     }
 
@@ -37,9 +40,9 @@ class FlexActionInterface {
             val message = array.getString(0)
 
             if(isShortSnackbar)
-                com.example.hybridapp.util.module.Snackbar.showShortText(App.activity.findViewById(R.id.constraintLayout), message)
+                Snackbar.showShortText(App.activity.findViewById(R.id.constraintLayout), message)
             else
-                com.example.hybridapp.util.module.Snackbar.showLongText(App.activity.findViewById(R.id.constraintLayout), message)
+                Snackbar.showLongText(App.activity.findViewById(R.id.constraintLayout), message)
         }
     }
 
@@ -66,7 +69,7 @@ class FlexActionInterface {
         val importance = Constants.NOTI_HIGH
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            com.example.hybridapp.util.module.Notification.createChannel(channelId, channelName, description, importance, true)
+            Notification.createChannel(channelId, channelName, description, importance, true)
         } else {
             Constants.LOGE(Constants.LOG_MSG_NOT_CHANNEL)
         }
@@ -82,7 +85,12 @@ class FlexActionInterface {
         val obj = array.get(0) as JSONObject
         val title = obj.get("title").toString()
         val message = obj.get("message").toString()
-        com.example.hybridapp.util.module.Notification.create(channelId, id, title, message, Constants.NOTI_HIGH, pendingIntent)
+        Notification.create(channelId, id, title, message, Constants.NOTI_HIGH, pendingIntent)
+    }
+
+    @FlexFuncInterface
+    fun RootingCheck(array: JSONArray): String {
+        return "루팅이 확인되지 않았습니다."
     }
 
     @FlexFuncInterface

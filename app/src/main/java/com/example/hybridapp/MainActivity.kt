@@ -14,6 +14,7 @@ import android.os.Handler
 import android.provider.MediaStore
 import android.util.Log
 import android.view.View
+import android.view.WindowManager
 import android.view.animation.AnimationUtils
 import android.webkit.ValueCallback
 import android.webkit.WebChromeClient
@@ -84,6 +85,8 @@ class MainActivity : BasicActivity() {
         setFlexWebView()
         setActions()
         setWebViewDownloadListener()
+        window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
+
     }
 
     /** 기본, 팝업 FlexView 설정 */
@@ -217,9 +220,9 @@ class MainActivity : BasicActivity() {
 //                    imgView.setImageBitmap(Photo.convertUriToBitmap(it))
 //                    constraintLayout.addView(tempView)
 
-                        val base64 = Constants.BASE64_URL +
-                                Photo.getBase64FromUri(it)
-
+//                        val base64 = Constants.BASE64_URL +
+//                                Photo.getBase64FromUri(it)
+                        val base64 = Constants.BASE64_URL + Photo.convertUriToResizingBase64(it, ratio, isWidthRatio)
                         photoDeviceAction?.promiseReturn(base64)
                         ratio = null
                         isWidthRatio = null
@@ -360,9 +363,12 @@ class MainActivity : BasicActivity() {
 
     /** 뒤로 가기 버튼 클릭 이벤트 */
     override fun onBackPressed() {
-        if(flex_pop_up_web_view.visibility == View.VISIBLE)
-            Utils.closePopup(this@MainActivity, constraintLayout, backgroundView, popupCloseButton, flex_pop_up_web_view)
-        else
+        if(flex_pop_up_web_view.visibility == View.VISIBLE) {
+            Utils.closePopup(
+                this@MainActivity, constraintLayout,
+                backgroundView, popupCloseButton, flex_pop_up_web_view
+            )
+        } else
             backPressedTwice()
     }
 
@@ -376,11 +382,11 @@ class MainActivity : BasicActivity() {
 
         backPressedTwice = true
         Toast.showLongText("뒤로가기 버튼을 한 번 더 누르시면 종료됩니다.")
+
         Handler().postDelayed({
             backPressedTwice = false
         }, 2000)
     }
-
 
     /*
     * 인터페이스

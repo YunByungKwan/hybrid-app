@@ -19,34 +19,39 @@ object Action {
             val title = array?.getString(0)
             val message = array?.getString(1)
             val jsonObject: JSONObject? = array?.get(2) as JSONObject
+            val isDialog = array.getBoolean(3)
 
-            jsonObject?.let {
-                val basic: String? = Utils.getJsonObjectValue("basic", it)
-                val destructive: String? = Utils.getJsonObjectValue("destructive", it)
-                val cancel: String? = Utils.getJsonObjectValue("cancel", it)
+            if(isDialog) {
+                jsonObject?.let {
+                    val basic: String? = Utils.getJsonObjectValue("basic", it)
+                    val destructive: String? = Utils.getJsonObjectValue("destructive", it)
+                    val cancel: String? = Utils.getJsonObjectValue("cancel", it)
 
-                val posListener = DialogInterface.OnClickListener { _, _ ->
-                    if (basic != null) {
-                        dialogAction?.promiseReturn(basic)
-                    } else {
-                        dialogAction?.resolveVoid()
+                    val posListener = DialogInterface.OnClickListener { _, _ ->
+                        if (basic != null) {
+                            dialogAction?.promiseReturn(basic)
+                        } else {
+                            dialogAction?.resolveVoid()
+                        }
                     }
-                }
-                val negListener = DialogInterface.OnClickListener { _, _ ->
-                    if (cancel != null) {
-                        dialogAction?.promiseReturn(cancel)
-                    } else {
-                        dialogAction?.resolveVoid()
+                    val negListener = DialogInterface.OnClickListener { _, _ ->
+                        if (cancel != null) {
+                            dialogAction?.promiseReturn(cancel)
+                        } else {
+                            dialogAction?.resolveVoid()
+                        }
                     }
-                }
-                val cancelListener = {
-                    dialogAction?.promiseReturn(Constants.RESULT_CANCELED)
-                }
+                    val cancelListener = {
+                        dialogAction?.promiseReturn(Constants.RESULT_CANCELED)
+                    }
 
-                Dialog.show(
-                    title, message, basic, destructive, cancel,
-                    posListener, null, negListener, cancelListener
-                )
+                    Dialog.show(
+                        title, message, basic, destructive, cancel,
+                        posListener, null, negListener, cancelListener
+                    )
+                }
+            } else {
+                Snackbar.showShortText(App.activity.findViewById(R.id.constraintLayout), message!!)
             }
         }
     }
@@ -87,8 +92,8 @@ object Action {
         CoroutineScope(Dispatchers.Main).launch {
 //            val ratio = array?.getDouble(0)
 //            val isWidthRatio = array?.getBoolean(1)
-            val ratio = 1.0
-            val isWidthRatio = false
+            val ratio = 0.1
+            val isWidthRatio = true
 
             Photo.requestImage(photoDeviceAction, ratio, isWidthRatio)
         }

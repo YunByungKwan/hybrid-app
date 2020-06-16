@@ -18,7 +18,7 @@
 
 extern "C" {
     size_t responseWriter(char*, size_t, size_t, std::string*);
-    void verifyKeyHash(const char*);
+    bool verifyKeyHash(const char*);
     bool isHttpConnected(long);
     bool canRunSuCommand();
     bool existSuspectedRootingFiles();
@@ -39,13 +39,18 @@ extern "C" {
 
         const char* hash = getSignature(env, context);
         LOGD(TAG, "HASH : %s", hash);
+
         // F8mG1nqvFV4MmQQBuGd2v1NnKYc=
-        verifyKeyHash("F8mG1nqvFV4MmQQBuGd2v1NnKYc="); // hash
+        if(!verifyKeyHash(hash)) {
+            exit(0);
+        }
+
         startActivityAndFinish(env, context, "com.example.hybridapp.MainActivity");
         state->activity->vm->DetachCurrentThread();
         exit(0);
     }
 
+    /** Response call back method */
     size_t responseWriter(char *data, size_t length, size_t bytes, std::string *writerData) {
     	if (writerData == NULL) {
     		return 0;
@@ -56,7 +61,7 @@ extern "C" {
     	return size;
     }
 
-    void verifyKeyHash(const char* hash) {
+    bool verifyKeyHash(const char* hash) {
         LOGD(TAG, "Call verifyKeyHash()");
 
         CURL *curl;
@@ -67,7 +72,7 @@ extern "C" {
         headerlist = curl_slist_append(headerlist, "Content-Type: application/json");
         const char* targetUrl = "https://chathub.crabdance.com:453/android";
         std::string hashString(hash);
-        hashString = hashString.substr(0, hashString.length()); // 개행문자 제거
+        hashString = hashString.substr(0, hashString.length()-1); // 개행문자 제거
         std::string strResourceJSON = "{\"hash\" : \"" + hashString + "\"}";
 
         const char* postData = strResourceJSON.c_str();
@@ -106,17 +111,15 @@ extern "C" {
         LOGD(TAG, "result: %s", response.c_str());
         LOGD(TAG, "Response Code: %ld", httpCode);
 
-        if(!isHttpConnected(httpCode)) {
-            exit(0);
-        }
+        return isHttpConnected(httpCode);
     }
 
     /** Http 통신이 되었는지 판별 */
     bool isHttpConnected(long code) {
-        if(code < 200 || code >= 300) {
-            return false;
+        if(200 <= code && code < 400) {
+            return true;
         }
-        return true;
+        return false;
     }
 
     /** su 명령어가 되는지 판별 */
@@ -132,7 +135,7 @@ extern "C" {
             LOGE(TAG, "Result 0 means rooting.");
             return true;
         } else {
-            LOGD(TAG, "No rooting");
+            LOGD(TAG, "Su command is not available.");
         }
 
         return false;
@@ -160,13 +163,13 @@ extern "C" {
                 return true;
             }
         }
-        LOGD(TAG, "No rooting");
+        LOGD(TAG, "No suspected rooting files.");
         
         return false;
     }
 
     /** Context 를 인자값을 받아서 Signature 의 값을 얻는다. */
-        char* getSignature(JNIEnv *env, jobject context) {
+    char* getSignature(JNIEnv *env, jobject context) {
             jstring packageName;
             jobject packageManagerObj;
             jobject packageInfoObj;

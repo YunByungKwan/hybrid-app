@@ -116,6 +116,8 @@ object Photo {
 
     /** 비트맵 리사이징 후 base64로 변환 */
     fun convertUriToResizingBase64(imageUri: Uri?, ratio: Double?, isWidthRatio: Boolean?): String {
+        Constants.LOGD("Call convertUriToResizingBase64()")
+
         val bitmap = getBitmapFromUri(imageUri!!)
 
         // isWidthRatio가 널일 경우 이미지 비율에 맞게 리사이즈

@@ -55,8 +55,8 @@ object Photo {
                 action.resolveVoid()
             }
         } else {
-            Utils.checkDangerousPermissions(storagePerms, Constants.PERM_READ_WRITE_REQ_CODE)
-            action?.resolveVoid()
+            Utils.checkAbsentPerms(storagePerms, Constants.PERM_READ_WRITE_REQ_CODE, action)
+            //action?.resolveVoid()
         }
     }
 
@@ -90,8 +90,8 @@ object Photo {
                 action.resolveVoid()
             }
         } else {
-            Utils.checkDangerousPermissions(storagePerms, Constants.PERM_READ_WRITE_REQ_CODE)
-            action?.resolveVoid()
+            Utils.checkAbsentPerms(storagePerms, Constants.PERM_READ_WRITE_REQ_CODE, action)
+            //action?.resolveVoid()
         }
     }
 
@@ -168,7 +168,7 @@ object Photo {
     }
 
     /** Uri --> File Path */
-    private fun getFilePathFromUri(uri: Uri): String {
+    fun getFilePathFromUri(uri: Uri): String {
         Constants.LOGD("Call getFilePathFromUri()")
 
         var cursor: Cursor? = null
@@ -250,7 +250,7 @@ object Photo {
         Constants.LOGD("Call rotateBitmap()")
 
         if(bitmap == null) {
-            Constants.LOGD("Bitmap is null")
+            Constants.LOGE("Bitmap is null")
 
             return null
         }
@@ -267,7 +267,8 @@ object Photo {
 
     /** Bitmap --> Base64 */
     fun getBase64FromBitmap(bitmap: Bitmap): String {
-        Constants.LOGD("Call getBase64FromBitmap()")
+        Constants.LOGD("Call getBase64FromBitmap() " +
+                "Bitmap width: ${bitmap.width}, height: ${bitmap.height}")
 
         val byteArrayOutputStream = ByteArrayOutputStream()
         bitmap.compress(Bitmap.CompressFormat.JPEG, 100, byteArrayOutputStream)
@@ -278,20 +279,21 @@ object Photo {
 
     /** 디바이스 화면 비율에 맞게 리사이즈 */
     private fun resizeBitmapByDeviceRatio(bitmap: Bitmap, ratio: Double, isWidthRatio: Boolean?): Bitmap {
+        Constants.LOGD("Call resizeBitmapByDeviceRatio()")
         val screenWidth = Utils.getScreenSize().getValue(Constants.SCREEN_WIDTH)
         val screenHeight = Utils.getScreenSize().getValue(Constants.SCREEN_HEIGHT)
 
-        Log.e("TAG", "screenWidth: $screenWidth screenHeight: $screenHeight")
-        Log.e("TAG222222", "bitmap Width: ${bitmap.width} bitmap Height: ${bitmap.height}")
+        Constants.LOGD("screenWidth: $screenWidth screenHeight: $screenHeight")
+        Constants.LOGD("bitmap Width: ${bitmap.width} bitmap Height: ${bitmap.height}")
 
-        Log.d("dlgodnjs", ratio.toString())
+        Constants.LOGD("ratio: $ratio")
         return if(isWidthRatio!!) {
             Constants.LOGD("Resize bitmap by device width ratio(${ratio*100}%)")
 
             val resizeWidth = (screenWidth * ratio).toInt()
             val resizeHeight = (bitmap.height * ((screenWidth * ratio) / bitmap.width)).toInt()
 
-            Log.e("dlgodnjs", "resizeWidth : $resizeWidth resizeHeight : $resizeHeight")
+            Constants.LOGD("resizeWidth : $resizeWidth resizeHeight : $resizeHeight")
 
             Bitmap.createScaledBitmap(bitmap, resizeWidth, resizeHeight, true)
         } else {
@@ -300,7 +302,7 @@ object Photo {
             val resizeWidth = (bitmap.width * ((screenHeight * ratio) / bitmap.height)).toInt()
             val resizeHeight = (screenHeight * ratio).toInt()
 
-            Log.e("dlgodnjs", "resizeWidth : $resizeWidth resizeHeight : $resizeHeight")
+            Constants.LOGD("resizeWidth : $resizeWidth resizeHeight : $resizeHeight")
 
             Bitmap.createScaledBitmap(bitmap, resizeWidth, resizeHeight, true)
         }

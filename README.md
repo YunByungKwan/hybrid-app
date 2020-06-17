@@ -206,7 +206,7 @@ if(필요 권한이 모두 존재할 때) {<br>
 - private fun isDenialPermission(permissionName: String): Boolean<br>
 : 해당 권한이 거절되었는지 확인
 
-- fun checkDangerousPermissions(permissions: Array<out String>, permissionCode: Int)<br>
+- fun checkAbsentPerms(permissions: Array<out String>, permissionCode: Int)<br>
 : 위험 권한이 없을 경우<br>
   --if(권한이 거절되었을 때) {<br>
   ----// task...<br>
@@ -311,7 +311,7 @@ dependencies {
 #### 사용법 >
 ```kotlin
 ...
-QRCode.startScan(qrCodeAction)
+QRCode.startScan()
 ...
 ...
 override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -445,7 +445,7 @@ dependencies {
 #### 사용법 >
 ```kotlin
 ...
-Location.getCurrent(locationAction)
+Location.getCurrentLatAndLot()
 ...
 ```
 

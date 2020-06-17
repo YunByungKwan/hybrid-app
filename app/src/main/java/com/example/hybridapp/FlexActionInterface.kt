@@ -9,10 +9,7 @@ import com.example.hybridapp.data.LogUrlRepository
 import com.example.hybridapp.data.LogUrlRoomDatabase
 import com.example.hybridapp.util.Constants
 import com.example.hybridapp.util.Utils
-import com.example.hybridapp.util.module.SMS
-import com.example.hybridapp.util.module.Toast
-import com.example.hybridapp.util.module.Snackbar
-import com.example.hybridapp.util.module.Notification
+import com.example.hybridapp.util.module.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -20,16 +17,19 @@ import org.json.JSONArray
 import org.json.JSONObject
 
 class FlexActionInterface {
+
+    /**================================= Toast Interface =========================================*/
     @FlexFuncInterface
     fun Toast(array: JSONArray) {
         CoroutineScope(Dispatchers.Main).launch {
-            val isShortToast = array.getBoolean(1)
             val message = array.getString(0)
+            val isShortToast = array.getBoolean(1)
 
-            if(isShortToast)
+            if(isShortToast) {
                 Toast.showShortText(message)
-            else
+            } else {
                 Toast.showLongText(message)
+            }
         }
     }
 
@@ -48,9 +48,10 @@ class FlexActionInterface {
 
     @FlexFuncInterface
     fun SendSMS(array: JSONArray): String {
-        // val phoneNumber = array.getString(0)
-        val phoneNumber = "01065720153"
+        val phoneNumber = array.getString(0)
         val message = array.getString(1)
+
+        Constants.LOGD("phoneNumber: $phoneNumber, message: $message")
 
         return SMS.sendMessage(phoneNumber, message)
     }
@@ -101,6 +102,14 @@ class FlexActionInterface {
     @FlexFuncInterface
     fun UniqueDeviceID(array: JSONArray): String {
         return Utils.getDeviceId(App.INSTANCE)
+    }
+
+    @FlexFuncInterface
+    fun FileDownload(array: JSONArray) {
+        val fileUrl = array.getString(0)
+        Constants.LOGD("fileUrl: $fileUrl")
+
+        Utils.downloadFileFromUrl(fileUrl)
     }
 
     @FlexFuncInterface

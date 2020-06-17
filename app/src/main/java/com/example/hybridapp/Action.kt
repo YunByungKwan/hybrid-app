@@ -1,17 +1,12 @@
 package com.example.hybridapp
 
 import android.content.DialogInterface
-import android.content.Intent
-import android.provider.MediaStore
-import android.util.Log
 import androidx.fragment.app.FragmentActivity
 import app.dvkyun.flexhybridand.FlexAction
 import com.example.hybridapp.basic.BasicActivity
 import com.example.hybridapp.util.Constants
 import com.example.hybridapp.util.Utils
 import com.example.hybridapp.util.module.*
-import com.google.android.gms.location.LocationServices
-import com.google.zxing.integration.android.IntentIntegrator
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -103,29 +98,83 @@ object Action {
         }
     }
 
+    /**================================ Photo Device Action ======================================*/
     val photoByDeviceRatio: (FlexAction?, JSONArray?) -> Unit = { photoDeviceAction, array ->
         CoroutineScope(Dispatchers.Main).launch {
+            Constants.LOGD("============== Photo By Device Ratio Action ==============")
+
             val ratio = array?.getDouble(0)
             val isWidthRatio = array?.getBoolean(1)
 
-            Photo.requestImage(photoDeviceAction, ratio, isWidthRatio)
+            // inject action and ratio
+            val basicActivity = App.activity as BasicActivity
+            basicActivity.photoDeviceAction = photoDeviceAction
+            basicActivity.ratio = ratio
+
+            val perms = arrayOf(Constants.PERM_WRITE_EXTERNAL_STORAGE,
+                Constants.PERM_READ_EXTERNAL_STORAGE)
+
+            // 권한이 다 있을 경우
+            if(Utils.existAllPermission(perms)) {
+                Photo.requestImage(isWidthRatio)
+            }
+            // 권한이 다 있지 않을 경우
+            else {
+                Utils.checkAbsentPerms(perms, Constants.PERM_MUL_PHOTO_DEVICE_REQ_CODE,
+                    basicActivity.photoDeviceAction)
+            }
         }
     }
 
     val photoByRatio: (FlexAction?, JSONArray?) -> Unit = { photoAction, array ->
         CoroutineScope(Dispatchers.Main).launch {
+            Constants.LOGD("============== Photo By Ratio Action ==============")
+
             val ratio = array?.getDouble(0)
 
-            Photo.requestImage(photoAction, ratio!!, null)
+            // inject action and ratio
+            val basicActivity = App.activity as BasicActivity
+            basicActivity.photoAction = photoAction
+            basicActivity.ratio = ratio
+
+            val perms = arrayOf(Constants.PERM_WRITE_EXTERNAL_STORAGE,
+                Constants.PERM_READ_EXTERNAL_STORAGE)
+
+            // 권한이 다 있을 경우
+            if(Utils.existAllPermission(perms)) {
+                Photo.requestImage(null)
+            }
+            // 권한이 다 있지 않을 경우
+            else {
+                Utils.checkAbsentPerms(perms, Constants.PERM_PHOTO_REQ_CODE,
+                    basicActivity.photoAction)
+            }
         }
     }
 
+    /**================================== Multi Photo Action =====================================*/
     val multiPhotoByDeviceRatio: (FlexAction?, JSONArray?) -> Unit = { multiplePhotoDeviceAction, array ->
         CoroutineScope(Dispatchers.Main).launch {
             val ratio = array?.getDouble(0)
             val isWidthRatio = array?.getBoolean(1)
 
-            Photo.requestMultipleImages(multiplePhotoDeviceAction, ratio!!, isWidthRatio!!)
+            // inject action and ratio
+            val basicActivity = App.activity as BasicActivity
+            basicActivity.multiplePhotoDeviceAction = multiplePhotoDeviceAction
+            basicActivity.ratio = ratio
+
+            val perms =
+                arrayOf(Constants.PERM_WRITE_EXTERNAL_STORAGE, Constants.PERM_READ_EXTERNAL_STORAGE)
+
+            // 권한이 다 있을 경우
+            if(Utils.existAllPermission(perms)) {
+                Photo.requestMultipleImages(isWidthRatio)
+            }
+            // 권한이 다 있지 않을 경우
+            else {
+                Utils.checkAbsentPerms(perms, Constants.PERM_MUL_PHOTO_DEVICE_REQ_CODE,
+                    basicActivity.multiplePhotoDeviceAction)
+            }
         }
     }
 
@@ -133,7 +182,23 @@ object Action {
         CoroutineScope(Dispatchers.Main).launch {
             val ratio = array?.getDouble(0)
 
-            Photo.requestMultipleImages(multiplePhotoAction, ratio!!, null)
+            // inject action and ratio
+            val basicActivity = App.activity as BasicActivity
+            basicActivity.multiplePhotoAction = multiplePhotoAction
+            basicActivity.ratio = ratio
+
+            val perms =
+                arrayOf(Constants.PERM_WRITE_EXTERNAL_STORAGE, Constants.PERM_READ_EXTERNAL_STORAGE)
+
+            // 권한이 다 있을 경우
+            if(Utils.existAllPermission(perms)) {
+                Photo.requestMultipleImages(null)
+            }
+            // 권한이 다 있지 않을 경우
+            else {
+                Utils.checkAbsentPerms(perms, Constants.PERM_MUL_PHOTO_REQ_CODE,
+                    basicActivity.multiplePhotoAction)
+            }
         }
     }
 
@@ -158,7 +223,7 @@ object Action {
             }
             // 권한이 다 있지 않을 경우
             else {
-                Utils.checkAbsentPerms(perms, Constants.PERM_CAMERA_REQ_CODE,
+                Utils.checkAbsentPerms(perms, Constants.PERM_CAMERA_DEVICE_REQ_CODE,
                     basicActivity.cameraDeviceAction)
             }
         }

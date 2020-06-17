@@ -38,8 +38,8 @@ object Location {
         }
         // GPS 사용이 불가능한 경우
         else {
-            val returnObj = Utils.createJSONObject(
-                true, Constants.MSG_NOT_LOAD_LAT_LOT)
+            val returnObj = Utils.createJSONObject(true,
+                null, Constants.MSG_NOT_LOAD_LAT_LOT)
             basicActivity.locationAction?.promiseReturn(returnObj)
         }
     }
@@ -83,7 +83,8 @@ object Location {
                 locObj.put("lot", longitude)
 
                 // promiseReturn할 JSONObject 생성
-                val returnObj = Utils.createJSONObject(true, locObj)
+                val returnObj = Utils.createJSONObject(true,
+                    locObj, null)
                 (App.activity as BasicActivity).locationAction?.promiseReturn(returnObj)
             }
         }

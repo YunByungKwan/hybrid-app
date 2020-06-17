@@ -78,7 +78,7 @@ class Constants {
        const val DIAL_MSG_SEND_SMS = "앱을 사용하기 위해 SMS 보내기 권한이 필요합니다."
 
        const val DENIED_DIAL_TITLE = "알림"
-       const val DENIED_DIAL_MSG = "해당 권한이 거부되었습니다."
+       const val MSG_DENIED_PERM = "해당 권한이 거부되었습니다"
        const val DENIED_DIAL_POS = "확인"
 
        const val BIO_PROMPT_TITLE = "생체 인증"
@@ -94,6 +94,12 @@ class Constants {
 
        const val BASE64_URL = "data:image/jpeg;base64,"
 
+       /** QR Code 텍스트 */
+       const val MSG_NO_QR = "QR Code값이 존재하지 않습니다"
+       const val MSG_NOT_LOAD_QR = "QR Code값을 불러올 수 없습니다"
+
+       /** Camera 텍스트 */
+       const val MSG_NOT_LOAD_CAMERA = "카메라 앱을 실행할 수 없습니다"
        /** 알림 텍스트 */
        const val NOTI_CHANNEL_ID = "com.example.hybridapp"
        const val NOTI_CHANNEL_NAME = "롯데정보통신"
@@ -103,11 +109,19 @@ class Constants {
 
 
        /** 네트워크 상태 텍스트 */
-       const val MSG_DISCONNECTED = "No Connection!"
-       const val MSG_CELLULAR = "Cellular Connection!"
-       const val MSG_WIFI = "WIFI Connection!"
+       const val MSG_DISCONNECTED = "No Connection"
+       const val MSG_CELLULAR = "Cellular Connection"
+       const val MSG_WIFI = "WIFI Connection"
 
        const val RESULT_CANCELED = "Cancel"
+
+       /** 위치 텍스트 */
+       const val MSG_NOT_LOAD_LAT_LOT = "현재 위도, 경도를 불러올 수 없습니다"
+
+       /** JSONObject key */
+       const val OBJ_KEY_AUTH = "auth"
+       const val OBJ_KEY_DATA = "data"
+       const val OBJ_KEY_MSG = "msg"
 
        /** 로그 텍스트 */
        const val LOG_MSG_CAMERA = "Camera app can't be launched."
@@ -150,11 +164,13 @@ class Constants {
        const val QR_REQ_CODE = IntentIntegrator.REQUEST_CODE // 49374
 
        /** PERMISSION CODE */
-       const val PERM_CAMERA_REQ_CODE = 1001
+       const val PERM_QR_REQ_CODE = 1001
        const val PERM_WRITE_REQ_CODE = 1002
        const val PERM_READ_WRITE_REQ_CODE = 1003
-       const val PERM_LOCATION_REQ_CODE = 1004
-       const val PERM_SEND_SMS_REQ_CODE = 1005
+       const val PERM_CAMERA_DEVICE_REQ_CODE = 1004
+       const val PERM_CAMERA_REQ_CODE = 1005
+       const val PERM_LOCATION_REQ_CODE = 1006
+       const val PERM_SEND_SMS_REQ_CODE = 1007
 
        /** Function */
        fun LOGD(message: String) = Log.d(TAG, message)

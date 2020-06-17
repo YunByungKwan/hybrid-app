@@ -34,14 +34,4 @@ object Dialog {
         dialog.create()
         dialog.show()
     }
-
-    /** 권한 거부 시 다이얼로그 */
-    fun showDenialPermissionText() {
-        Constants.LOGD("Call showDenialPermissionText() in Dialog object.")
-
-        show(Constants.DENIED_DIAL_TITLE, Constants.DENIED_DIAL_MSG, Constants.DENIED_DIAL_POS,
-            null, null, null, null,
-            null
-        ) {}
-    }
 }

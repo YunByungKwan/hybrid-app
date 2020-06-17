@@ -2,7 +2,6 @@ package com.example.hybridapp.util.module
 
 import android.content.Context
 import com.example.hybridapp.App
-import com.example.hybridapp.util.Constants
 
 object SharedPreferences {
     

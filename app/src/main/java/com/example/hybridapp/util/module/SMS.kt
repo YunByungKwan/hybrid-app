@@ -52,10 +52,9 @@ object SMS {
 
             Constants.LOG_MSG_SMS_SUCCESS
         } else {
-            Utils.checkDangerousPermissions(arrayOf(Constants.PERM_SEND_SMS),
-                Constants.PERM_SEND_SMS_REQ_CODE)
+//            Utils.checkAbsentPerms(arrayOf(Constants.PERM_SEND_SMS),
+//                Constants.PERM_SEND_SMS_REQ_CODE. )
 
-            Log.d("dlgodnjs", "asggg")
             ""
         }
     }

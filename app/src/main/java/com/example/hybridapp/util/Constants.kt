@@ -100,6 +100,10 @@ class Constants {
 
        /** Camera 텍스트 */
        const val MSG_NOT_LOAD_CAMERA = "카메라 앱을 실행할 수 없습니다"
+
+       /** Photo 텍스트 */
+       const val MSG_NOT_LOAD_GALLERY = "앨범을 실행할 수 없습니다"
+
        /** 알림 텍스트 */
        const val NOTI_CHANNEL_ID = "com.example.hybridapp"
        const val NOTI_CHANNEL_NAME = "롯데정보통신"
@@ -167,10 +171,17 @@ class Constants {
        const val PERM_QR_REQ_CODE = 1001
        const val PERM_WRITE_REQ_CODE = 1002
        const val PERM_READ_WRITE_REQ_CODE = 1003
-       const val PERM_CAMERA_DEVICE_REQ_CODE = 1004
-       const val PERM_CAMERA_REQ_CODE = 1005
+       //const val PERM_CAMERA_REQ_CODE = 1005
        const val PERM_LOCATION_REQ_CODE = 1006
        const val PERM_SEND_SMS_REQ_CODE = 1007
+
+       const val PERM_CAMERA_DEVICE_REQ_CODE = 1008
+       const val PERM_CAMERA_REQ_CODE = 1009
+       const val PERM_PHOTO_DEVICE_REQ_CODE = 1010
+       const val PERM_PHOTO_REQ_CODE = 1011
+       const val PERM_MUL_PHOTO_DEVICE_REQ_CODE = 1012
+       const val PERM_MUL_PHOTO_REQ_CODE = 1013
+
 
        /** Function */
        fun LOGD(message: String) = Log.d(TAG, message)

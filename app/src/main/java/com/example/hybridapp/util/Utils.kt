@@ -60,17 +60,11 @@ object Utils {
     fun checkAbsentPerms(permissions: Array<out String>, code: Int, action: FlexAction?) {
         Constants.LOGD("Call checkAbsentPerms()")
 
-        val basicActivity = App.activity as BasicActivity
         // 거절한 권한이 하나라도 존재할 경우
         if (existsDenialPermission(permissions)) {
-            if(action == basicActivity.locationAction) {
-                val returnObj = createJSONObject(false,
-                    "설정 > 앱에서 필수 권한들을 승인해 주세요")
-                action?.promiseReturn(returnObj)
-            } else if(action == basicActivity.cameraDeviceAction) {
-                // Constants.LOGE("Here", "HEREE")
-                action?.resolveVoid()
-            }
+            val returnObj = createJSONObject(false,
+                null, "설정 > 앱에서 필수 권한들을 승인해 주세요")
+            action?.promiseReturn(returnObj)
         } else { // 승인이 필요한 권한들을 요청
             val perms = getPermissionsToRequest(permissions)
             requestPermissions(perms, code)
@@ -111,29 +105,6 @@ object Utils {
         Constants.LOGD("Call requestPermissions()")
 
         ActivityCompat.requestPermissions(App.activity, permissions, requestCode)
-    }
-
-    /** 권한 다이얼로그 메시지 */
-    private fun getDialogMessage(permissionCode: Int): String {
-        when(permissionCode) {
-            Constants.PERM_CAMERA_REQ_CODE -> {
-                return Constants.DIAL_MSG_CAMERA
-            }
-            Constants.PERM_WRITE_REQ_CODE -> {
-                return Constants.DIAL_MSG_WRITE
-            }
-            Constants.PERM_READ_WRITE_REQ_CODE -> {
-                return Constants.DIAL_MSG_READ_WRITE
-            }
-            Constants.PERM_LOCATION_REQ_CODE -> {
-                return Constants.DIAL_MSG_LOCATION
-            }
-            Constants.PERM_SEND_SMS_REQ_CODE -> {
-                return Constants.DIAL_MSG_SEND_SMS
-            }
-        }
-
-        return ""
     }
 
     /** 암시적 인텐트를 받을 수 있는 앱이 있는지 확인 */
@@ -347,70 +318,114 @@ object Utils {
     /** JSONObject 생성
      *
      * Parameter:
-     * Boolean, JSONObject
-     */
-    fun createJSONObject(authValue: Boolean, dataValue: JSONObject): JSONObject {
-        val obj = JSONObject()
-        obj.put(Constants.OBJ_KEY_AUTH, authValue)
-        obj.put(Constants.OBJ_KEY_DATA, dataValue)
-
-        return obj
-    }
-
-    /** JSONObject 생성
-     *
-     * Parameter:
      * Boolean, String
      */
-    fun createJSONObject(authValue: Boolean, msgValue: String): JSONObject {
+    fun createJSONObject(authValue: Boolean?, dataValue: Any?, msgValue: String?): JSONObject {
         val obj = JSONObject()
         obj.put(Constants.OBJ_KEY_AUTH, authValue)
+
+        when(dataValue) {
+            is String -> {
+                obj.put(Constants.OBJ_KEY_DATA, dataValue)
+            }
+            is JSONObject -> {
+                obj.put(Constants.OBJ_KEY_DATA, dataValue)
+            }
+            is Array<*> -> {
+                obj.put(Constants.OBJ_KEY_DATA, dataValue)
+            }
+            else -> {
+                obj.put(Constants.OBJ_KEY_DATA, null)
+            }
+        }
+
         obj.put(Constants.OBJ_KEY_MSG, msgValue)
 
         return obj
     }
 
-    /** JSONObject 생성
-     *
-     * Parameter:
-     * Boolean, String, String
-     */
-    fun createJSONObject(authValue: Boolean, dataValue: String, msgValue: String): JSONObject {
-        val obj = JSONObject()
-        obj.put(Constants.OBJ_KEY_AUTH, authValue)
-        obj.put(Constants.OBJ_KEY_DATA, dataValue)
-        obj.put(Constants.OBJ_KEY_MSG, msgValue)
-
-        return obj
-    }
-
-    /** JSONObject 생성
-     *
-     * Parameter:
-     * Boolean, JSONObject, String
-     */
-    fun createJSONObject(authValue: Boolean, dataValue: JSONObject, msgValue: String): JSONObject {
-        val obj = JSONObject()
-        obj.put(Constants.OBJ_KEY_AUTH, authValue)
-        obj.put(Constants.OBJ_KEY_DATA, dataValue)
-        obj.put(Constants.OBJ_KEY_MSG, msgValue)
-
-        return obj
-    }
-
-    /** JSONObject 생성
-     *
-     * Parameter:
-     * Boolean, Array, String
-     */
-    fun createJSONObject(authValue: Boolean, dataValue: Array<out String>, msgValue: String)
-            : JSONObject
-    {
-        val obj = JSONObject()
-        obj.put(Constants.OBJ_KEY_AUTH, authValue)
-        obj.put(Constants.OBJ_KEY_DATA, dataValue)
-        obj.put(Constants.OBJ_KEY_MSG, msgValue)
-
-        return obj
-    }
+//    /** JSONObject 생성
+//     *
+//     * Parameter:
+//     * Boolean, String
+//     */
+//    fun createJSONObject(authValue: Boolean, dataValue: String): JSONObject {
+//        val obj = JSONObject()
+//        obj.put(Constants.OBJ_KEY_AUTH, authValue)
+//        obj.put(Constants.OBJ_KEY_DATA, dataValue)
+//        obj.put(Constants.OBJ_KEY_MSG, null)
+//
+//        return obj
+//    }
+//
+//    /** JSONObject 생성
+//     *
+//     * Parameter:
+//     * Boolean, JSONObject
+//     */
+//    fun createJSONObject(authValue: Boolean, dataValue: JSONObject): JSONObject {
+//        val obj = JSONObject()
+//        obj.put(Constants.OBJ_KEY_AUTH, authValue)
+//        obj.put(Constants.OBJ_KEY_DATA, dataValue)
+//        obj.put(Constants.OBJ_KEY_MSG, null)
+//
+//        return obj
+//    }
+//
+//    /** JSONObject 생성
+//     *
+//     * Parameter:
+//     * Boolean, String
+//     */
+//    fun createJSONObject(authValue: Boolean?, msgValue: String?): JSONObject {
+//        val obj = JSONObject()
+//        obj.put(Constants.OBJ_KEY_AUTH, authValue)
+//        obj.put(Constants.OBJ_KEY_MSG, msgValue)
+//
+//        return obj
+//    }
+//
+//    /** JSONObject 생성
+//     *
+//     * Parameter:
+//     * Boolean, String, String?
+//     */
+//    fun createJSONObject(authValue: Boolean, dataValue: String, msgValue: String): JSONObject {
+//        val obj = JSONObject()
+//        obj.put(Constants.OBJ_KEY_AUTH, authValue)
+//        obj.put(Constants.OBJ_KEY_DATA, dataValue)
+//        obj.put(Constants.OBJ_KEY_MSG, msgValue)
+//
+//        return obj
+//    }
+//
+//    /** JSONObject 생성
+//     *
+//     * Parameter:
+//     * Boolean, JSONObject, String
+//     */
+//    fun createJSONObject(authValue: Boolean, dataValue: JSONObject, msgValue: String): JSONObject {
+//        val obj = JSONObject()
+//        obj.put(Constants.OBJ_KEY_AUTH, authValue)
+//        obj.put(Constants.OBJ_KEY_DATA, dataValue)
+//        obj.put(Constants.OBJ_KEY_MSG, msgValue)
+//
+//        return obj
+//    }
+//
+//    /** JSONObject 생성
+//     *
+//     * Parameter:
+//     * Boolean, Array, String
+//     */
+//    fun createJSONObject(authValue: Boolean, dataValue: Array<out String>, msgValue: String)
+//            : JSONObject
+//    {
+//        val obj = JSONObject()
+//        obj.put(Constants.OBJ_KEY_AUTH, authValue)
+//        obj.put(Constants.OBJ_KEY_DATA, dataValue)
+//        obj.put(Constants.OBJ_KEY_MSG, msgValue)
+//
+//        return obj
+//    }
 }

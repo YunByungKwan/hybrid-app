@@ -23,75 +23,52 @@ import java.lang.Exception
 object Photo {
 
     /** 갤러리 호출 (1장) */
-    fun requestImage(action: FlexAction?, ratio: Double?, isWidthRatio: Boolean?) {
+    fun requestImage(isWidthRatio: Boolean?) {
         Constants.LOGD("Call requestImage()")
 
-        val storagePerms = arrayOf(Constants.PERM_WRITE_EXTERNAL_STORAGE,
-            Constants.PERM_READ_EXTERNAL_STORAGE)
+        val basicActivity = App.activity as BasicActivity
+        val packageManager = App.INSTANCE.packageManager
+        val singlePhotoIntent = getSinglePhotoIntent()
 
-        if(Utils.existAllPermission(storagePerms) && action != null) {
-            Constants.LOGD("Read/write storage permission exist.")
-
-            val singlePhotoIntent = getSinglePhotoIntent()
-            val packageManager = App.INSTANCE.packageManager
-            val basicActivity = App.activity as BasicActivity
-            basicActivity.ratio = ratio
-
-            if(Utils.existsReceiveActivity(singlePhotoIntent, packageManager)) {
-                if(isWidthRatio != null) {
-                    basicActivity.photoDeviceAction = action
-                    basicActivity.isWidthRatio = isWidthRatio
-
-                    basicActivity.startActivityForResult(singlePhotoIntent,
-                        Constants.PHOTO_DEVICE_RATIO_REQ_CODE)
-                } else {
-                    basicActivity.photoAction = action
-
-                    basicActivity.startActivityForResult(singlePhotoIntent,
-                        Constants.PHOTO_RATIO_REQ_CODE)
-                }
-            } else {
-                Constants.LOGE(Constants.LOG_MSG_GALLERY)
-                action.resolveVoid()
+        // 갤러리 앱을 사용할 수 있는 경우
+        if(Utils.existsReceiveActivity(singlePhotoIntent, packageManager)) {
+            // 디바이스 기준으로 resize
+            if(isWidthRatio != null) {
+                basicActivity.isWidthRatio = isWidthRatio
+                basicActivity.startActivityForResult(singlePhotoIntent,
+                    Constants.PHOTO_DEVICE_RATIO_REQ_CODE)
+            }
+            // 이미지 기준으로 resize
+            else {
+                basicActivity.startActivityForResult(singlePhotoIntent,
+                    Constants.PHOTO_RATIO_REQ_CODE)
             }
         } else {
-            Utils.checkAbsentPerms(storagePerms, Constants.PERM_READ_WRITE_REQ_CODE, action)
-            //action?.resolveVoid()
+            val returnObj = Utils.createJSONObject(true,
+                null, Constants.MSG_NOT_LOAD_GALLERY)
+            basicActivity.photoDeviceAction?.promiseReturn(returnObj)
         }
     }
 
     /** 갤러리 호출 (여러 장) */
-    fun requestMultipleImages(action: FlexAction?, ratio: Double, isWidthRatio: Boolean?) {
+    fun requestMultipleImages(isWidthRatio: Boolean?) {
         Constants.LOGE("Call requestMultipleImages()")
 
-        val storagePerms =
-            arrayOf(Constants.PERM_WRITE_EXTERNAL_STORAGE,
-                Constants.PERM_READ_EXTERNAL_STORAGE)
+        val packageManager = App.INSTANCE.packageManager
+        val basicActivity = App.activity as BasicActivity
+        val multiplePhotosIntent = getMultiplePhotosIntent()
 
-        if(Utils.existAllPermission(storagePerms) && action != null) {
-            val multiplePhotosIntent = getMultiplePhotosIntent()
-            val packageManager = App.INSTANCE.packageManager
-            val basicActivity = App.activity as BasicActivity
-            basicActivity.ratio = ratio
-
-            if(Utils.existsReceiveActivity(multiplePhotosIntent, packageManager)) {
-                if(isWidthRatio != null) {
-                    basicActivity.multiplePhotoDeviceAction = action
-                    basicActivity.isWidthRatio = isWidthRatio
-                    basicActivity.startActivityForResult(multiplePhotosIntent,
-                        Constants.MULTI_PHOTO_DEVICE_RATIO_REQ_CODE)
-                } else {
-                    basicActivity.multiplePhotosAction = action
-                    basicActivity.startActivityForResult(multiplePhotosIntent,
-                        Constants.MULTI_PHOTO_RATIO_REQ_CODE)
-                }
+        if(Utils.existsReceiveActivity(multiplePhotosIntent, packageManager)) {
+            if(isWidthRatio != null) {
+                basicActivity.isWidthRatio = isWidthRatio
+                basicActivity.startActivityForResult(multiplePhotosIntent,
+                    Constants.MULTI_PHOTO_DEVICE_RATIO_REQ_CODE)
             } else {
-                Constants.LOGE(Constants.LOG_MSG_GALLERY)
-                action.resolveVoid()
+                basicActivity.startActivityForResult(multiplePhotosIntent,
+                    Constants.MULTI_PHOTO_RATIO_REQ_CODE)
             }
         } else {
-            Utils.checkAbsentPerms(storagePerms, Constants.PERM_READ_WRITE_REQ_CODE, action)
-            //action?.resolveVoid()
+            Constants.LOGE(Constants.LOG_MSG_GALLERY)
         }
     }
 

@@ -37,8 +37,8 @@ object Camera {
         }
         // 카메라 앱을 사용할 수 없는 경우
         else {
-            val returnObj = Utils.createJSONObject(
-                true, Constants.MSG_NOT_LOAD_CAMERA)
+            val returnObj = Utils.createJSONObject(true,
+                null, Constants.MSG_NOT_LOAD_CAMERA)
             basicActivity.cameraDeviceAction?.promiseReturn(returnObj)
         }
     }

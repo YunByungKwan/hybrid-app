@@ -13,7 +13,7 @@ open class BasicActivity: AppCompatActivity() {
     var photoDeviceAction: FlexAction? = null
     var photoAction: FlexAction? = null
     var multiplePhotoDeviceAction: FlexAction? = null
-    var multiplePhotosAction: FlexAction? = null
+    var multiplePhotoAction: FlexAction? = null
     var qrCodeScanAction: FlexAction? = null
     var locationAction: FlexAction? = null
     var bioAuthAction: FlexAction? = null

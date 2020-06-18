@@ -1,17 +1,12 @@
 package com.example.hybridapp
 
 import android.app.Activity
-import android.app.DownloadManager
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.graphics.Bitmap
-import android.graphics.ImageDecoder
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.os.Environment
 import android.os.Handler
-import android.provider.MediaStore
 import android.util.Log
 import android.view.View
 import android.view.WindowManager
@@ -35,7 +30,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.json.JSONArray
-import java.net.URLDecoder
 import kotlin.collections.ArrayList
 
 class MainActivity : BasicActivity() {
@@ -78,7 +72,6 @@ class MainActivity : BasicActivity() {
 
         setFlexWebView()
         setActions()
-        setWebViewDownloadListener()
         window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
 
     }
@@ -108,48 +101,9 @@ class MainActivity : BasicActivity() {
         flex_web_view.setAction(Constants.TYPE_MULTI_PHOTO_RATIO, Action.multiPhotoByRatio)
         flex_web_view.setAction(Constants.TYPE_QR_CODE_SCAN, Action.qrCode)
         flex_web_view.setAction(Constants.TYPE_LOCATION, Action.location)
-        flex_web_view.setAction(Constants.TYPE_BIO_AUTHENTICATION, Action.bioAuth)
+        flex_web_view.setAction(Constants.TYPE_SEND_SMS, Action.sendSms)
+        flex_web_view.setAction(Constants.TYPE_AUTH, Action.authentication)
         flex_web_view.setAction(Constants.TYPE_LOCAL_REPO, Action.localRepository)
-    }
-
-    private fun setWebViewDownloadListener() {
-        /** File Download */
-        flex_web_view.setDownloadListener { url, userAgent, contentDisposition, mimeType, _ ->
-            if(Utils.existsPermission(Constants.PERM_WRITE_EXTERNAL_STORAGE)) {
-                try {
-                    val request = DownloadManager.Request(Uri.parse(url))
-                    val downloadManager
-                            = getSystemService(DOWNLOAD_SERVICE) as DownloadManager
-
-                    val decodedContentDisposition
-                            = URLDecoder.decode(contentDisposition,"UTF-8")
-
-                    val fileName = decodedContentDisposition
-                        .replace("attachment; filename=", "")
-
-                    request.setMimeType(mimeType)
-                    request.addRequestHeader("User-Agent", userAgent)
-                    request.setDescription("Downloading File")
-                    request.setAllowedOverMetered(true)
-                    request.setAllowedOverRoaming(true)
-                    request.setTitle(fileName)
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                        request.setRequiresCharging(false)
-                    }
-                    request.allowScanningByMediaScanner()
-                    request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
-                    request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, fileName)
-                    downloadManager.enqueue(request)
-
-                    Toast.showLongText("파일이 다운로드됩니다.")
-                }
-                catch (e: Exception) {
-                    Log.e(Constants.TAG_MAIN, e.toString())
-                }
-            } else {
-                Utils.requestPermissions(arrayOf(Constants.PERM_WRITE_EXTERNAL_STORAGE), 1234)
-            }
-        }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -373,11 +327,12 @@ class MainActivity : BasicActivity() {
                     multiplePhotoAction?.resolveVoid()
                 }
             }
-            Constants.PERM_SEND_SMS_REQ_CODE -> {
+            Constants.SEND_SMS_REQ_CODE -> {
+                Constants.LOGD("SEND SMS in onActivityResult()")
                 if(resultOk) {
-
+                    Constants.LOGD("abcdefg")
                 } else {
-
+                    Constants.LOGD("xyz")
                 }
             }
             Constants.FILE_UPLOAD_REQ_CODE -> {
@@ -510,10 +465,15 @@ class MainActivity : BasicActivity() {
                 }
             }
             Constants.PERM_SEND_SMS_REQ_CODE -> {
+                // 처음에 권한을 승인한 경우
                 if(isNotEmpty && isGranted) {
-                    Constants.LOGD(Constants.LOG_PERM_GRANTED_SEND_SMS)
-                } else {
-
+                    SMS.sendMessage()
+                }
+                // 권한을 거부한 경우
+                else {
+                    val returnObj = Utils.createJSONObject(false,
+                        null, Constants.MSG_DENIED_PERM)
+                    sendSmsAction?.promiseReturn(returnObj)
                 }
             }
         }
@@ -546,9 +506,9 @@ class MainActivity : BasicActivity() {
         }, 2000)
     }
 
-    /*
+    /**
     * 인터페이스
-    * */
+    */
     inner class FlexPopupInterface{
 
         @FlexFuncInterface
@@ -572,16 +532,19 @@ class MainActivity : BasicActivity() {
                 flex_pop_up_web_view.layoutParams = Utils.getParamsAlignCenterInConstraintLayout(
                     popupWidth, popupHeight, R.id.constraintLayout)
 
-                val bottomUp = AnimationUtils.loadAnimation(this@MainActivity, R.anim.open)
+                val bottomUp = AnimationUtils.loadAnimation(this@MainActivity,
+                        R.anim.open)
                 flex_pop_up_web_view.startAnimation(bottomUp)
                 flex_pop_up_web_view.bringToFront()
 
                 // 닫기 버튼 생성
-                popupCloseButton = Utils.createCloseButton(this@MainActivity, R.id.constraintLayout)
+                popupCloseButton = Utils.createCloseButton(this@MainActivity,
+                        R.id.constraintLayout)
                 constraintLayout.addView(popupCloseButton)
 
                 popupCloseButton.setOnClickListener {
-                    Utils.closePopup(this@MainActivity, constraintLayout, backgroundView, popupCloseButton, flex_pop_up_web_view)
+                    Utils.closePopup(this@MainActivity, constraintLayout, backgroundView,
+                        popupCloseButton, flex_pop_up_web_view)
                 }
             }
         }

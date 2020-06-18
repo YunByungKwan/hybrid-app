@@ -1,6 +1,8 @@
 package com.example.hybridapp
 
 import android.content.DialogInterface
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.fragment.app.FragmentActivity
 import app.dvkyun.flexhybridand.FlexAction
 import com.example.hybridapp.basic.BasicActivity
@@ -64,14 +66,17 @@ object Action {
             val returnObj = JSONObject()
             when(Network.getStatus(App.activity)) {
                 Constants.NET_STAT_CELLULAR -> {
+                    returnObj.put(Constants.OBJ_KEY_DATA, Constants.NET_STAT_CELLULAR)
                     returnObj.put(Constants.OBJ_KEY_MSG, Constants.MSG_CELLULAR)
                     networkAction?.promiseReturn(returnObj)
                 }
                 Constants.NET_STAT_WIFI -> {
+                    returnObj.put(Constants.OBJ_KEY_DATA, Constants.NET_STAT_WIFI)
                     returnObj.put(Constants.OBJ_KEY_MSG, Constants.MSG_WIFI)
                     networkAction?.promiseReturn(returnObj)
                 }
                 else -> {
+                    returnObj.put(Constants.OBJ_KEY_DATA, Constants.NET_STAT_DISCONNECTED)
                     returnObj.put(Constants.OBJ_KEY_MSG, Constants.MSG_DISCONNECTED)
                     networkAction?.promiseReturn(returnObj)
                 }
@@ -163,8 +168,8 @@ object Action {
             basicActivity.multiplePhotoDeviceAction = multiplePhotoDeviceAction
             basicActivity.ratio = ratio
 
-            val perms =
-                arrayOf(Constants.PERM_WRITE_EXTERNAL_STORAGE, Constants.PERM_READ_EXTERNAL_STORAGE)
+            val perms = arrayOf(Constants.PERM_WRITE_EXTERNAL_STORAGE,
+                Constants.PERM_READ_EXTERNAL_STORAGE)
 
             // 권한이 다 있을 경우
             if(Utils.existAllPermission(perms)) {
@@ -278,66 +283,79 @@ object Action {
         }
     }
 
-    val bioAuth: (FlexAction?, JSONArray?) -> Unit = { bioAuthAction, _->
+    /**================================= SEND SMS Action =========================================*/
+    val sendSms: (FlexAction?, JSONArray?) -> Unit = { sendSmsAction, array ->
         CoroutineScope(Dispatchers.Main).launch {
-            val fragmentActivity = App.activity as FragmentActivity
+            Constants.LOGD("============== Send SMS Action ==============")
 
-            if(BioAuth.canAuthenticate()) {
-                BioAuth.showPrompt(fragmentActivity, bioAuthAction)
-            } else {
-                Constants.LOGE("You can't call biometric prompt.")
+            // inject action
+            val basicActivity = App.activity as BasicActivity
+            basicActivity.sendSmsAction = sendSmsAction
+            basicActivity.phoneNumber = array?.getString(0)
+            basicActivity.smsMessage = array?.getString(1)
+
+            val perms = arrayOf(Constants.PERM_SEND_SMS)
+
+            // 권한이 다 있을 경우
+            if(Utils.existAllPermission(perms)) {
+                SMS.sendMessage()
+            }
+            // 권한이 다 있지 않을 경우
+            else {
+                Utils.checkAbsentPerms(perms, Constants.PERM_SEND_SMS_REQ_CODE,
+                    basicActivity.sendSmsAction)
             }
         }
     }
 
+    /**=============================== Authentication Action =====================================*/
+    @RequiresApi(Build.VERSION_CODES.P)
+    val authentication: (FlexAction?, JSONArray?) -> Unit = { authAction, _->
+        CoroutineScope(Dispatchers.Main).launch {
+            Constants.LOGD("============== Authentication Action ==============")
+
+            val fragmentActivity = App.activity as FragmentActivity
+            val basicActivity = App.activity as BasicActivity
+            basicActivity.authAction = authAction
+
+            if(Authentication.canAuthenticate()) {
+                Authentication.showPrompt(fragmentActivity)
+            } else {
+                Constants.LOGE("You can't call biometric prompt.")
+                val returnObj = Utils.createJSONObject(true,
+                    false, "인증을 진행할 수 없습니다")
+                basicActivity.authAction?.promiseReturn(returnObj)
+            }
+        }
+    }
+
+    /**============================ Local Repository Action ======================================*/
     val localRepository: (FlexAction?, JSONArray?) -> Unit = { localRepoAction, array ->
+        Constants.LOGD("============== Local Repository Action ==============")
+
         when (array!!.getInt(0)) {
-            Constants.SET_DATA_SHARED -> {
+            Constants.PUT_DATA_CODE -> {
                 val key = array.getString(1)
                 val value = array.getString(2)
 
-                val originValue = SharedPreferences.getString(Constants.SHARED_FILE_NAME, key)
+                SharedPreferences.putData(Constants.SHARED_FILE_NAME, key, value)
 
-                // 해당 키값에 대한 데이터가 존재하지 않을 경우
-                if(originValue == "") {
-                    // 입력받은 value값이 비어있는 경우
-                    if(value == "") {
-                        localRepoAction?.promiseReturn("데이터를 입력해 주세요.")
-                    } else {
-                        SharedPreferences.putData(Constants.SHARED_FILE_NAME, key, value)
-                        localRepoAction?.promiseReturn("데이터를 저장하였습니다.")
-                    }
-                }
-                // 해당 키값에 대한 데이터가 이미 존재하는 경우
-                else {
-                    localRepoAction?.promiseReturn("데이터가 이미 존재합니다.")
-                }
-
+                val returnObj = Utils.createJSONObject(null,
+                    null, "데이터를 저장하였습니다")
+                localRepoAction?.promiseReturn(returnObj)
             }
-            Constants.GET_DATA_SHARED -> {
+            Constants.GET_DATA_CODE -> {
                 val key = array.getString(1)
                 var value = SharedPreferences.getString(Constants.SHARED_FILE_NAME, key)
 
-                // 해당 키값에 대한 데이터가 존재하지 않을 경우
-                if(value == "") {
-                    localRepoAction?.promiseReturn(
-                        "해당 키값에 대한 데이터가 존재하지 않습니다.")
-                } else {
-                    localRepoAction?.promiseReturn(value)
-                }
+                val returnObj = Utils.createJSONObject(null,
+                    value, null)
+                localRepoAction?.promiseReturn(returnObj)
             }
-            Constants.DELETE_DATA_SHARED -> {
+            Constants.DEL_DATA_CODE -> {
                 val key = array.getString(1)
-                val value = SharedPreferences.getString(Constants.SHARED_FILE_NAME, key)
-
-                // 해당 키값에 대한 데이터가 존재하지 않을 경우
-                if(value == "") {
-                    localRepoAction?.promiseReturn(
-                        "해당 키값에 대한 데이터가 존재하지 않습니다.")
-                } else {
-                    SharedPreferences.removeData(Constants.SHARED_FILE_NAME, key)
-                    localRepoAction?.promiseReturn("데이터를 제거하였습니다.")
-                }
+                SharedPreferences.removeData(Constants.SHARED_FILE_NAME, key)
+                localRepoAction?.promiseReturn("데이터를 제거하였습니다")
             }
         }
     }

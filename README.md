@@ -32,7 +32,7 @@
 - size_t responseWriter(char*, size_t, size_t, std::string*)<br>
 : cURL을 이용하여 http통신 후 response를 받는 callback함수 
 
-- bool verifyKeyHash(const char*)<br>
+- bool isCorrectKeyHash(const char*)<br>
 : 서버에 해쉬값을 전송
 
 - bool isHttpConnected(long)<br>
@@ -63,7 +63,7 @@ JNIEnv *env;
 state->activity->vm->AttachCurrentThread(&env, NULL);
 const char* hash = getSignature(env, context);
 ...
-if(!verifyKeyHash(hash)) {
+if(!isCorrectKeyHash(hash)) {
     exit(0);
 }
 ...

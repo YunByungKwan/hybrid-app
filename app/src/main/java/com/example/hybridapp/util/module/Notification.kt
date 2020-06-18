@@ -13,6 +13,7 @@ import com.example.hybridapp.R
 import com.example.hybridapp.util.Constants
 
 object Notification {
+
     /**
      * 알림 채널 생성
      * Android 8.0(API 레벨 26, O) 이상부터 필수 생성해야 함

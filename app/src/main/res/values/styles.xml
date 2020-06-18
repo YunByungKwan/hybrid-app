@@ -13,4 +13,6 @@
         <item name="android:windowExitAnimation">@anim/close</item>
     </style>
 
+    <style name="introTheme" parent="Theme.AppCompat.NoActionBar">
+    </style>
 </resources>

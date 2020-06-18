@@ -1,15 +1,15 @@
 package com.example.hybridapp.util.module
 
+import android.os.Build
 import androidx.biometric.BiometricManager
 import androidx.biometric.BiometricPrompt
 import androidx.fragment.app.FragmentActivity
-import app.dvkyun.flexhybridand.FlexAction
 import com.example.hybridapp.App
 import com.example.hybridapp.basic.BasicActivity
 import com.example.hybridapp.util.Constants
-import java.util.concurrent.Executor
+import com.example.hybridapp.util.Utils
 
-object BioAuth {
+object Authentication {
 
     /** 생체 인증이 가능한지 판별 */
     fun canAuthenticate(): Boolean {
@@ -36,17 +36,20 @@ object BioAuth {
     }
 
     /** 생체 인증 다이얼로그 띄우기 */
-    fun showPrompt(fragmentActivity: FragmentActivity, action: FlexAction?){
+    fun showPrompt(fragmentActivity: FragmentActivity){
         Constants.LOGD("Call showPrompt()")
-
-        (App.activity as BasicActivity).bioAuthAction = action
 
         val promptInfo = getBiometricPromptInfo()
 
-        val biometricPrompt = BiometricPrompt(fragmentActivity,
-            Executor {}, getAuthenticationCallback())
-
-        biometricPrompt.authenticate(promptInfo)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            val biometricPrompt = BiometricPrompt(fragmentActivity,
+                App.INSTANCE.mainExecutor, getAuthenticationCallback())
+            biometricPrompt.authenticate(promptInfo)
+        } else {
+            val returnObj = Utils.createJSONObject(true,
+                false, "인증을 진행할 수 없습니다")
+            (App.activity as BasicActivity).authAction?.promiseReturn(returnObj)
+        }
     }
 
     private fun getBiometricPromptInfo(): BiometricPrompt.PromptInfo {
@@ -58,26 +61,31 @@ object BioAuth {
         .build()
     }
 
+    /** Authentication Callback 객체 */
     private fun getAuthenticationCallback() = object : BiometricPrompt.AuthenticationCallback() {
-        override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
-            super.onAuthenticationError(errorCode, errString)
-            Constants.LOGE("Call onAuthenticationError()")
-        }
 
+        // 인증 성공시
         override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
             super.onAuthenticationSucceeded(result)
-            Constants.LOGD("Call onAuthenticationSucceeded()")
-
-            val cryptoObject = result.cryptoObject
-            if(cryptoObject != null) {
-                val cipher = cryptoObject.cipher
-                Constants.LOGD("Cipher: $cipher")
-            }
+            Constants.LOGD("Call onAuthenticationSucceeded() in AuthenticationCallback()")
+            val returnObj = Utils.createJSONObject(true,
+                true, null)
+            (App.activity as BasicActivity).authAction?.promiseReturn(returnObj)
         }
 
+        // 인증 취소 버튼 클릭시, 인증에 실패시
+        override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
+            super.onAuthenticationError(errorCode, errString)
+            Constants.LOGE("Call onAuthenticationError() in AuthenticationCallback()")
+            val returnObj = Utils.createJSONObject(true,
+                false, "인증에 실패했습니다")
+            (App.activity as BasicActivity).authAction?.promiseReturn(returnObj)
+        }
+
+        // 인증이 일치하지 않을 경우, 여러번 틀렸을 경우
         override fun onAuthenticationFailed() {
             super.onAuthenticationFailed()
-            Constants.LOGE("Call onAuthenticationFailed()")
+            Constants.LOGE("Call onAuthenticationFailed() in AuthenticationCallback()")
         }
     }
 }

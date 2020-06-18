@@ -36,24 +36,14 @@ class FlexActionInterface {
     @FlexFuncInterface
     fun Snackbar(array: JSONArray) {
         CoroutineScope(Dispatchers.Main).launch {
-            val isShortSnackbar = array.getBoolean(1)
             val message = array.getString(0)
+            val isShortSnackbar = array.getBoolean(1)
 
             if(isShortSnackbar)
                 Snackbar.showShortText(App.activity.findViewById(R.id.constraintLayout), message)
             else
                 Snackbar.showLongText(App.activity.findViewById(R.id.constraintLayout), message)
         }
-    }
-
-    @FlexFuncInterface
-    fun SendSMS(array: JSONArray): String {
-        val phoneNumber = array.getString(0)
-        val message = array.getString(1)
-
-        Constants.LOGD("phoneNumber: $phoneNumber, message: $message")
-
-        return SMS.sendMessage(phoneNumber, message)
     }
 
     @FlexFuncInterface
@@ -89,21 +79,25 @@ class FlexActionInterface {
         Notification.create(channelId, id, title, message, Constants.NOTI_HIGH, pendingIntent)
     }
 
+    /**============================= RootingCheck Interface ======================================*/
     @FlexFuncInterface
     fun RootingCheck(array: JSONArray): String {
-        return "루팅이 확인되지 않았습니다."
+        return Constants.MSG_NO_ROOTING
     }
 
+    /**=============================== UniqueAppID Interface =====================================*/
     @FlexFuncInterface
     fun UniqueAppID(array: JSONArray): String {
         return Utils.getAppId()
     }
 
+    /**============================== UniqueDeviceID Interface ===================================*/
     @FlexFuncInterface
     fun UniqueDeviceID(array: JSONArray): String {
         return Utils.getDeviceId(App.INSTANCE)
     }
 
+    /** FileDownload */
     @FlexFuncInterface
     fun FileDownload(array: JSONArray) {
         val fileUrl = array.getString(0)

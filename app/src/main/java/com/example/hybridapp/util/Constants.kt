@@ -57,7 +57,9 @@ class Constants {
        const val TYPE_MULTI_PHOTO_DEVICE_RATIO = "MultiPhotoByDeviceRatio"
        const val TYPE_MULTI_PHOTO_RATIO = "MultiPhotoByRatio"
        const val TYPE_QR_CODE_SCAN = "QRCodeScan"
+       const val TYPE_SEND_SMS = "SendSMS"
        const val TYPE_LOCATION = "Location"
+       const val TYPE_AUTH = "Authentication"
        const val TYPE_BIO_AUTHENTICATION = "BioAuthentication"
        const val TYPE_LOCAL_REPO = "LocalRepository"
        const val TYPE_POP_UP = "WebPopup"
@@ -115,7 +117,7 @@ class Constants {
        /** 네트워크 상태 텍스트 */
        const val MSG_DISCONNECTED = "No Connection"
        const val MSG_CELLULAR = "Cellular Connection"
-       const val MSG_WIFI = "WIFI Connection"
+       const val MSG_WIFI = "Wifi Connection"
 
        const val RESULT_CANCELED = "Cancel"
 
@@ -153,9 +155,9 @@ class Constants {
        const val NOTIFICATION_ID = 101
 
        /** SHAREDPREFERENCES CODE */
-       const val SET_DATA_SHARED = 0
-       const val GET_DATA_SHARED = 1
-       const val DELETE_DATA_SHARED = 2
+       const val PUT_DATA_CODE = 0
+       const val GET_DATA_CODE = 1
+       const val DEL_DATA_CODE = 2
 
        /** INTENT REQUEST CODE */
        const val CAMERA_DEVICE_RATIO_REQ_CODE = 10001
@@ -166,6 +168,7 @@ class Constants {
        const val MULTI_PHOTO_RATIO_REQ_CODE = 10006
        const val FILE_UPLOAD_REQ_CODE = 10007
        const val QR_REQ_CODE = IntentIntegrator.REQUEST_CODE // 49374
+       const val SEND_SMS_REQ_CODE = 10008
 
        /** PERMISSION CODE */
        const val PERM_QR_REQ_CODE = 1001
@@ -182,7 +185,8 @@ class Constants {
        const val PERM_MUL_PHOTO_DEVICE_REQ_CODE = 1012
        const val PERM_MUL_PHOTO_REQ_CODE = 1013
 
-
+       /** 루팅체크 */
+       const val MSG_NO_ROOTING = "루팅이 확인되지 않았습니다"
        /** Function */
        fun LOGD(message: String) = Log.d(TAG, message)
 

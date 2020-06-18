@@ -1,7 +1,6 @@
 package com.example.hybridapp.util.module
 
 import android.view.View
-import com.example.hybridapp.util.Constants
 import com.google.android.material.snackbar.Snackbar
 
 object Snackbar {

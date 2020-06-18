@@ -24,7 +24,6 @@ import androidx.core.content.ContextCompat
 import app.dvkyun.flexhybridand.FlexAction
 import com.example.hybridapp.App
 import com.example.hybridapp.R
-import com.example.hybridapp.basic.BasicActivity
 import com.example.hybridapp.util.module.SharedPreferences
 import org.json.JSONObject
 import java.io.File
@@ -196,24 +195,26 @@ object Utils {
             Base64.NO_PADDING or Base64.NO_WRAP).substring(0, 11)
     }
 
-    /** 디바이스 id 가져오기 */
-    fun getDeviceId(context: Context): String {
-        return Settings.Secure.getString(context.contentResolver, Settings.Secure.ANDROID_ID)
-    }
-
     /** App id 가져오기 */
     fun getAppId(): String {
-        val appId : String = SharedPreferences.getString(Constants.SHARED_APPID_FILE_NAME, Constants.SHARED_APPID_KEY)
-        return if(appId.isNullOrEmpty()) {
-            val str: String = UUID.randomUUID().toString()
-            SharedPreferences.putData(Constants.SHARED_APPID_FILE_NAME, Constants.SHARED_APPID_KEY, str)
+        val appId : String = SharedPreferences.getString(Constants.SHARED_APPID_FILE_NAME,
+            Constants.SHARED_APPID_KEY)
 
-            str
+        return if(appId.isNullOrEmpty()) {
+            val uuid: String = UUID.randomUUID().toString()
+            SharedPreferences.putData(Constants.SHARED_APPID_FILE_NAME,
+                Constants.SHARED_APPID_KEY, uuid)
+
+            uuid
         }
         else {
             appId
         }
+    }
 
+    /** 디바이스 id 가져오기 */
+    fun getDeviceId(context: Context): String {
+        return Settings.Secure.getString(context.contentResolver, Settings.Secure.ANDROID_ID)
     }
 
     /** 현재 날짜와 시간 반환 */
@@ -328,6 +329,9 @@ object Utils {
             is String -> {
                 obj.put(Constants.OBJ_KEY_DATA, dataValue)
             }
+            is Boolean -> {
+                obj.put(Constants.OBJ_KEY_DATA, dataValue)
+            }
             is JSONObject -> {
                 obj.put(Constants.OBJ_KEY_DATA, dataValue)
             }
@@ -343,89 +347,4 @@ object Utils {
 
         return obj
     }
-
-//    /** JSONObject 생성
-//     *
-//     * Parameter:
-//     * Boolean, String
-//     */
-//    fun createJSONObject(authValue: Boolean, dataValue: String): JSONObject {
-//        val obj = JSONObject()
-//        obj.put(Constants.OBJ_KEY_AUTH, authValue)
-//        obj.put(Constants.OBJ_KEY_DATA, dataValue)
-//        obj.put(Constants.OBJ_KEY_MSG, null)
-//
-//        return obj
-//    }
-//
-//    /** JSONObject 생성
-//     *
-//     * Parameter:
-//     * Boolean, JSONObject
-//     */
-//    fun createJSONObject(authValue: Boolean, dataValue: JSONObject): JSONObject {
-//        val obj = JSONObject()
-//        obj.put(Constants.OBJ_KEY_AUTH, authValue)
-//        obj.put(Constants.OBJ_KEY_DATA, dataValue)
-//        obj.put(Constants.OBJ_KEY_MSG, null)
-//
-//        return obj
-//    }
-//
-//    /** JSONObject 생성
-//     *
-//     * Parameter:
-//     * Boolean, String
-//     */
-//    fun createJSONObject(authValue: Boolean?, msgValue: String?): JSONObject {
-//        val obj = JSONObject()
-//        obj.put(Constants.OBJ_KEY_AUTH, authValue)
-//        obj.put(Constants.OBJ_KEY_MSG, msgValue)
-//
-//        return obj
-//    }
-//
-//    /** JSONObject 생성
-//     *
-//     * Parameter:
-//     * Boolean, String, String?
-//     */
-//    fun createJSONObject(authValue: Boolean, dataValue: String, msgValue: String): JSONObject {
-//        val obj = JSONObject()
-//        obj.put(Constants.OBJ_KEY_AUTH, authValue)
-//        obj.put(Constants.OBJ_KEY_DATA, dataValue)
-//        obj.put(Constants.OBJ_KEY_MSG, msgValue)
-//
-//        return obj
-//    }
-//
-//    /** JSONObject 생성
-//     *
-//     * Parameter:
-//     * Boolean, JSONObject, String
-//     */
-//    fun createJSONObject(authValue: Boolean, dataValue: JSONObject, msgValue: String): JSONObject {
-//        val obj = JSONObject()
-//        obj.put(Constants.OBJ_KEY_AUTH, authValue)
-//        obj.put(Constants.OBJ_KEY_DATA, dataValue)
-//        obj.put(Constants.OBJ_KEY_MSG, msgValue)
-//
-//        return obj
-//    }
-//
-//    /** JSONObject 생성
-//     *
-//     * Parameter:
-//     * Boolean, Array, String
-//     */
-//    fun createJSONObject(authValue: Boolean, dataValue: Array<out String>, msgValue: String)
-//            : JSONObject
-//    {
-//        val obj = JSONObject()
-//        obj.put(Constants.OBJ_KEY_AUTH, authValue)
-//        obj.put(Constants.OBJ_KEY_DATA, dataValue)
-//        obj.put(Constants.OBJ_KEY_MSG, msgValue)
-//
-//        return obj
-//    }
 }

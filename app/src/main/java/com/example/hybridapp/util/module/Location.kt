@@ -2,14 +2,8 @@ package com.example.hybridapp.util.module
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.content.Intent
 import android.location.Location
 import android.location.LocationManager
-import android.os.Bundle
-import android.provider.Settings
-import android.util.Log
-import androidx.core.content.ContextCompat.startActivity
-import app.dvkyun.flexhybridand.FlexAction
 import com.example.hybridapp.App
 import com.example.hybridapp.basic.BasicActivity
 import com.example.hybridapp.util.Constants
@@ -21,45 +15,35 @@ import com.google.android.gms.location.LocationServices
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-
+import org.json.JSONObject
 
 object Location {
 
-    /** 현재 위치(위도, 경도) 가져오기 */
+    /** 현재 위치의 위도,경도 가져오기 */
     @SuppressLint("MissingPermission")
-    fun getCurrent(action: FlexAction?) {
-        Constants.LOGD("Call getCurrent() in Location object.")
+    fun getCurrentLatAndLot() {
+        Constants.LOGD("Call getCurrentLatAndLot() in Location object.")
 
-        val locationPermissions = arrayOf(Constants.PERM_ACCESS_FINE_LOCATION,
-            Constants.PERM_ACCESS_COARSE_LOCATION)
+        val basicActivity = App.activity as BasicActivity
 
-        if(Utils.existAllPermission(locationPermissions)) {
-            Constants.LOGD("All location permissions exist.")
+        // GPS 사용이 가능한 경우
+        if(isLocationEnabled(basicActivity)) {
+            val mLocationRequest = getLocationRequest()
+            val mFusedLocationClient = LocationServices
+                .getFusedLocationProviderClient(basicActivity)
+            mFusedLocationClient!!.requestLocationUpdates(mLocationRequest, mLocationCallback, null)
 
-            val basicActivity = App.activity as BasicActivity
-            basicActivity.locationAction = action
-
-            if(isLocationEnabled(basicActivity)) {
-                Log.d("dlgodnjs", "zzzsf2")
-                val mLocationRequest = getLocationRequest()
-                val mFusedLocationClient = LocationServices
-                    .getFusedLocationProviderClient(basicActivity)
-                mFusedLocationClient!!.requestLocationUpdates(mLocationRequest, mLocationCallback, null)
-                return
-
-            } else {
-                action?.resolveVoid()
-            }
-        } else {
-            Utils.checkDangerousPermissions(locationPermissions, Constants.PERM_LOCATION_REQ_CODE)
-            action?.resolveVoid()
+            return
         }
-
-        // 위치 설정 창 열기
-        val gpsOptionsIntent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
-        App.activity.startActivityForResult(gpsOptionsIntent, Constants.PERM_LOCATION_REQ_CODE)
+        // GPS 사용이 불가능한 경우
+        else {
+            val returnObj = Utils.createJSONObject(true,
+                null, Constants.MSG_NOT_LOAD_LAT_LOT)
+            basicActivity.locationAction?.promiseReturn(returnObj)
+        }
     }
 
+    /** GPS를 사용 가능 여부 판별 */
     private fun isLocationEnabled(context: Context): Boolean {
         var locationManager = context.getSystemService(Context.LOCATION_SERVICE)
                 as LocationManager
@@ -68,8 +52,9 @@ object Location {
         )
     }
 
+    /** LocationRequest 생성 후 반환 */
     private fun getLocationRequest(): LocationRequest {
-        Constants.LOGD("Create LocationRequest() in Location object.")
+        Constants.LOGD("Call getLocationRequest() in Location object.")
 
         val mLocationRequest = LocationRequest()
         mLocationRequest.priority = LocationRequest.PRIORITY_HIGH_ACCURACY
@@ -80,6 +65,7 @@ object Location {
         return mLocationRequest
     }
 
+    /** Location Callback */
     private val mLocationCallback = object : LocationCallback() {
         override fun onLocationResult(locationResult: LocationResult) {
             CoroutineScope(Dispatchers.Main).launch {
@@ -90,8 +76,15 @@ object Location {
                 val longitude = mLastLocation.longitude.toString()
                 Constants.LOGD("Latitude: $latitude, Longitude: $longitude")
 
-                (App.activity as BasicActivity).locationAction?.promiseReturn(
-                    "Latitude: $latitude, Longitude: $longitude")
+                // 위도, 경도에 대한 JSONObject 생성
+                val locObj = JSONObject()
+                locObj.put("lat", latitude)
+                locObj.put("lot", longitude)
+
+                // promiseReturn할 JSONObject 생성
+                val returnObj = Utils.createJSONObject(true,
+                    locObj, null)
+                (App.activity as BasicActivity).locationAction?.promiseReturn(returnObj)
             }
         }
     }

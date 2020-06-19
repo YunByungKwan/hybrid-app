@@ -1,115 +1,220 @@
 package com.example.hybridapp
 
 import android.content.DialogInterface
+import android.os.Build
+import android.util.Log
+import android.view.KeyEvent
+import android.widget.Button
+import androidx.annotation.RequiresApi
 import androidx.fragment.app.FragmentActivity
 import app.dvkyun.flexhybridand.FlexAction
+import com.example.hybridapp.basic.BasicActivity
 import com.example.hybridapp.util.Constants
 import com.example.hybridapp.util.Utils
 import com.example.hybridapp.util.module.*
+import com.google.android.material.bottomsheet.BottomSheetDialog
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import org.json.JSONArray
 import org.json.JSONObject
 
 object Action {
 
+    /**================================= Dialog Action ===========================================*/
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     val dialog: (FlexAction?, JSONArray?) -> Unit = { dialogAction, array ->
         CoroutineScope(Dispatchers.Main).launch {
             val title = array?.getString(0)
-            val message = array?.getString(1)
+            val contents = array?.getString(1)
             val jsonObject: JSONObject? = array?.get(2) as JSONObject
+            val isDialog = array.getBoolean(3)
 
             jsonObject?.let {
-                val basic: String? = Utils.getJsonObjectValue("basic", it)
-                val destructive: String? = Utils.getJsonObjectValue("destructive", it)
-                val cancel: String? = Utils.getJsonObjectValue("cancel", it)
+                val dialogKeys = arrayOf("basic", "destructive", "cancel")
+                val basic: String? = Utils.getJsonObjectValue(dialogKeys[0], it)
+                val destructive: String? = Utils.getJsonObjectValue(dialogKeys[1], it)
+                val cancel: String? = Utils.getJsonObjectValue(dialogKeys[2], it)
 
-                val posListener = DialogInterface.OnClickListener { _, _ ->
-                    if (basic != null) {
-                        dialogAction?.promiseReturn(basic)
-                    } else {
-                        dialogAction?.resolveVoid()
+                if(isDialog) {
+                    val posListener = DialogInterface.OnClickListener { _, _ ->
+                        basic?.let { dialogAction?.promiseReturn(dialogKeys[0]) }
                     }
-                }
-                val negListener = DialogInterface.OnClickListener { _, _ ->
-                    if (cancel != null) {
-                        dialogAction?.promiseReturn(cancel)
-                    } else {
-                        dialogAction?.resolveVoid()
+                    val neutralListener = DialogInterface.OnClickListener { _, _ ->
+                        destructive?.let { dialogAction?.promiseReturn(dialogKeys[1]) }
                     }
-                }
-                val cancelListener = {
-                    dialogAction?.promiseReturn(Constants.RESULT_CANCELED)
-                }
+                    val negListener = DialogInterface.OnClickListener { _, _ ->
+                        cancel?.let { dialogAction?.promiseReturn(dialogKeys[2]) }
+                    }
+                    val exitListener = {
+                        dialogAction?.promiseReturn(Constants.RESULT_CANCELED)
+                    }
 
-                Dialog.show(
-                    title, message, basic, destructive, cancel,
-                    posListener, null, negListener, cancelListener
-                )
+                    Dialog.show(
+                        title, contents, basic, destructive, cancel,
+                        posListener, neutralListener, negListener, exitListener
+                    )
+                }
+                else {  // Bottom Dialog (Bottom Sheet Dialog)
+                    val dialog = BottomSheetDialog(App.activity)
+
+                    var posBtn = Dialog.getBtnView(basic)
+                    posBtn?.let { btn ->
+                        btn.setOnClickListener {
+                        dialogAction?.promiseReturn(dialogKeys[0])
+                        dialog.dismiss()
+                        }
+                    }
+
+                    var neutralBtn = Dialog.getBtnView(destructive)
+                    neutralBtn?.let { btn ->
+                        btn.setOnClickListener {
+                            dialogAction?.promiseReturn(dialogKeys[1])
+                            dialog.dismiss()
+                        }
+                    }
+
+                    var negBtn = Dialog.getBtnView(cancel)
+                    negBtn?.let { btn ->
+                        btn.setOnClickListener {
+                        dialogAction?.promiseReturn(dialogKeys[2])
+                        dialog.dismiss()
+                        }
+                    }
+
+                    val exitListener = {
+                        dialogAction?.promiseReturn(Constants.RESULT_CANCELED)
+                    }
+
+                    val btnList = arrayListOf(posBtn, neutralBtn, negBtn)
+                    val dialogLayout = Dialog.getBottomSheetDialogView(title, contents, btnList)
+                    Dialog.bottomSheetshow(dialog, dialogLayout, exitListener)
+                }
             }
         }
     }
 
+    /**================================== Network Action =========================================*/
     val network: (FlexAction?, JSONArray?) -> Unit = { networkAction, _ ->
         CoroutineScope(Dispatchers.Main).launch {
+            val returnObj = JSONObject()
             when(Network.getStatus(App.activity)) {
                 Constants.NET_STAT_CELLULAR -> {
-                    networkAction?.promiseReturn(Constants.MSG_CELLULAR)
+                    returnObj.put(Constants.OBJ_KEY_DATA, Constants.NET_STAT_CELLULAR)
+                    returnObj.put(Constants.OBJ_KEY_MSG, Constants.MSG_CELLULAR)
+                    networkAction?.promiseReturn(returnObj)
                 }
                 Constants.NET_STAT_WIFI -> {
-                    networkAction?.promiseReturn(Constants.MSG_WIFI)
+                    returnObj.put(Constants.OBJ_KEY_DATA, Constants.NET_STAT_WIFI)
+                    returnObj.put(Constants.OBJ_KEY_MSG, Constants.MSG_WIFI)
+                    networkAction?.promiseReturn(returnObj)
                 }
                 else -> {
-                    networkAction?.promiseReturn(Constants.MSG_DISCONNECTED)
+                    returnObj.put(Constants.OBJ_KEY_DATA, Constants.NET_STAT_DISCONNECTED)
+                    returnObj.put(Constants.OBJ_KEY_MSG, Constants.MSG_DISCONNECTED)
+                    networkAction?.promiseReturn(returnObj)
                 }
             }
         }
     }
 
-    val cameraByDeviceRatio: (FlexAction?, JSONArray?) -> Unit = { cameraDeviceAction, array ->
-        CoroutineScope(Dispatchers.Main).launch {
-            val ratio = array?.getDouble(0)
-            val isWidthRatio = array?.getBoolean(1)
-            Camera.request(cameraDeviceAction, ratio, isWidthRatio)
+    /**================================= QR Code Action ==========================================*/
+    val qrCode: (FlexAction?, JSONArray?) -> Unit = { qrCodeAction, _->
+        Constants.LOGD("============== QR Code Action ==============")
+
+        // inject action
+        val basicActivity = App.activity as BasicActivity
+        basicActivity.qrCodeScanAction = qrCodeAction
+
+        // 권한이 다 있을 경우
+        if(Utils.existAllPermission(arrayOf(Constants.PERM_CAMERA))) {
+            QRCode.startScan()
+        }
+        // 권한이 다 있지 않을 경우
+        else {
+            Utils.checkAbsentPerms(arrayOf(Constants.PERM_CAMERA), Constants.PERM_QR_REQ_CODE,
+                basicActivity.qrCodeScanAction)
         }
     }
 
-    val cameraByRatio: (FlexAction?, JSONArray?) -> Unit = { cameraAction, array ->
-        CoroutineScope(Dispatchers.Main).launch {
-            val ratio = array?.getDouble(0)
-
-            Camera.request(cameraAction, ratio, null)
-        }
-    }
-
+    /**================================ Photo Device Action ======================================*/
     val photoByDeviceRatio: (FlexAction?, JSONArray?) -> Unit = { photoDeviceAction, array ->
         CoroutineScope(Dispatchers.Main).launch {
-//            val ratio = array?.getDouble(0)
-//            val isWidthRatio = array?.getBoolean(1)
-            val ratio = 1.0
-            val isWidthRatio = false
+            Constants.LOGD("============== Photo By Device Ratio Action ==============")
 
-            Photo.requestImage(photoDeviceAction, ratio, isWidthRatio)
+            val ratio = array?.getDouble(0)
+            val isWidthRatio = array?.getBoolean(1)
+
+            // inject action and ratio
+            val basicActivity = App.activity as BasicActivity
+            basicActivity.photoDeviceAction = photoDeviceAction
+            basicActivity.ratio = ratio
+
+            val perms = arrayOf(Constants.PERM_WRITE_EXTERNAL_STORAGE,
+                Constants.PERM_READ_EXTERNAL_STORAGE)
+
+            // 권한이 다 있을 경우
+            if(Utils.existAllPermission(perms)) {
+                Photo.requestImage(isWidthRatio)
+            }
+            // 권한이 다 있지 않을 경우
+            else {
+                Utils.checkAbsentPerms(perms, Constants.PERM_MUL_PHOTO_DEVICE_REQ_CODE,
+                    basicActivity.photoDeviceAction)
+            }
         }
     }
 
     val photoByRatio: (FlexAction?, JSONArray?) -> Unit = { photoAction, array ->
         CoroutineScope(Dispatchers.Main).launch {
+            Constants.LOGD("============== Photo By Ratio Action ==============")
+
             val ratio = array?.getDouble(0)
 
-            Photo.requestImage(photoAction, ratio!!, null)
+            // inject action and ratio
+            val basicActivity = App.activity as BasicActivity
+            basicActivity.photoAction = photoAction
+            basicActivity.ratio = ratio
+
+            val perms = arrayOf(Constants.PERM_WRITE_EXTERNAL_STORAGE,
+                Constants.PERM_READ_EXTERNAL_STORAGE)
+
+            // 권한이 다 있을 경우
+            if(Utils.existAllPermission(perms)) {
+                Photo.requestImage(null)
+            }
+            // 권한이 다 있지 않을 경우
+            else {
+                Utils.checkAbsentPerms(perms, Constants.PERM_PHOTO_REQ_CODE,
+                    basicActivity.photoAction)
+            }
         }
     }
 
+    /**================================== Multi Photo Action =====================================*/
     val multiPhotoByDeviceRatio: (FlexAction?, JSONArray?) -> Unit = { multiplePhotoDeviceAction, array ->
         CoroutineScope(Dispatchers.Main).launch {
-//            val ratio = array?.getDouble(0)
-//            val isWidthRatio = array?.getBoolean(1)
-            val ratio = 1.0
-            val isWidthRatio = true
+            val ratio = array?.getDouble(0)
+            val isWidthRatio = array?.getBoolean(1)
 
-            Photo.requestMultipleImages(multiplePhotoDeviceAction, ratio!!, isWidthRatio!!)
+            // inject action and ratio
+            val basicActivity = App.activity as BasicActivity
+            basicActivity.multiplePhotoDeviceAction = multiplePhotoDeviceAction
+            basicActivity.ratio = ratio
+
+            val perms = arrayOf(Constants.PERM_WRITE_EXTERNAL_STORAGE,
+                Constants.PERM_READ_EXTERNAL_STORAGE)
+
+            // 권한이 다 있을 경우
+            if(Utils.existAllPermission(perms)) {
+                Photo.requestMultipleImages(isWidthRatio)
+            }
+            // 권한이 다 있지 않을 경우
+            else {
+                Utils.checkAbsentPerms(perms, Constants.PERM_MUL_PHOTO_DEVICE_REQ_CODE,
+                    basicActivity.multiplePhotoDeviceAction)
+            }
         }
     }
 
@@ -117,55 +222,175 @@ object Action {
         CoroutineScope(Dispatchers.Main).launch {
             val ratio = array?.getDouble(0)
 
-            Photo.requestMultipleImages(multiplePhotoAction, ratio!!, null)
+            // inject action and ratio
+            val basicActivity = App.activity as BasicActivity
+            basicActivity.multiplePhotoAction = multiplePhotoAction
+            basicActivity.ratio = ratio
+
+            val perms =
+                arrayOf(Constants.PERM_WRITE_EXTERNAL_STORAGE, Constants.PERM_READ_EXTERNAL_STORAGE)
+
+            // 권한이 다 있을 경우
+            if(Utils.existAllPermission(perms)) {
+                Photo.requestMultipleImages(null)
+            }
+            // 권한이 다 있지 않을 경우
+            else {
+                Utils.checkAbsentPerms(perms, Constants.PERM_MUL_PHOTO_REQ_CODE,
+                    basicActivity.multiplePhotoAction)
+            }
         }
     }
 
-    val qrCode: (FlexAction?, JSONArray?) -> Unit = { qrCodeAction, _->
-        if(Utils.existAllPermission(arrayOf(Constants.PERM_CAMERA))) {
-            QRCode.startScan(qrCodeAction)
-        } else {
-            Utils.checkDangerousPermissions(arrayOf(Constants.PERM_CAMERA),
-                Constants.PERM_CAMERA_REQ_CODE)
+    /**=================================== Camera Action =========================================*/
+    val cameraByDeviceRatio: (FlexAction?, JSONArray?) -> Unit = { cameraDeviceAction, array ->
+        CoroutineScope(Dispatchers.Main).launch {
+            Constants.LOGD("============== Camera By Device Ratio Action ==============")
+
+            val ratio = array?.getDouble(0)
+            val isWidthRatio = array?.getBoolean(1)
+
+            // inject action and ratio
+            val basicActivity = App.activity as BasicActivity
+            basicActivity.cameraDeviceAction = cameraDeviceAction
+            basicActivity.ratio = ratio
+
+            val perms = arrayOf(Constants.PERM_CAMERA)
+
+            // 권한이 다 있을 경우
+            if(Utils.existAllPermission(perms)) {
+                Camera.request(isWidthRatio)
+            }
+            // 권한이 다 있지 않을 경우
+            else {
+                Utils.checkAbsentPerms(perms, Constants.PERM_CAMERA_DEVICE_REQ_CODE,
+                    basicActivity.cameraDeviceAction)
+            }
         }
     }
 
+    val cameraByRatio: (FlexAction?, JSONArray?) -> Unit = { cameraAction, array ->
+        CoroutineScope(Dispatchers.Main).launch {
+            Constants.LOGD("============== Camera By Ratio Action ==============")
+
+            val ratio = array?.getDouble(0)
+
+            // inject action and ratio
+            val basicActivity = App.activity as BasicActivity
+            basicActivity.cameraAction = cameraAction
+            basicActivity.ratio = ratio
+
+            val perms = arrayOf(Constants.PERM_CAMERA)
+
+            // 권한이 다 있을 경우
+            if(Utils.existAllPermission(perms)) {
+                Camera.request(null)
+            }
+            // 권한이 다 있지 않을 경우
+            else {
+                Utils.checkAbsentPerms(perms, Constants.PERM_CAMERA_REQ_CODE,
+                    basicActivity.cameraAction)
+            }
+        }
+    }
+
+    /**=================================== Location Action =======================================*/
     val location: (FlexAction?, JSONArray?) -> Unit = { locationAction, _->
         CoroutineScope(Dispatchers.Main).launch {
-            Constants.LOGD("Call location action.")
-            Location.getCurrent(locationAction)
+            Constants.LOGD("============== Location Action ==============")
+
+            // inject action
+            val basicActivity = App.activity as BasicActivity
+            basicActivity.locationAction = locationAction
+
+            val perms = arrayOf(Constants.PERM_ACCESS_FINE_LOCATION,
+                Constants.PERM_ACCESS_COARSE_LOCATION)
+
+            // 권한이 다 있을 경우
+            if(Utils.existAllPermission(perms)) {
+                Location.getCurrentLatAndLot()
+            }
+            // 권한이 다 있지 않을 경우
+            else {
+                Utils.checkAbsentPerms(perms, Constants.PERM_LOCATION_REQ_CODE,
+                    basicActivity.locationAction)
+            }
         }
     }
 
-    val bioAuth: (FlexAction?, JSONArray?) -> Unit = { bioAuthAction, _->
+    /**================================= SEND SMS Action =========================================*/
+    val sendSms: (FlexAction?, JSONArray?) -> Unit = { sendSmsAction, array ->
         CoroutineScope(Dispatchers.Main).launch {
-            val fragmentActivity = App.activity as FragmentActivity
+            Constants.LOGD("============== Send SMS Action ==============")
 
-            if(BioAuth.canAuthenticate()) {
-                BioAuth.showPrompt(fragmentActivity, bioAuthAction)
+            // inject action
+            val basicActivity = App.activity as BasicActivity
+            basicActivity.sendSmsAction = sendSmsAction
+            basicActivity.phoneNumber = array?.getString(0)
+            basicActivity.smsMessage = array?.getString(1)
+
+            val perms = arrayOf(Constants.PERM_SEND_SMS)
+
+            // 권한이 다 있을 경우
+            if(Utils.existAllPermission(perms)) {
+                SMS.sendMessage()
+            }
+            // 권한이 다 있지 않을 경우
+            else {
+                Utils.checkAbsentPerms(perms, Constants.PERM_SEND_SMS_REQ_CODE,
+                    basicActivity.sendSmsAction)
+            }
+        }
+    }
+
+    /**=============================== Authentication Action =====================================*/
+    @RequiresApi(Build.VERSION_CODES.P)
+    val authentication: (FlexAction?, JSONArray?) -> Unit = { authAction, _->
+        CoroutineScope(Dispatchers.Main).launch {
+            Constants.LOGD("============== Authentication Action ==============")
+
+            val fragmentActivity = App.activity as FragmentActivity
+            val basicActivity = App.activity as BasicActivity
+            basicActivity.authAction = authAction
+
+            if(Authentication.canAuthenticate()) {
+                Authentication.showPrompt(fragmentActivity)
             } else {
                 Constants.LOGE("You can't call biometric prompt.")
+                val returnObj = Utils.createJSONObject(true,
+                    false, "인증을 진행할 수 없습니다")
+                basicActivity.authAction?.promiseReturn(returnObj)
             }
         }
     }
 
+    /**============================ Local Repository Action ======================================*/
     val localRepository: (FlexAction?, JSONArray?) -> Unit = { localRepoAction, array ->
+        Constants.LOGD("============== Local Repository Action ==============")
+
         when (array!!.getInt(0)) {
-            Constants.SET_DATA_SHARED -> {
+            Constants.PUT_DATA_CODE -> {
                 val key = array.getString(1)
                 val value = array.getString(2)
+
                 SharedPreferences.putData(Constants.SHARED_FILE_NAME, key, value)
-                localRepoAction?.promiseReturn("데이터를 저장하였습니다.")
+
+                val returnObj = Utils.createJSONObject(null,
+                    null, "데이터를 저장하였습니다")
+                localRepoAction?.promiseReturn(returnObj)
             }
-            Constants.GET_DATA_SHARED -> {
+            Constants.GET_DATA_CODE -> {
                 val key = array.getString(1)
-                val value = SharedPreferences.getString(Constants.SHARED_FILE_NAME, key)
-                localRepoAction?.promiseReturn(value)
+                var value = SharedPreferences.getString(Constants.SHARED_FILE_NAME, key)
+
+                val returnObj = Utils.createJSONObject(null,
+                    value, null)
+                localRepoAction?.promiseReturn(returnObj)
             }
-            Constants.DELETE_DATA_SHARED -> {
+            Constants.DEL_DATA_CODE -> {
                 val key = array.getString(1)
                 SharedPreferences.removeData(Constants.SHARED_FILE_NAME, key)
-                localRepoAction?.promiseReturn("데이터를 제거하였습니다.")
+                localRepoAction?.promiseReturn("데이터를 제거하였습니다")
             }
         }
     }

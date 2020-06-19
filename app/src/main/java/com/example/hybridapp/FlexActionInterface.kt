@@ -9,7 +9,7 @@ import com.example.hybridapp.data.LogUrlRepository
 import com.example.hybridapp.data.LogUrlRoomDatabase
 import com.example.hybridapp.util.Constants
 import com.example.hybridapp.util.Utils
-import com.example.hybridapp.util.module.SMS
+import com.example.hybridapp.util.module.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -17,39 +17,33 @@ import org.json.JSONArray
 import org.json.JSONObject
 
 class FlexActionInterface {
+
+    /**================================= Toast Interface =========================================*/
     @FlexFuncInterface
     fun Toast(array: JSONArray) {
         CoroutineScope(Dispatchers.Main).launch {
-            val isShortToast = array.getBoolean(1)
             val message = array.getString(0)
+            val isShortToast = array.getBoolean(1)
 
-            if(isShortToast)
-                com.example.hybridapp.util.module.Toast.showShortText(message)
-            else
-                com.example.hybridapp.util.module.Toast.showLongText(message)
+            if(isShortToast) {
+                Toast.showShortText(message)
+            } else {
+                Toast.showLongText(message)
+            }
         }
     }
 
     @FlexFuncInterface
     fun Snackbar(array: JSONArray) {
         CoroutineScope(Dispatchers.Main).launch {
-            val isShortSnackbar = array.getBoolean(1)
             val message = array.getString(0)
+            val isShortSnackbar = array.getBoolean(1)
 
             if(isShortSnackbar)
-                com.example.hybridapp.util.module.Snackbar.showShortText(App.activity.findViewById(R.id.constraintLayout), message)
+                Snackbar.showShortText(App.activity.findViewById(R.id.constraintLayout), message)
             else
-                com.example.hybridapp.util.module.Snackbar.showLongText(App.activity.findViewById(R.id.constraintLayout), message)
+                Snackbar.showLongText(App.activity.findViewById(R.id.constraintLayout), message)
         }
-    }
-
-    @FlexFuncInterface
-    fun SendSMS(array: JSONArray): String {
-        // val phoneNumber = array.getString(0)
-        val phoneNumber = "01065720153"
-        val message = array.getString(1)
-
-        return SMS.sendMessage(phoneNumber, message)
     }
 
     @FlexFuncInterface
@@ -66,7 +60,7 @@ class FlexActionInterface {
         val importance = Constants.NOTI_HIGH
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            com.example.hybridapp.util.module.Notification.createChannel(channelId, channelName, description, importance, true)
+            Notification.createChannel(channelId, channelName, description, importance, true)
         } else {
             Constants.LOGE(Constants.LOG_MSG_NOT_CHANNEL)
         }
@@ -82,17 +76,34 @@ class FlexActionInterface {
         val obj = array.get(0) as JSONObject
         val title = obj.get("title").toString()
         val message = obj.get("message").toString()
-        com.example.hybridapp.util.module.Notification.create(channelId, id, title, message, Constants.NOTI_HIGH, pendingIntent)
+        Notification.create(channelId, id, title, message, Constants.NOTI_HIGH, pendingIntent)
     }
 
+    /**============================= RootingCheck Interface ======================================*/
+    @FlexFuncInterface
+    fun RootingCheck(array: JSONArray): String {
+        return Constants.MSG_NO_ROOTING
+    }
+
+    /**=============================== UniqueAppID Interface =====================================*/
     @FlexFuncInterface
     fun UniqueAppID(array: JSONArray): String {
         return Utils.getAppId()
     }
 
+    /**============================== UniqueDeviceID Interface ===================================*/
     @FlexFuncInterface
     fun UniqueDeviceID(array: JSONArray): String {
         return Utils.getDeviceId(App.INSTANCE)
+    }
+
+    /** FileDownload */
+    @FlexFuncInterface
+    fun FileDownload(array: JSONArray) {
+        val fileUrl = array.getString(0)
+        Constants.LOGD("fileUrl: $fileUrl")
+
+        Utils.downloadFileFromUrl(fileUrl)
     }
 
     @FlexFuncInterface

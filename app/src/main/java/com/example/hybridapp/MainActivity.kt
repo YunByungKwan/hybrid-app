@@ -1,26 +1,20 @@
 package com.example.hybridapp
 
 import android.app.Activity
-import android.app.DownloadManager
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.media.ExifInterface
-import android.graphics.Bitmap
-import android.graphics.ImageDecoder
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.os.Environment
 import android.os.Handler
-import android.provider.MediaStore
 import android.util.Log
 import android.view.View
+import android.view.WindowManager
 import android.view.animation.AnimationUtils
 import android.webkit.ValueCallback
 import android.webkit.WebChromeClient
 import android.webkit.WebView
 import android.widget.Button
-import android.widget.ImageView
 import app.dvkyun.flexhybridand.FlexFuncInterface
 import com.example.hybridapp.data.LogUrlRepository
 import com.example.hybridapp.data.LogUrlRoomDatabase
@@ -36,25 +30,14 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.json.JSONArray
-import java.net.URLDecoder
 import kotlin.collections.ArrayList
 
 class MainActivity : BasicActivity() {
 
-    private val scope = CoroutineScope(Dispatchers.Default)
     private lateinit var repository: LogUrlRepository
     private var smsReceiver: SMSReceiver? = null
-    private var mFilePatCallback: ValueCallback<Array<Uri>>? = null
     private lateinit var backgroundView: View
     private lateinit var popupCloseButton: Button
-
-//    companion object {
-//        init {
-//            System.loadLibrary("main")
-//        }
-//    }
-
-
 
     override fun onResume() {
         super.onResume()
@@ -75,21 +58,26 @@ class MainActivity : BasicActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-
+        App.INSTANCE.setTheme(R.style.SplashTheme)
+        Log.d("dlgodnjs", "start")
         init()
+
+        Log.d("dlgodnjs", "end")
+        App.INSTANCE.setTheme(R.style.AppTheme)
     }
 
     /** 시작 시 기본 초기화 함수 */
     private fun init() {
         /** Room Database default settings */
-        scope.launch {
+        CoroutineScope(Dispatchers.Default).launch {
             val logUrlDao = LogUrlRoomDatabase.getDatabase(this@MainActivity).logUrlDao()
             repository = LogUrlRepository(logUrlDao)
         }
 
         setFlexWebView()
         setActions()
-        setWebViewDownloadListener()
+        window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
+
     }
 
     /** 기본, 팝업 FlexView 설정 */
@@ -101,9 +89,14 @@ class MainActivity : BasicActivity() {
         WebView.setWebContentsDebuggingEnabled(true)
         flex_web_view.webChromeClient = BasicWebChromeClient(this)
         flex_web_view.webViewClient = BasicWebViewClient()
+//        Utils.disabledWebViewScroll(flex_web_view)
         flex_web_view.addFlexInterface(FlexActionInterface())
         flex_web_view.addFlexInterface(FlexPopupInterface())
+
+        flex_web_view.isVerticalScrollBarEnabled = false
+        flex_web_view.isHorizontalScrollBarEnabled = false
     }
+
 
     /** FlexWebView Action 설정 */
     private fun setActions() {
@@ -117,145 +110,184 @@ class MainActivity : BasicActivity() {
         flex_web_view.setAction(Constants.TYPE_MULTI_PHOTO_RATIO, Action.multiPhotoByRatio)
         flex_web_view.setAction(Constants.TYPE_QR_CODE_SCAN, Action.qrCode)
         flex_web_view.setAction(Constants.TYPE_LOCATION, Action.location)
-        flex_web_view.setAction(Constants.TYPE_BIO_AUTHENTICATION, Action.bioAuth)
+        flex_web_view.setAction(Constants.TYPE_SEND_SMS, Action.sendSms)
+        flex_web_view.setAction(Constants.TYPE_AUTH, Action.authentication)
         flex_web_view.setAction(Constants.TYPE_LOCAL_REPO, Action.localRepository)
     }
 
-    private fun setWebViewDownloadListener() {
-        /** File Download */
-        flex_web_view.setDownloadListener { url, userAgent, contentDisposition, mimeType, _ ->
-            if(Utils.existsPermission(Constants.PERM_WRITE_EXTERNAL_STORAGE)) {
-                try {
-                    val request = DownloadManager.Request(Uri.parse(url))
-                    val downloadManager
-                            = getSystemService(DOWNLOAD_SERVICE) as DownloadManager
-
-                    val decodedContentDisposition
-                            = URLDecoder.decode(contentDisposition,"UTF-8")
-
-                    val fileName = decodedContentDisposition
-                        .replace("attachment; filename=", "")
-
-                    request.setMimeType(mimeType)
-                    request.addRequestHeader("User-Agent", userAgent)
-                    request.setDescription("Downloading File")
-                    request.setAllowedOverMetered(true)
-                    request.setAllowedOverRoaming(true)
-                    request.setTitle(fileName)
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                        request.setRequiresCharging(false)
-                    }
-                    request.allowScanningByMediaScanner()
-                    request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
-                    request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, fileName)
-                    downloadManager.enqueue(request)
-
-                    Toast.showLongText("파일이 다운로드됩니다.")
-                }
-                catch (e: Exception) {
-                    Log.e(Constants.TAG_MAIN, e.toString())
-                }
-            } else {
-                Utils.requestPermissions(arrayOf(Constants.PERM_WRITE_EXTERNAL_STORAGE), 1234)
-            }
-        }
-    }
-
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-
         val resultOk = (resultCode == Activity.RESULT_OK)
-
         when(requestCode) {
-            /** 카메라 테스트 관련 */
-            Constants.CAMERA_DEVICE_RATIO_REQ_CODE -> {
-                if(resultOk) {
-                    var bitmap: Bitmap = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                        ImageDecoder.decodeBitmap(ImageDecoder.createSource(Utils.getOutputMediaFile()!!))
+            Constants.QR_REQ_CODE -> {
+                Constants.LOGD("QR CODE in onActivityResult()")
+
+                val result: IntentResult? =
+                    IntentIntegrator.parseActivityResult(requestCode, resultCode, data)
+
+                // QR Code 성공
+                if(result != null) {
+                    // QR Code 값이 있는 경우
+                    if(result.contents != null) {
+                        Constants.LOGD("IntentIntegrator Result: ${result.contents}")
+                        val returnObj = Utils.createJSONObject(
+                            true, result.contents, null)
+                        qrCodeScanAction?.promiseReturn(returnObj)
                     }
+                    // QR Code 값이 없는 경우
                     else {
-                        MediaStore.Images.Media.getBitmap(contentResolver, Uri.fromFile(Utils.getOutputMediaFile()))
+                        Constants.LOGE("QR Code result is null")
+                        val returnObj = Utils.createJSONObject(
+                            true, null, Constants.MSG_NO_QR)
+                        qrCodeScanAction?.promiseReturn(returnObj)
                     }
+                }
+                // QR Code 실패
+                else {
+                    Constants.LOGE("QR CODE RESULT_CANCELED")
+                    val returnObj = Utils.createJSONObject(
+                        true, null, Constants.MSG_NOT_LOAD_QR)
+                    qrCodeScanAction?.promiseReturn(returnObj)
+                }
+            }
+            Constants.CAMERA_DEVICE_RATIO_REQ_CODE -> {
+                Constants.LOGD("CAMERA DEVICE RATIO in onActivityResult()")
 
-                    val base64 = Constants.BASE64_URL +
-                            Photo.getBase64FromBitmap(bitmap)
+                // 카메라 촬영 성공
+                if(resultOk) {
+                    if(data != null) {
+                        val base64 = Constants.BASE64_URL +
+                            Photo.convertUriToResizingBase64(data.data, ratio, isWidthRatio)
 
-                    cameraDeviceAction?.promiseReturn(base64)
+                        val returnObj = Utils.createJSONObject(true,
+                            base64, null)
+                        cameraDeviceAction?.promiseReturn(returnObj)
+                        ratio = null
+                        isWidthRatio = null
+                    } else {
+                        Constants.LOGE("사진이 존재하지 않습니다")
+                        val returnObj = Utils.createJSONObject(true,
+                            null, "사진이 존재하지 않습니다")
+                        cameraDeviceAction?.promiseReturn(returnObj)
+                        ratio = null
+                        isWidthRatio = null
+                    }
+                }
+                // 카메라 촬영 실패
+                else {
+                    Constants.LOGE("취소되었습니다")
+                    val returnObj = Utils.createJSONObject(true,
+                        null, "취소되었습니다")
+                    cameraDeviceAction?.promiseReturn(returnObj)
                     ratio = null
                     isWidthRatio = null
-
-
-                    // 카메라 촬영 이미지 출력을 위한 임시 코드
-//                    val mInflater = Utils.getLayoutInflater(this@MainActivity)
-//                    var tempView: View = mInflater.inflate(R.layout.test, null)
-//                    var imgView : ImageView = tempView.findViewById(R.id.test)
-//                    imgView.setImageBitmap(bitmap)
-//                    constraintLayout.addView(tempView)
                 }
-
-                cameraDeviceAction?.resolveVoid()
             }
             Constants.CAMERA_RATIO_REQ_CODE -> {
+                Constants.LOGD("CAMERA DEVICE RATIO in onActivityResult()")
+
+                // 카메라 촬영 성공
                 if(resultOk) {
-                    var bitmap: Bitmap = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                        ImageDecoder.decodeBitmap(ImageDecoder.createSource(Utils.getOutputMediaFile()!!))
-                    }
-                    else {
-                        MediaStore.Images.Media.getBitmap(contentResolver, Uri.fromFile(Utils.getOutputMediaFile()))
-                    }
+                    if(data != null) {
+                        val base64 = Constants.BASE64_URL +
+                                Photo.convertUriToResizingBase64(data.data, ratio, isWidthRatio)
 
-                    val base64 = Constants.BASE64_URL +
-                            Photo.getBase64FromBitmap(bitmap)
-
-                    cameraAction?.promiseReturn(base64)
+                        val returnObj = Utils.createJSONObject(true,
+                            base64, null)
+                        cameraAction?.promiseReturn(returnObj)
+                        ratio = null
+                    } else {
+                        Constants.LOGE("사진이 존재하지 않습니다")
+                        val returnObj = Utils.createJSONObject(true,
+                            null, "사진이 존재하지 않습니다")
+                        cameraAction?.promiseReturn(returnObj)
+                        ratio = null
+                    }
+                }
+                // 카메라 촬영 실패
+                else {
+                    Constants.LOGE("취소되었습니다")
+                    val returnObj = Utils.createJSONObject(true,
+                        null, "취소되었습니다")
+                    cameraAction?.promiseReturn(returnObj)
                     ratio = null
                 }
 
                 cameraAction?.resolveVoid()
             }
-            /** 한 개의 이미지 선택 관련 */
             Constants.PHOTO_DEVICE_RATIO_REQ_CODE -> {
+                Constants.LOGD("PHOTO DEVICE RATIO in onActivityResult()")
+
+                // 사진 불러오기 성공
                 if(resultOk) {
-                    data?.data?.let {
-//                    val mInflater = Utils.getLayoutInflater(this@MainActivity)
-//                    var tempView: View = mInflater.inflate(R.layout.test, null)
-//                    var imgView : ImageView = tempView.findViewById(R.id.test)
-//                    imgView.setImageBitmap(Photo.convertUriToBitmap(it))
-//                    constraintLayout.addView(tempView)
-
+                    if(data != null) {
                         val base64 = Constants.BASE64_URL +
-                                Photo.getBase64FromUri(it)
+                                Photo.convertUriToResizingBase64(data.data, ratio, isWidthRatio)
 
-                        photoDeviceAction?.promiseReturn(base64)
+                        val returnObj = Utils.createJSONObject(true,
+                            base64, null)
+                        photoDeviceAction?.promiseReturn(returnObj)
+                        ratio = null
+                        isWidthRatio = null
+                    } else {
+                        Constants.LOGE("사진이 존재하지 않습니다")
+                        val returnObj = Utils.createJSONObject(true,
+                            null, "사진이 존재하지 않습니다")
+                        photoDeviceAction?.promiseReturn(returnObj)
                         ratio = null
                         isWidthRatio = null
                     }
                 }
-
-                photoDeviceAction?.resolveVoid()
+                // 사진 불러오기 실패
+                else {
+                    Constants.LOGE("취소되었습니다")
+                    val returnObj = Utils.createJSONObject(true,
+                        null, "취소되었습니다")
+                    photoDeviceAction?.promiseReturn(returnObj)
+                    ratio = null
+                    isWidthRatio = null
+                }
             }
             Constants.PHOTO_RATIO_REQ_CODE -> {
-                if(resultOk) {
-                    data?.data?.let {
-                        val base64 = Constants.BASE64_URL +
-                                Photo.convertUriToResizingBase64(it, ratio, isWidthRatio)
+                Constants.LOGD("PHOTO RATIO in onActivityResult()")
 
-                        photoAction?.promiseReturn(base64)
+                // 사진 불러오기 성공
+                if(resultOk) {
+                    if(data != null) {
+                        val base64 = Constants.BASE64_URL +
+                                Photo.convertUriToResizingBase64(data.data, ratio, isWidthRatio)
+
+                        val returnObj = Utils.createJSONObject(true,
+                            base64, null)
+                        photoAction?.promiseReturn(returnObj)
+                        ratio = null
+                    } else {
+                        Constants.LOGE("사진이 존재하지 않습니다")
+                        val returnObj = Utils.createJSONObject(true,
+                            null, "사진이 존재하지 않습니다")
+                        photoAction?.promiseReturn(returnObj)
                         ratio = null
                     }
                 }
-                photoAction?.resolveVoid()
+                // 사진 불러오기 실패
+                else {
+                    Constants.LOGE("취소되었습니다")
+                    val returnObj = Utils.createJSONObject(true,
+                        null, "취소되었습니다")
+                    photoAction?.promiseReturn(returnObj)
+                    ratio = null
+                }
             }
-            /** 멀티(다중) 이미지 선택 관련 */
             Constants.MULTI_PHOTO_DEVICE_RATIO_REQ_CODE -> {
+                Constants.LOGD("MULTI PHOTO DEVICE RATIO in onActivityResult()")
                 if(resultOk) {
                     val base64Images = ArrayList<String>()
-                    data?.clipData?.let {
-                        if(it.itemCount in 1..9) {
-                            for(idx in 0 until it.itemCount) {
-                                val imageUri = it.getItemAt(idx).uri
+                    if(data != null) {
+                        val clipData = data.clipData
+                        if(clipData?.itemCount in 1..9) {
+                            for(i in 0 until clipData?.itemCount!!) {
+                                val imageUri = clipData.getItemAt(i).uri
                                 val base64 = Constants.BASE64_URL +
-                                        Photo.getBase64FromUri(imageUri)
+                                        Photo.convertUriToResizingBase64(imageUri, ratio, isWidthRatio)
                                 base64Images.add(base64)
                             }
 
@@ -264,61 +296,56 @@ class MainActivity : BasicActivity() {
                             isWidthRatio = null
                         } else {
                             Toast.showLongText("10장 이상의 사진을 첨부할 수 없습니다.")
-                            Log.e(Constants.TAG_MAIN, "10장 이상의 사진을 첨부할 수 없습니다.")
+                            multiplePhotoDeviceAction?.resolveVoid()
                         }
+                    } else {
+                        Constants.LOGE("Data is null")
+                        multiplePhotoDeviceAction?.resolveVoid()
                     }
+                } else {
+                    Constants.LOGE("MULTI PHOTO BY DEVICE RATIO RESULT CANCELED")
+                    multiplePhotoDeviceAction?.resolveVoid()
                 }
-
-                multiplePhotoDeviceAction?.resolveVoid()
             }
             Constants.MULTI_PHOTO_RATIO_REQ_CODE -> {
+                Constants.LOGD("MULTI PHOTO RATIO in onActivityResult()")
                 if(resultOk) {
                     val base64Images = ArrayList<String>()
-
-                    data?.clipData?.let {
-                        if(it.itemCount in 1..9) {
-                            for(idx in 0 until it.itemCount) {
-                                val imageUri = it.getItemAt(idx).uri
+                    if(data != null) {
+                        val clipData = data.clipData
+                        if(clipData?.itemCount in 1..9) {
+                            for(idx in 0 until clipData?.itemCount!!) {
+                                val imageUri = clipData.getItemAt(idx).uri
                                 val base64 = Constants.BASE64_URL +
                                         Photo.convertUriToResizingBase64(imageUri, ratio, isWidthRatio)
                                 base64Images.add(base64)
                             }
 
-                            multiplePhotosAction?.promiseReturn(base64Images)
+                            multiplePhotoAction?.promiseReturn(base64Images)
                             ratio = null
                         } else {
                             Toast.showLongText("10장 이상의 사진을 첨부할 수 없습니다.")
-                            Log.e(Constants.TAG_MAIN, "10장 이상의 사진을 첨부할 수 없습니다.")
+                            multiplePhotoAction?.resolveVoid()
                         }
+                    } else {
+                        Constants.LOGE("Data is null")
+                        multiplePhotoAction?.resolveVoid()
                     }
-                }
-
-                multiplePhotosAction?.resolveVoid()
-            }
-            /** QR코드 인증 */
-
-            Constants.QR_REQ_CODE -> {
-                Constants.LOGE("QR REQ CODE: ${Constants.QR_REQ_CODE}")
-                if(resultOk) {
-                    val result: IntentResult? =
-                        IntentIntegrator.parseActivityResult(requestCode, resultCode, data)
-
-                    result?.let {
-                        Constants.LOGD("Result: ${result.contents}")
-                        qrCodeScanAction?.promiseReturn(result.contents)
-                    }
-                }
-
-                qrCodeScanAction?.resolveVoid()
-            }
-            Constants.PERM_SEND_SMS_REQ_CODE -> {
-                if(resultOk) {
-
                 } else {
-
+                    Constants.LOGE("MULTI PHOTO BY RATIO RESULT CANCELED")
+                    multiplePhotoAction?.resolveVoid()
+                }
+            }
+            Constants.SEND_SMS_REQ_CODE -> {
+                Constants.LOGD("SEND SMS in onActivityResult()")
+                if(resultOk) {
+                    Constants.LOGD("abcdefg")
+                } else {
+                    Constants.LOGD("xyz")
                 }
             }
             Constants.FILE_UPLOAD_REQ_CODE -> {
+                var mFilePatCallback: ValueCallback<Array<Uri>>? = null
                 if(resultOk) {
                     if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                         mFilePatCallback?.onReceiveValue(WebChromeClient.FileChooserParams.parseResult(resultCode, data))
@@ -330,6 +357,9 @@ class MainActivity : BasicActivity() {
                 }
 
             }
+            else -> {
+                super.onActivityResult(requestCode, resultCode, data)
+            }
         }
     }
 
@@ -340,34 +370,132 @@ class MainActivity : BasicActivity() {
         val isNotEmpty = grantResults.isNotEmpty()
         val isGranted = (grantResults[0] == PackageManager.PERMISSION_GRANTED)
 
-        if(isNotEmpty && isGranted) {
-            when(requestCode) {
-                Constants.PERM_CAMERA_REQ_CODE -> {
-                    Log.e(Constants.TAG_MAIN, Constants.LOG_PERM_GRANTED_CAMERA)
+        when(requestCode) {
+            Constants.PERM_QR_REQ_CODE -> {
+                // 처음에 권한을 승인한 경우
+                if(isNotEmpty && isGranted) {
+                    QRCode.startScan()
                 }
-                Constants.PERM_WRITE_REQ_CODE -> {
-                    Log.e(Constants.TAG_MAIN, Constants.LOG_PERM_GRANTED_WRITE)
-                }
-                Constants.PERM_READ_WRITE_REQ_CODE -> {
-                    Log.e(Constants.TAG_MAIN, Constants.LOG_PERM_GRANTED_READ_WRITE)
-                }
-                Constants.PERM_LOCATION_REQ_CODE -> {
-                    Log.e(Constants.TAG_MAIN, Constants.LOG_PERM_GRANTED_LOCATION)
-                }
-                Constants.PERM_SEND_SMS_REQ_CODE -> {
-                    Log.e(Constants.TAG_MAIN, Constants.LOG_PERM_GRANTED_SEND_SMS)
+                // 권한을 거부한 경우
+                else {
+                    val returnObj = Utils.createJSONObject(false,
+                        null, Constants.MSG_DENIED_PERM)
+                    qrCodeScanAction?.promiseReturn(returnObj)
                 }
             }
-        } else {
-            Dialog.showDenialPermissionText()
+            Constants.PERM_PHOTO_DEVICE_REQ_CODE -> {
+                // 처음에 권한을 승인한 경우
+                if(isNotEmpty && isGranted) {
+                    Photo.requestImage(isWidthRatio)
+                }
+                // 권한을 거부한 경우
+                else {
+                    val returnObj = Utils.createJSONObject(false,
+                        null, Constants.MSG_DENIED_PERM)
+                    photoDeviceAction?.promiseReturn(returnObj)
+                }
+            }
+            Constants.PERM_PHOTO_REQ_CODE -> {
+                // 처음에 권한을 승인한 경우
+                if(isNotEmpty && isGranted) {
+                    Photo.requestImage(null)
+                }
+                // 권한을 거부한 경우
+                else {
+                    val returnObj = Utils.createJSONObject(false,
+                        null, Constants.MSG_DENIED_PERM)
+                    photoAction?.promiseReturn(returnObj)
+                }
+            }
+            Constants.PERM_MUL_PHOTO_DEVICE_REQ_CODE -> {
+                // 처음에 권한을 승인한 경우
+                if(isNotEmpty && isGranted) {
+                    Photo.requestMultipleImages(isWidthRatio)
+                }
+                // 권한을 거부한 경우
+                else {
+                    val returnObj = Utils.createJSONObject(false,
+                        null, Constants.MSG_DENIED_PERM)
+                    multiplePhotoDeviceAction?.promiseReturn(returnObj)
+                }
+            }
+            Constants.PERM_MUL_PHOTO_REQ_CODE -> {
+                // 처음에 권한을 승인한 경우
+                if(isNotEmpty && isGranted) {
+                    Photo.requestMultipleImages(null)
+                }
+                // 권한을 거부한 경우
+                else {
+                    val returnObj = Utils.createJSONObject(false,
+                        null, Constants.MSG_DENIED_PERM)
+                    multiplePhotoAction?.promiseReturn(returnObj)
+                }
+            }
+            Constants.PERM_WRITE_REQ_CODE -> {
+                if(isNotEmpty && isGranted) {
+                    Constants.LOGD(Constants.LOG_PERM_GRANTED_CAMERA)
+                } else {
+
+                }
+                Log.e(Constants.TAG_MAIN, Constants.LOG_PERM_GRANTED_WRITE)
+            }
+            Constants.PERM_CAMERA_REQ_CODE -> {
+                // 처음에 권한을 승인한 경우
+                if(isNotEmpty && isGranted) {
+                    if(isWidthRatio != null) {
+                        Camera.request(isWidthRatio)
+                    } else {
+                        Camera.request(null)
+                    }
+                }
+                // 권한을 거부한 경우
+                else {
+                    val returnObj = Utils.createJSONObject(false,
+                        null, Constants.MSG_DENIED_PERM)
+                    if(cameraDeviceAction != null) {
+                        cameraDeviceAction!!.promiseReturn(returnObj)
+                    }
+                    if(cameraAction != null) {
+                        cameraAction!!.promiseReturn(returnObj)
+                    }
+                }
+
+            }
+            Constants.PERM_LOCATION_REQ_CODE -> {
+                // 처음에 권한을 승인한 경우
+                if(isNotEmpty && isGranted) {
+                    Location.getCurrentLatAndLot()
+                }
+                // 권한을 거부한 경우
+                else {
+                    val returnObj = Utils.createJSONObject(false,
+                        null, Constants.MSG_DENIED_PERM)
+                    locationAction?.promiseReturn(returnObj)
+                }
+            }
+            Constants.PERM_SEND_SMS_REQ_CODE -> {
+                // 처음에 권한을 승인한 경우
+                if(isNotEmpty && isGranted) {
+                    SMS.sendMessage()
+                }
+                // 권한을 거부한 경우
+                else {
+                    val returnObj = Utils.createJSONObject(false,
+                        null, Constants.MSG_DENIED_PERM)
+                    sendSmsAction?.promiseReturn(returnObj)
+                }
+            }
         }
     }
 
     /** 뒤로 가기 버튼 클릭 이벤트 */
     override fun onBackPressed() {
-        if(flex_pop_up_web_view.visibility == View.VISIBLE)
-            Utils.closePopup(this@MainActivity, constraintLayout, backgroundView, popupCloseButton, flex_pop_up_web_view)
-        else
+        if(flex_pop_up_web_view.visibility == View.VISIBLE) {
+            Utils.closePopup(
+                this@MainActivity, constraintLayout,
+                backgroundView, popupCloseButton, flex_pop_up_web_view
+            )
+        } else
             backPressedTwice()
     }
 
@@ -381,15 +509,15 @@ class MainActivity : BasicActivity() {
 
         backPressedTwice = true
         Toast.showLongText("뒤로가기 버튼을 한 번 더 누르시면 종료됩니다.")
+
         Handler().postDelayed({
             backPressedTwice = false
         }, 2000)
     }
 
-
-    /*
+    /**
     * 인터페이스
-    * */
+    */
     inner class FlexPopupInterface{
 
         @FlexFuncInterface
@@ -413,16 +541,19 @@ class MainActivity : BasicActivity() {
                 flex_pop_up_web_view.layoutParams = Utils.getParamsAlignCenterInConstraintLayout(
                     popupWidth, popupHeight, R.id.constraintLayout)
 
-                val bottomUp = AnimationUtils.loadAnimation(this@MainActivity, R.anim.open)
+                val bottomUp = AnimationUtils.loadAnimation(this@MainActivity,
+                        R.anim.open)
                 flex_pop_up_web_view.startAnimation(bottomUp)
                 flex_pop_up_web_view.bringToFront()
 
                 // 닫기 버튼 생성
-                popupCloseButton = Utils.createCloseButton(this@MainActivity, R.id.constraintLayout)
+                popupCloseButton = Utils.createCloseButton(this@MainActivity,
+                        R.id.constraintLayout)
                 constraintLayout.addView(popupCloseButton)
 
                 popupCloseButton.setOnClickListener {
-                    Utils.closePopup(this@MainActivity, constraintLayout, backgroundView, popupCloseButton, flex_pop_up_web_view)
+                    Utils.closePopup(this@MainActivity, constraintLayout, backgroundView,
+                        popupCloseButton, flex_pop_up_web_view)
                 }
             }
         }

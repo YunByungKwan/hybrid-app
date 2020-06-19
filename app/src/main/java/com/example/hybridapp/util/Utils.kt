@@ -1,29 +1,32 @@
 package com.example.hybridapp.util
 
+import android.annotation.SuppressLint
+import android.app.DownloadManager
 import android.content.Context
-import android.content.DialogInterface
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.pm.Signature
 import android.net.Uri
 import android.os.Build
+import android.os.Environment
 import android.provider.Settings
-import android.text.TextUtils
 import android.util.Base64
 import android.util.DisplayMetrics
-import android.util.Log
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AnimationUtils
+import android.webkit.MimeTypeMap
 import android.widget.Button
+import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import app.dvkyun.flexhybridand.FlexAction
+import app.dvkyun.flexhybridand.FlexWebView
 import com.example.hybridapp.App
-import com.example.hybridapp.BuildConfig
 import com.example.hybridapp.R
-import com.example.hybridapp.util.module.Dialog
 import com.example.hybridapp.util.module.SharedPreferences
 import org.json.JSONObject
 import java.io.File
@@ -36,116 +39,108 @@ import kotlin.collections.ArrayList
 
 object Utils {
 
-    /** permissionName이 있는지 없는지 확인 */
+    /**================================== Permission Function ====================================*/
+
+    /** 필요 권한들이 모두 있는지 확인
+     *  하나라도 없으면 false
+     */
+    fun existAllPermission(permissions: Array<out String>): Boolean {
+        for(permissionName in permissions) {
+            if(!existsPermission(permissionName)) {
+                return false
+            }
+        }
+        return true
+    }
+
+    /** 권한 승인 여부 판별 */
     fun existsPermission(permissionName: String): Boolean
             = (ContextCompat.checkSelfPermission(App.INSTANCE, permissionName)
             == PackageManager.PERMISSION_GRANTED)
 
-    /** permissions가 모두 있는지 확인 */
-    fun existAllPermission(permissions: Array<out String>): Boolean {
-        for(permissionName in permissions) {
-            if(!existsPermission(permissionName)) {
-                Log.d("dlgodnjs", "zzz")
-                return false
-            }
-        }
-
-        Log.d("dlgodnjs", "zzzsf24")
-        return true
-    }
-
-    /** permissionName이 거절되었는지 확인 */
-    private fun isDenialPermission(permissionName: String): Boolean =
-        ActivityCompat.shouldShowRequestPermissionRationale(App.activity, permissionName)
-
     /** 위험 권한이 없을 경우 */
-    fun checkDangerousPermissions(permissions: Array<out String>, permissionCode: Int) {
+    fun checkAbsentPerms(permissions: Array<out String>, code: Int, action: FlexAction?) {
+        Constants.LOGD("Call checkAbsentPerms()")
+
+        // 거절한 권한이 하나라도 존재할 경우
         if (existsDenialPermission(permissions)) {
-            Log.d("dlgodnjss", "aasg22 ,, " + permissionCode)
-            Dialog.show(Constants.DIAL_TITLE,
-                getDialogMessage(permissionCode),
-                Constants.DIAL_POS,
-                null,
-                Constants.DIAL_NEG,
-                DialogInterface.OnClickListener { _, _ ->
-                    requestAppSettingsIntent()
-                },
-                null,
-                null,
-                {})
-        } else {
-            Log.d("dlgodnjss", "aasg2zzzz2")
-            val permissionsToRequest = getPermissionsToRequest(permissions)
-            requestPermissions(permissionsToRequest, permissionCode)
+            val returnObj = createJSONObject(false,
+                null, "설정 > 앱에서 필수 권한들을 승인해 주세요")
+            action?.promiseReturn(returnObj)
+        } else { // 승인이 필요한 권한들을 요청
+            val perms = getPermissionsToRequest(permissions)
+            requestPermissions(perms, code)
         }
     }
 
-    /** 거절한 권한이 하나라도 있는지 확인 */
+    /** 거절된 권한 존재 여부 판별
+     * 거절된 권한이 하나라도 있을 경우 false
+     */
     private fun existsDenialPermission(permissions: Array<out String>): Boolean {
-        Log.d("dlgodnjs", "adsf")
         for(permissionName in permissions) {
             if(isDenialPermission(permissionName)) {
-                Log.d("dlgodnjs", "gadgadg")
                 return true
             }
         }
-        Log.d("dlgodnjs", "fff2")
         return false
     }
 
+    /** 필요 권한이 거절되었는지 확인 */
+    private fun isDenialPermission(permissionName: String): Boolean =
+        ActivityCompat.shouldShowRequestPermissionRationale(App.activity, permissionName)
+
     /** 요청이 필요한 권한들을 반환 */
     private fun getPermissionsToRequest(permissions: Array<out String>): Array<out String> {
-        val permissionsToRequest = ArrayList<String>()
+        val perms = ArrayList<String>()
 
         for(permissionName in permissions) {
             if(!existsPermission(permissionName)) {
-                permissionsToRequest.add(permissionName)
+                perms.add(permissionName)
             }
         }
 
-        return permissionsToRequest.toTypedArray()
+        return perms.toTypedArray()
     }
 
     /** 다수 권한 요청 */
     fun requestPermissions(permissions: Array<out String>, requestCode: Int) {
-        Constants.LOGE("requestPermissions")
+        Constants.LOGD("Call requestPermissions()")
 
         ActivityCompat.requestPermissions(App.activity, permissions, requestCode)
-    }
-
-    /** 앱 설정 화면으로 이동 */
-    private fun requestAppSettingsIntent() {
-        val settingsIntent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
-        settingsIntent.data = Uri.fromParts("package", App.INSTANCE.packageName, null)
-        ActivityCompat.startActivity(App.activity, settingsIntent, null)
-    }
-
-    /** 권한 다이얼로그 메시지 */
-    private fun getDialogMessage(permissionCode: Int): String {
-        when(permissionCode) {
-            Constants.PERM_CAMERA_REQ_CODE -> {
-                return Constants.DIAL_MSG_CAMERA
-            }
-            Constants.PERM_WRITE_REQ_CODE -> {
-                return Constants.DIAL_MSG_WRITE
-            }
-            Constants.PERM_READ_WRITE_REQ_CODE -> {
-                return Constants.DIAL_MSG_READ_WRITE
-            }
-            Constants.PERM_LOCATION_REQ_CODE -> {
-                return Constants.DIAL_MSG_LOCATION
-            }
-            Constants.PERM_SEND_SMS_REQ_CODE -> {
-                return Constants.DIAL_MSG_SEND_SMS
-            }
-        }
-
-        return ""
     }
 
     /** 암시적 인텐트를 받을 수 있는 앱이 있는지 확인 */
     fun existsReceiveActivity(intent: Intent, packageManager: PackageManager): Boolean
             = (intent.resolveActivity(packageManager) != null)
+
+    /** url로부터 파일을 다운받음 */
+    fun downloadFileFromUrl(url: String) {
+        val mimeTypeMap = MimeTypeMap.getSingleton()
+        val extension = MimeTypeMap.getFileExtensionFromUrl(url)
+        Constants.LOGD("extension: $extension")
+        val mimeType = mimeTypeMap.getMimeTypeFromExtension(extension)
+        Constants.LOGD("MimeType: $mimeType")
+
+        if(existsPermission(Constants.PERM_WRITE_EXTERNAL_STORAGE)) {
+            val downloadManager = (App.activity).getSystemService(
+                AppCompatActivity.DOWNLOAD_SERVICE) as DownloadManager
+            val request = DownloadManager.Request(Uri.parse(url))
+            request.setMimeType(mimeType)
+            request.setDescription("Downloading File...")
+            request.setAllowedOverMetered(true)
+            request.setAllowedOverRoaming(true)
+            request.setTitle("file")
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                request.setRequiresCharging(false)
+            }
+            request.allowScanningByMediaScanner()
+            request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
+            request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, "file.$extension")
+            downloadManager.enqueue(request)
+        } else {
+            requestPermissions(arrayOf(Constants.PERM_WRITE_EXTERNAL_STORAGE), Constants.PERM_WRITE_REQ_CODE)
+        }
+    }
 
     fun getAppSignatures(context: Context): ArrayList<String> {
         val appCodes: ArrayList<String> = ArrayList()
@@ -203,24 +198,26 @@ object Utils {
             Base64.NO_PADDING or Base64.NO_WRAP).substring(0, 11)
     }
 
-    /** 디바이스 id 가져오기 */
-    fun getDeviceId(context: Context): String {
-        return Settings.Secure.getString(context.contentResolver, Settings.Secure.ANDROID_ID)
-    }
-
     /** App id 가져오기 */
     fun getAppId(): String {
-        val appId : String = SharedPreferences.getString(Constants.SHARED_APPID_FILE_NAME, Constants.SHARED_APPID_KEY)
-        return if(appId.isNullOrEmpty()) {
-            val str: String = UUID.randomUUID().toString()
-            SharedPreferences.putData(Constants.SHARED_APPID_FILE_NAME, Constants.SHARED_APPID_KEY, str)
+        val appId : String = SharedPreferences.getString(Constants.SHARED_APPID_FILE_NAME,
+            Constants.SHARED_APPID_KEY)
 
-            str
+        return if(appId.isNullOrEmpty()) {
+            val uuid: String = UUID.randomUUID().toString()
+            SharedPreferences.putData(Constants.SHARED_APPID_FILE_NAME,
+                Constants.SHARED_APPID_KEY, uuid)
+
+            uuid
         }
         else {
             appId
         }
+    }
 
+    /** 디바이스 id 가져오기 */
+    fun getDeviceId(context: Context): String {
+        return Settings.Secure.getString(context.contentResolver, Settings.Secure.ANDROID_ID)
     }
 
     /** 현재 날짜와 시간 반환 */
@@ -305,6 +302,16 @@ object Utils {
         return if(jsonObject.has(key)) jsonObject.get(key).toString() else null
     }
 
+    /** WebView 가로, 세로 스크롤 기능 해제 리스너 */
+//    @SuppressLint("ClickableViewAccessibility")
+//    fun disabledWebViewScroll(webView: FlexWebView) {
+//        webView.setOnTouchListener { _ , event -> run {
+//            when (event.action) { MotionEvent.ACTION_MOVE -> { } }
+//        }
+//        true
+//        }
+//    }
+
     fun getParamsAlignCenterInConstraintLayout(
         width: Int, height: Int, root: Int): ConstraintLayout.LayoutParams {
         val params = getParamsInConstraintLayout(width, height)
@@ -318,5 +325,39 @@ object Utils {
 
     fun getParamsInConstraintLayout(width: Int, height: Int): ConstraintLayout.LayoutParams {
         return ConstraintLayout.LayoutParams(width, height)
+    }
+
+    /**================================== JSONObject 관련 ========================================*/
+
+    /** JSONObject 생성
+     *
+     * Parameter:
+     * Boolean, String
+     */
+    fun createJSONObject(authValue: Boolean?, dataValue: Any?, msgValue: String?): JSONObject {
+        val obj = JSONObject()
+        obj.put(Constants.OBJ_KEY_AUTH, authValue)
+
+        when(dataValue) {
+            is String -> {
+                obj.put(Constants.OBJ_KEY_DATA, dataValue)
+            }
+            is Boolean -> {
+                obj.put(Constants.OBJ_KEY_DATA, dataValue)
+            }
+            is JSONObject -> {
+                obj.put(Constants.OBJ_KEY_DATA, dataValue)
+            }
+            is Array<*> -> {
+                obj.put(Constants.OBJ_KEY_DATA, dataValue)
+            }
+            else -> {
+                obj.put(Constants.OBJ_KEY_DATA, null)
+            }
+        }
+
+        obj.put(Constants.OBJ_KEY_MSG, msgValue)
+
+        return obj
     }
 }

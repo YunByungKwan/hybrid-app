@@ -4,7 +4,6 @@ import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.os.Build
-import android.util.Log
 import com.example.hybridapp.util.Constants
 
 /**
@@ -20,21 +19,22 @@ object Network {
     /**
      * 네트워크 상태를 확인
      *
-     * return :
+     * Return :
      * 0 : 연결되지 않음
      * 1 : 데이터 연결됨
      * 2 : 와이파이 연결됨
      */
     fun getStatus(context: Context): Int {
         Constants.LOGD("Call getStatus() in Network object.")
-
         val manager = getConnectivityManager(context)
+
+        // 현재 버전이 M보다 크거나 같을 경우
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            Constants.LOGD("Build version is greater than Marshmallow.")
+            Constants.LOGD("Current version >= M")
 
             val network = manager.activeNetwork ?: return Constants.NET_STAT_DISCONNECTED
-            val capabilities = manager.getNetworkCapabilities(network)
-                ?: return Constants.NET_STAT_DISCONNECTED
+            val capabilities
+                    = manager.getNetworkCapabilities(network) ?: return Constants.NET_STAT_DISCONNECTED
             return when {
                 capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) -> {
                     Constants.NET_STAT_CELLULAR
@@ -46,8 +46,8 @@ object Network {
                     Constants.NET_STAT_DISCONNECTED
                 }
             }
-        } else {
-            Constants.LOGD("Build version is smaller than Marshmallow.")
+        } else { // 현재 버전이 M보다 작은 경우
+            Constants.LOGD("Current version < M")
 
             val network = manager.activeNetworkInfo
                 ?: return Constants.NET_STAT_DISCONNECTED

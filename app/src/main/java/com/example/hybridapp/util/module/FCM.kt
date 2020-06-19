@@ -3,7 +3,6 @@ package com.example.hybridapp.util.module
 import android.app.PendingIntent
 import android.content.Intent
 import android.os.Build
-import android.util.Log
 import com.example.hybridapp.MainActivity
 import com.example.hybridapp.util.Constants
 import com.google.firebase.messaging.FirebaseMessagingService

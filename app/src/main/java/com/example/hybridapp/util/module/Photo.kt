@@ -10,7 +10,6 @@ import android.net.Uri
 import android.provider.MediaStore
 import android.util.Base64
 import android.util.Log
-import app.dvkyun.flexhybridand.FlexAction
 import com.example.hybridapp.App
 import com.example.hybridapp.basic.BasicActivity
 import com.example.hybridapp.util.Constants
@@ -23,75 +22,52 @@ import java.lang.Exception
 object Photo {
 
     /** 갤러리 호출 (1장) */
-    fun requestImage(action: FlexAction?, ratio: Double?, isWidthRatio: Boolean?) {
+    fun requestImage(isWidthRatio: Boolean?) {
         Constants.LOGD("Call requestImage()")
 
-        val storagePerms = arrayOf(Constants.PERM_WRITE_EXTERNAL_STORAGE,
-            Constants.PERM_READ_EXTERNAL_STORAGE)
+        val basicActivity = App.activity as BasicActivity
+        val packageManager = App.INSTANCE.packageManager
+        val singlePhotoIntent = getSinglePhotoIntent()
 
-        if(Utils.existAllPermission(storagePerms) && action != null) {
-            Constants.LOGD("Read/write storage permission exist.")
-
-            val singlePhotoIntent = getSinglePhotoIntent()
-            val packageManager = App.INSTANCE.packageManager
-            val basicActivity = App.activity as BasicActivity
-            basicActivity.ratio = ratio
-
-            if(Utils.existsReceiveActivity(singlePhotoIntent, packageManager)) {
-                if(isWidthRatio != null) {
-                    basicActivity.photoDeviceAction = action
-                    basicActivity.isWidthRatio = isWidthRatio
-
-                    basicActivity.startActivityForResult(singlePhotoIntent,
-                        Constants.PHOTO_DEVICE_RATIO_REQ_CODE)
-                } else {
-                    basicActivity.photoAction = action
-
-                    basicActivity.startActivityForResult(singlePhotoIntent,
-                        Constants.PHOTO_RATIO_REQ_CODE)
-                }
-            } else {
-                Constants.LOGE(Constants.LOG_MSG_GALLERY)
-                action.resolveVoid()
+        // 갤러리 앱을 사용할 수 있는 경우
+        if(Utils.existsReceiveActivity(singlePhotoIntent, packageManager)) {
+            // 디바이스 기준으로 resize
+            if(isWidthRatio != null) {
+                basicActivity.isWidthRatio = isWidthRatio
+                basicActivity.startActivityForResult(singlePhotoIntent,
+                    Constants.PHOTO_DEVICE_RATIO_REQ_CODE)
+            }
+            // 이미지 기준으로 resize
+            else {
+                basicActivity.startActivityForResult(singlePhotoIntent,
+                    Constants.PHOTO_RATIO_REQ_CODE)
             }
         } else {
-            Utils.checkDangerousPermissions(storagePerms, Constants.PERM_READ_WRITE_REQ_CODE)
-            action?.resolveVoid()
+            val returnObj = Utils.createJSONObject(true,
+                null, Constants.MSG_NOT_LOAD_GALLERY)
+            basicActivity.photoDeviceAction?.promiseReturn(returnObj)
         }
     }
 
     /** 갤러리 호출 (여러 장) */
-    fun requestMultipleImages(action: FlexAction?, ratio: Double, isWidthRatio: Boolean?) {
+    fun requestMultipleImages(isWidthRatio: Boolean?) {
         Constants.LOGE("Call requestMultipleImages()")
 
-        val storagePerms =
-            arrayOf(Constants.PERM_WRITE_EXTERNAL_STORAGE,
-                Constants.PERM_READ_EXTERNAL_STORAGE)
+        val packageManager = App.INSTANCE.packageManager
+        val basicActivity = App.activity as BasicActivity
+        val multiplePhotosIntent = getMultiplePhotosIntent()
 
-        if(Utils.existAllPermission(storagePerms) && action != null) {
-            val multiplePhotosIntent = getMultiplePhotosIntent()
-            val packageManager = App.INSTANCE.packageManager
-            val basicActivity = App.activity as BasicActivity
-            basicActivity.ratio = ratio
-
-            if(Utils.existsReceiveActivity(multiplePhotosIntent, packageManager)) {
-                if(isWidthRatio != null) {
-                    basicActivity.multiplePhotoDeviceAction = action
-                    basicActivity.isWidthRatio = isWidthRatio
-                    basicActivity.startActivityForResult(multiplePhotosIntent,
-                        Constants.MULTI_PHOTO_DEVICE_RATIO_REQ_CODE)
-                } else {
-                    basicActivity.multiplePhotosAction = action
-                    basicActivity.startActivityForResult(multiplePhotosIntent,
-                        Constants.MULTI_PHOTO_RATIO_REQ_CODE)
-                }
+        if(Utils.existsReceiveActivity(multiplePhotosIntent, packageManager)) {
+            if(isWidthRatio != null) {
+                basicActivity.isWidthRatio = isWidthRatio
+                basicActivity.startActivityForResult(multiplePhotosIntent,
+                    Constants.MULTI_PHOTO_DEVICE_RATIO_REQ_CODE)
             } else {
-                Constants.LOGE(Constants.LOG_MSG_GALLERY)
-                action.resolveVoid()
+                basicActivity.startActivityForResult(multiplePhotosIntent,
+                    Constants.MULTI_PHOTO_RATIO_REQ_CODE)
             }
         } else {
-            Utils.checkDangerousPermissions(storagePerms, Constants.PERM_READ_WRITE_REQ_CODE)
-            action?.resolveVoid()
+            Constants.LOGE(Constants.LOG_MSG_GALLERY)
         }
     }
 
@@ -116,6 +92,8 @@ object Photo {
 
     /** 비트맵 리사이징 후 base64로 변환 */
     fun convertUriToResizingBase64(imageUri: Uri?, ratio: Double?, isWidthRatio: Boolean?): String {
+        Constants.LOGD("Call convertUriToResizingBase64()")
+
         val bitmap = getBitmapFromUri(imageUri!!)
 
         // isWidthRatio가 널일 경우 이미지 비율에 맞게 리사이즈
@@ -166,7 +144,7 @@ object Photo {
     }
 
     /** Uri --> File Path */
-    private fun getFilePathFromUri(uri: Uri): String {
+    fun getFilePathFromUri(uri: Uri): String {
         Constants.LOGD("Call getFilePathFromUri()")
 
         var cursor: Cursor? = null
@@ -248,7 +226,7 @@ object Photo {
         Constants.LOGD("Call rotateBitmap()")
 
         if(bitmap == null) {
-            Constants.LOGD("Bitmap is null")
+            Constants.LOGE("Bitmap is null")
 
             return null
         }
@@ -265,7 +243,8 @@ object Photo {
 
     /** Bitmap --> Base64 */
     fun getBase64FromBitmap(bitmap: Bitmap): String {
-        Constants.LOGD("Call getBase64FromBitmap()")
+        Constants.LOGD("Call getBase64FromBitmap() " +
+                "Bitmap width: ${bitmap.width}, height: ${bitmap.height}")
 
         val byteArrayOutputStream = ByteArrayOutputStream()
         bitmap.compress(Bitmap.CompressFormat.JPEG, 100, byteArrayOutputStream)
@@ -276,20 +255,21 @@ object Photo {
 
     /** 디바이스 화면 비율에 맞게 리사이즈 */
     private fun resizeBitmapByDeviceRatio(bitmap: Bitmap, ratio: Double, isWidthRatio: Boolean?): Bitmap {
+        Constants.LOGD("Call resizeBitmapByDeviceRatio()")
         val screenWidth = Utils.getScreenSize().getValue(Constants.SCREEN_WIDTH)
         val screenHeight = Utils.getScreenSize().getValue(Constants.SCREEN_HEIGHT)
 
-        Log.e("TAG", "screenWidth: $screenWidth screenHeight: $screenHeight")
-        Log.e("TAG222222", "bitmap Width: ${bitmap.width} bitmap Height: ${bitmap.height}")
+        Constants.LOGD("screenWidth: $screenWidth screenHeight: $screenHeight")
+        Constants.LOGD("bitmap Width: ${bitmap.width} bitmap Height: ${bitmap.height}")
 
-        Log.d("dlgodnjs", ratio.toString())
+        Constants.LOGD("ratio: $ratio")
         return if(isWidthRatio!!) {
             Constants.LOGD("Resize bitmap by device width ratio(${ratio*100}%)")
 
             val resizeWidth = (screenWidth * ratio).toInt()
             val resizeHeight = (bitmap.height * ((screenWidth * ratio) / bitmap.width)).toInt()
 
-            Log.e("dlgodnjs", "resizeWidth : $resizeWidth resizeHeight : $resizeHeight")
+            Constants.LOGD("resizeWidth : $resizeWidth resizeHeight : $resizeHeight")
 
             Bitmap.createScaledBitmap(bitmap, resizeWidth, resizeHeight, true)
         } else {
@@ -298,7 +278,7 @@ object Photo {
             val resizeWidth = (bitmap.width * ((screenHeight * ratio) / bitmap.height)).toInt()
             val resizeHeight = (screenHeight * ratio).toInt()
 
-            Log.e("dlgodnjs", "resizeWidth : $resizeWidth resizeHeight : $resizeHeight")
+            Constants.LOGD("resizeWidth : $resizeWidth resizeHeight : $resizeHeight")
 
             Bitmap.createScaledBitmap(bitmap, resizeWidth, resizeHeight, true)
         }

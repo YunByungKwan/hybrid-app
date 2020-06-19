@@ -1,11 +1,12 @@
 package com.example.hybridapp.util.module
 
+import android.app.PendingIntent
+import android.content.Intent
 import android.content.IntentFilter
 import android.telephony.SmsManager
-import android.util.Log
 import com.example.hybridapp.App
+import com.example.hybridapp.basic.BasicActivity
 import com.example.hybridapp.util.Constants
-import com.example.hybridapp.util.Utils
 import com.google.android.gms.auth.api.phone.SmsRetriever
 
 /**
@@ -42,23 +43,26 @@ object SMS {
     }
 
     /** 문자 메시지를 보냄  */
-    fun sendMessage(phoneNumber: String, message: String): String {
+    fun sendMessage() {
         Constants.LOGD("Call sendMessage() in SMS object.")
 
-        return if(Utils.existAllPermission(arrayOf(Constants.PERM_SEND_SMS))) {
-            val smsManager = SmsManager.getDefault()
-            smsManager.sendTextMessage(phoneNumber, null, message,
-                null, null)
+        val basicActivity = App.activity as BasicActivity
 
-            Constants.LOG_MSG_SMS_SUCCESS
-        } else {
-            Utils.checkDangerousPermissions(arrayOf(Constants.PERM_SEND_SMS),
-                Constants.PERM_SEND_SMS_REQ_CODE)
+        val sentIntent = PendingIntent.getBroadcast(basicActivity,
+            Constants.SEND_SMS_REQ_CODE, Intent("SMS_SENT"), 0)
+        val deliveryIntent = PendingIntent.getBroadcast(basicActivity,
+            Constants.SEND_SMS_REQ_CODE, Intent(), 0)
 
-            Log.d("dlgodnjs", "asggg")
-            ""
-        }
+        val smsManager = SmsManager.getDefault()
+            smsManager.sendTextMessage(basicActivity.phoneNumber,
+                null,
+                basicActivity.smsMessage,
+                sentIntent,
+                null)
+
+        basicActivity.sendSmsAction?.promiseReturn("성공")
     }
+
 
     /** 문자 메시지를 받음 */
     fun receiveMessage() {

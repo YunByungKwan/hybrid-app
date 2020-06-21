@@ -1,6 +1,5 @@
 package com.example.hybridapp.util
 
-import android.annotation.SuppressLint
 import android.app.DownloadManager
 import android.content.Context
 import android.content.Intent
@@ -13,7 +12,6 @@ import android.provider.Settings
 import android.util.Base64
 import android.util.DisplayMetrics
 import android.view.LayoutInflater
-import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AnimationUtils
@@ -24,9 +22,9 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import app.dvkyun.flexhybridand.FlexAction
-import app.dvkyun.flexhybridand.FlexWebView
 import com.example.hybridapp.App
 import com.example.hybridapp.R
+import com.example.hybridapp.basic.BasicActivity
 import com.example.hybridapp.util.module.SharedPreferences
 import org.json.JSONObject
 import java.io.File
@@ -59,7 +57,7 @@ object Utils {
             == PackageManager.PERMISSION_GRANTED)
 
     /** 위험 권한이 없을 경우 */
-    fun checkAbsentPerms(permissions: Array<out String>, code: Int, action: FlexAction?) {
+    fun checkAbsentPerms(permissions: Array<out String>, requestCode: Int, action: FlexAction?) {
         Constants.LOGD("Call checkAbsentPerms()")
 
         // 거절한 권한이 하나라도 존재할 경우
@@ -67,9 +65,11 @@ object Utils {
             val returnObj = createJSONObject(false,
                 null, "설정 > 앱에서 필수 권한들을 승인해 주세요")
             action?.promiseReturn(returnObj)
-        } else { // 승인이 필요한 권한들을 요청
+        }
+        // 승인이 필요한 권한들을 요청
+        else {
             val perms = getPermissionsToRequest(permissions)
-            requestPermissions(perms, code)
+            requestPermissions(perms, requestCode)
         }
     }
 
@@ -114,32 +114,32 @@ object Utils {
             = (intent.resolveActivity(packageManager) != null)
 
     /** url로부터 파일을 다운받음 */
-    fun downloadFileFromUrl(url: String) {
+    fun downloadFileFromUrl() {
+        Constants.LOGD("Call downloadFileFromUrl()")
+
+        val basicActivity = App.activity as BasicActivity
         val mimeTypeMap = MimeTypeMap.getSingleton()
-        val extension = MimeTypeMap.getFileExtensionFromUrl(url)
+        val extension = MimeTypeMap.getFileExtensionFromUrl(basicActivity.fileUrl)
         Constants.LOGD("extension: $extension")
         val mimeType = mimeTypeMap.getMimeTypeFromExtension(extension)
         Constants.LOGD("MimeType: $mimeType")
 
-        if(existsPermission(Constants.PERM_WRITE_EXTERNAL_STORAGE)) {
-            val downloadManager = (App.activity).getSystemService(
-                AppCompatActivity.DOWNLOAD_SERVICE) as DownloadManager
-            val request = DownloadManager.Request(Uri.parse(url))
-            request.setMimeType(mimeType)
-            request.setDescription("Downloading File...")
-            request.setAllowedOverMetered(true)
-            request.setAllowedOverRoaming(true)
-            request.setTitle("file")
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                request.setRequiresCharging(false)
-            }
-            request.allowScanningByMediaScanner()
-            request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
-            request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, "file.$extension")
-            downloadManager.enqueue(request)
-        } else {
-            requestPermissions(arrayOf(Constants.PERM_WRITE_EXTERNAL_STORAGE), Constants.PERM_WRITE_REQ_CODE)
+        val downloadManager = (App.activity).getSystemService(
+            AppCompatActivity.DOWNLOAD_SERVICE) as DownloadManager
+        val request = DownloadManager.Request(Uri.parse(basicActivity.fileUrl))
+        request.setMimeType(mimeType)
+        request.setDescription("Downloading File...")
+        request.setAllowedOverMetered(true)
+        request.setAllowedOverRoaming(true)
+        request.setTitle("file")
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            request.setRequiresCharging(false)
         }
+        request.allowScanningByMediaScanner()
+        request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
+        request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS,
+            "file.$extension")
+        downloadManager.enqueue(request)
     }
 
     fun getAppSignatures(context: Context): ArrayList<String> {
@@ -349,6 +349,9 @@ object Utils {
                 obj.put(Constants.OBJ_KEY_DATA, dataValue)
             }
             is Array<*> -> {
+                obj.put(Constants.OBJ_KEY_DATA, dataValue)
+            }
+            is ArrayList<*> -> {
                 obj.put(Constants.OBJ_KEY_DATA, dataValue)
             }
             else -> {

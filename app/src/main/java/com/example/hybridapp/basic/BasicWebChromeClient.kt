@@ -3,7 +3,6 @@ package com.example.hybridapp.basic
 import android.content.Intent
 import android.net.Uri
 import android.webkit.ValueCallback
-import android.webkit.WebChromeClient
 import android.webkit.WebView
 import app.dvkyun.flexhybridand.FlexWebChromeClient
 import com.example.hybridapp.util.Constants

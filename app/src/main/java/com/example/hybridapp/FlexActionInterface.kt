@@ -1,10 +1,15 @@
 package com.example.hybridapp
 
+import android.app.DownloadManager
 import android.app.PendingIntent
 import android.content.Intent
+import android.net.Uri
 import android.os.Build
+import android.os.Environment
 import android.util.Log
+import androidx.appcompat.app.AppCompatActivity
 import app.dvkyun.flexhybridand.FlexFuncInterface
+import com.example.hybridapp.basic.BasicActivity
 import com.example.hybridapp.data.LogUrlRepository
 import com.example.hybridapp.data.LogUrlRoomDatabase
 import com.example.hybridapp.util.Constants
@@ -30,19 +35,6 @@ class FlexActionInterface {
             } else {
                 Toast.showLongText(message)
             }
-        }
-    }
-
-    @FlexFuncInterface
-    fun Snackbar(array: JSONArray) {
-        CoroutineScope(Dispatchers.Main).launch {
-            val message = array.getString(0)
-            val isShortSnackbar = array.getBoolean(1)
-
-            if(isShortSnackbar)
-                Snackbar.showShortText(App.activity.findViewById(R.id.constraintLayout), message)
-            else
-                Snackbar.showLongText(App.activity.findViewById(R.id.constraintLayout), message)
         }
     }
 
@@ -97,13 +89,25 @@ class FlexActionInterface {
         return Utils.getDeviceId(App.INSTANCE)
     }
 
-    /** FileDownload */
+    /**============================== FileDownload Interface =====================================*/
     @FlexFuncInterface
     fun FileDownload(array: JSONArray) {
-        val fileUrl = array.getString(0)
-        Constants.LOGD("fileUrl: $fileUrl")
+        Constants.LOGD("Call FileDownload Interface")
 
-        Utils.downloadFileFromUrl(fileUrl)
+        val basicActivity = App.activity as BasicActivity
+        basicActivity.fileUrl = array?.getString(0)
+
+        val perms = arrayOf(Constants.PERM_WRITE_EXTERNAL_STORAGE)
+
+        // 권한이 다 있을 경우
+        if(Utils.existAllPermission(perms)) {
+            Utils.downloadFileFromUrl()
+        }
+        // 권한이 다 있지 않을 경우
+        else {
+            Utils.checkAbsentPerms(perms, Constants.PERM_FILE_REQ_CODE,
+                null)
+        }
     }
 
     @FlexFuncInterface

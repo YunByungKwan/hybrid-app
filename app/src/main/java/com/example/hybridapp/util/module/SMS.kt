@@ -3,11 +3,14 @@ package com.example.hybridapp.util.module
 import android.app.PendingIntent
 import android.content.Intent
 import android.content.IntentFilter
+import android.net.Uri
 import android.telephony.SmsManager
 import com.example.hybridapp.App
 import com.example.hybridapp.basic.BasicActivity
 import com.example.hybridapp.util.Constants
+import com.example.hybridapp.util.Utils
 import com.google.android.gms.auth.api.phone.SmsRetriever
+import java.lang.Exception
 
 /**
  * 문자 형식
@@ -47,20 +50,22 @@ object SMS {
         Constants.LOGD("Call sendMessage() in SMS object.")
 
         val basicActivity = App.activity as BasicActivity
+        val packageManager = App.INSTANCE.packageManager
 
-        val sentIntent = PendingIntent.getBroadcast(basicActivity,
-            Constants.SEND_SMS_REQ_CODE, Intent("SMS_SENT"), 0)
-        val deliveryIntent = PendingIntent.getBroadcast(basicActivity,
-            Constants.SEND_SMS_REQ_CODE, Intent(), 0)
+        val sendIntent = Intent(Intent.ACTION_SEND).apply {
+            data = Uri.parse("smsto:${basicActivity.phoneNumber}")
+            putExtra("sms_body", basicActivity.smsMessage)
+        }
 
-        val smsManager = SmsManager.getDefault()
-            smsManager.sendTextMessage(basicActivity.phoneNumber,
-                null,
-                basicActivity.smsMessage,
-                sentIntent,
-                null)
-
-        basicActivity.sendSmsAction?.promiseReturn("성공")
+        if(Utils.existsReceiveActivity(sendIntent, packageManager)) {
+            basicActivity.startActivityForResult(sendIntent, Constants.SEND_SMS_REQ_CODE)
+        } else {
+            val returnObj = Utils.createJSONObject(true,
+                false, "메시지를 보낼 수 없습니다")
+            basicActivity.sendSmsAction?.promiseReturn(returnObj)
+            basicActivity.phoneNumber = null
+            basicActivity.smsMessage = null
+        }
     }
 
 

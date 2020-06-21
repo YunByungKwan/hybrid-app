@@ -22,7 +22,7 @@ import java.lang.Exception
 object Photo {
 
     /** 갤러리 호출 (1장) */
-    fun requestImage(isWidthRatio: Boolean?) {
+    fun requestImage() {
         Constants.LOGD("Call requestImage()")
 
         val basicActivity = App.activity as BasicActivity
@@ -32,8 +32,7 @@ object Photo {
         // 갤러리 앱을 사용할 수 있는 경우
         if(Utils.existsReceiveActivity(singlePhotoIntent, packageManager)) {
             // 디바이스 기준으로 resize
-            if(isWidthRatio != null) {
-                basicActivity.isWidthRatio = isWidthRatio
+            if(basicActivity.isWidthRatio != null) {
                 basicActivity.startActivityForResult(singlePhotoIntent,
                     Constants.PHOTO_DEVICE_RATIO_REQ_CODE)
             }
@@ -42,32 +41,63 @@ object Photo {
                 basicActivity.startActivityForResult(singlePhotoIntent,
                     Constants.PHOTO_RATIO_REQ_CODE)
             }
-        } else {
+        }
+        // 갤러리 앱을 사용할 수 없는 경우
+        else {
             val returnObj = Utils.createJSONObject(true,
                 null, Constants.MSG_NOT_LOAD_GALLERY)
-            basicActivity.photoDeviceAction?.promiseReturn(returnObj)
+
+            // 디바이스 기준일 경우
+            if(basicActivity.isWidthRatio != null) {
+                basicActivity.photoDeviceAction?.promiseReturn(returnObj)
+                basicActivity.ratio = null
+                basicActivity.isWidthRatio = null
+            }
+            // 이미지 기준일 경우우
+           else {
+                basicActivity.photoAction?.promiseReturn(returnObj)
+                basicActivity.ratio = null
+            }
         }
     }
 
     /** 갤러리 호출 (여러 장) */
-    fun requestMultipleImages(isWidthRatio: Boolean?) {
-        Constants.LOGE("Call requestMultipleImages()")
+    fun requestMultipleImages() {
+        Constants.LOGD("Call requestMultipleImages()")
 
         val packageManager = App.INSTANCE.packageManager
         val basicActivity = App.activity as BasicActivity
         val multiplePhotosIntent = getMultiplePhotosIntent()
 
+        // 갤러리 앱을 사용할 수 있는 경우
         if(Utils.existsReceiveActivity(multiplePhotosIntent, packageManager)) {
-            if(isWidthRatio != null) {
-                basicActivity.isWidthRatio = isWidthRatio
+            // 디바이스 기준으로 resize
+            if(basicActivity.isWidthRatio != null) {
                 basicActivity.startActivityForResult(multiplePhotosIntent,
                     Constants.MULTI_PHOTO_DEVICE_RATIO_REQ_CODE)
-            } else {
+            }
+            // 이미지 기준으로 resize
+            else {
                 basicActivity.startActivityForResult(multiplePhotosIntent,
                     Constants.MULTI_PHOTO_RATIO_REQ_CODE)
             }
-        } else {
-            Constants.LOGE(Constants.LOG_MSG_GALLERY)
+        }
+        // 갤러리 앱을 사용할 수 있는 경우
+        else {
+            val returnObj = Utils.createJSONObject(true,
+                null, Constants.MSG_NOT_LOAD_GALLERY)
+
+            // 디바이스 기준일 경우
+            if(basicActivity.isWidthRatio != null) {
+                basicActivity.multiplePhotoDeviceAction?.promiseReturn(returnObj)
+                basicActivity.ratio = null
+                basicActivity.isWidthRatio = null
+            }
+            // 이미지 기준일 경우
+            else {
+                basicActivity.multiplePhotoAction?.promiseReturn(returnObj)
+                basicActivity.ratio = null
+            }
         }
     }
 

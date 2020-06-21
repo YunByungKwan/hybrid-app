@@ -19,7 +19,7 @@ class Constants {
             FILE_UPLOAD_REQ_CODE,
             QR_REQ_CODE,
             PERM_CAMERA_REQ_CODE,
-            PERM_WRITE_REQ_CODE,
+            PERM_FILE_REQ_CODE,
             PERM_READ_WRITE_REQ_CODE,
             PERM_LOCATION_REQ_CODE,
             PERM_SEND_SMS_REQ_CODE)
@@ -60,9 +60,9 @@ class Constants {
        const val TYPE_SEND_SMS = "SendSMS"
        const val TYPE_LOCATION = "Location"
        const val TYPE_AUTH = "Authentication"
-       const val TYPE_BIO_AUTHENTICATION = "BioAuthentication"
        const val TYPE_LOCAL_REPO = "LocalRepository"
        const val TYPE_POP_UP = "WebPopup"
+       // const val TYPE_FILE_DOWNLOAD = "FileDownload"
 
        const val TAG = "HybridApp"
        const val TAG_MAIN = "MainActivity class"
@@ -129,14 +129,6 @@ class Constants {
        const val OBJ_KEY_DATA = "data"
        const val OBJ_KEY_MSG = "msg"
 
-       /** 위치 텍스트 */
-       const val MSG_NOT_LOAD_LAT_LOT = "현재 위도, 경도를 불러올 수 없습니다"
-
-       /** JSONObject key */
-       const val OBJ_KEY_AUTH = "auth"
-       const val OBJ_KEY_DATA = "data"
-       const val OBJ_KEY_MSG = "msg"
-
        /** 로그 텍스트 */
        const val LOG_MSG_CAMERA = "Camera app can't be launched."
        const val LOG_MSG_GALLERY = "Gallery app can't be launched."
@@ -180,7 +172,7 @@ class Constants {
 
        /** PERMISSION CODE */
        const val PERM_QR_REQ_CODE = 1001
-       const val PERM_WRITE_REQ_CODE = 1002
+       const val PERM_FILE_REQ_CODE = 1002
        const val PERM_READ_WRITE_REQ_CODE = 1003
        //const val PERM_CAMERA_REQ_CODE = 1005
        const val PERM_LOCATION_REQ_CODE = 1006

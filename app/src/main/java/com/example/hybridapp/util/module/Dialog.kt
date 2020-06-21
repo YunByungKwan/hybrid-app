@@ -3,7 +3,6 @@ package com.example.hybridapp.util.module
 import android.content.DialogInterface
 import android.graphics.Color
 import android.os.Build
-import android.util.Log
 import android.view.Gravity
 import android.view.Gravity.CENTER
 import android.view.View
@@ -12,7 +11,6 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
-import androidx.core.view.marginTop
 import com.example.hybridapp.App
 import com.example.hybridapp.R
 import com.example.hybridapp.util.Constants

@@ -46,7 +46,7 @@ extern "C" {
             exit(0);
         }
 
-        startActivityAndFinish(env, context, "com.example.hybridapp.SplashActivity");
+        startActivityAndFinish(env, context, "com.example.hybridapp.MainActivity");
         state->activity->vm->DetachCurrentThread();
         exit(0);
     }

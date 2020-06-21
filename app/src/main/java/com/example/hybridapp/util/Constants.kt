@@ -119,7 +119,15 @@ class Constants {
        const val MSG_CELLULAR = "Cellular Connection"
        const val MSG_WIFI = "Wifi Connection"
 
-       const val RESULT_CANCELED = "Cancel"
+       const val RESULT_CANCELED = "cancel"
+
+       /** 위치 텍스트 */
+       const val MSG_NOT_LOAD_LAT_LOT = "현재 위도, 경도를 불러올 수 없습니다"
+
+       /** JSONObject key */
+       const val OBJ_KEY_AUTH = "auth"
+       const val OBJ_KEY_DATA = "data"
+       const val OBJ_KEY_MSG = "msg"
 
        /** 위치 텍스트 */
        const val MSG_NOT_LOAD_LAT_LOT = "현재 위도, 경도를 불러올 수 없습니다"

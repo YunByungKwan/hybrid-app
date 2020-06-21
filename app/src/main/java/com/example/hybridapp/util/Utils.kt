@@ -1,5 +1,6 @@
 package com.example.hybridapp.util
 
+import android.annotation.SuppressLint
 import android.app.DownloadManager
 import android.content.Context
 import android.content.Intent
@@ -12,6 +13,7 @@ import android.provider.Settings
 import android.util.Base64
 import android.util.DisplayMetrics
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AnimationUtils
@@ -22,6 +24,7 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import app.dvkyun.flexhybridand.FlexAction
+import app.dvkyun.flexhybridand.FlexWebView
 import com.example.hybridapp.App
 import com.example.hybridapp.R
 import com.example.hybridapp.util.module.SharedPreferences
@@ -298,6 +301,16 @@ object Utils {
     fun getJsonObjectValue(key: String, jsonObject: JSONObject) : String? {
         return if(jsonObject.has(key)) jsonObject.get(key).toString() else null
     }
+
+    /** WebView 가로, 세로 스크롤 기능 해제 리스너 */
+//    @SuppressLint("ClickableViewAccessibility")
+//    fun disabledWebViewScroll(webView: FlexWebView) {
+//        webView.setOnTouchListener { _ , event -> run {
+//            when (event.action) { MotionEvent.ACTION_MOVE -> { } }
+//        }
+//        true
+//        }
+//    }
 
     fun getParamsAlignCenterInConstraintLayout(
         width: Int, height: Int, root: Int): ConstraintLayout.LayoutParams {

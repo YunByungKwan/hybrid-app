@@ -36,11 +36,13 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Design.Light.NoActionBar"
         android:usesCleartextTraffic="true">
-        <activity android:name=".SplashActivity"></activity>
+
         <activity
             android:name="android.app.NativeActivity"
             android:configChanges="orientation|keyboardHidden"
+            android:screenOrientation="portrait"
             android:hasCode="false"
+            android:theme="@style/SplashTheme"
             android:label="@string/app_name">
             <meta-data
                 android:name="android.app.lib_name"
@@ -63,6 +65,7 @@
         </activity>
         <activity
             android:name=".MainActivity"
+            android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustNothing" /> <!-- FCM -->
         <service android:name=".util.module.FCM">
             <intent-filter>

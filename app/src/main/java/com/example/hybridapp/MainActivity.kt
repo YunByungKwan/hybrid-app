@@ -58,8 +58,12 @@ class MainActivity : BasicActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-
+        App.INSTANCE.setTheme(R.style.SplashTheme)
+        Log.d("dlgodnjs", "start")
         init()
+
+        Log.d("dlgodnjs", "end")
+        App.INSTANCE.setTheme(R.style.AppTheme)
     }
 
     /** 시작 시 기본 초기화 함수 */
@@ -85,9 +89,14 @@ class MainActivity : BasicActivity() {
         WebView.setWebContentsDebuggingEnabled(true)
         flex_web_view.webChromeClient = BasicWebChromeClient(this)
         flex_web_view.webViewClient = BasicWebViewClient()
+//        Utils.disabledWebViewScroll(flex_web_view)
         flex_web_view.addFlexInterface(FlexActionInterface())
         flex_web_view.addFlexInterface(FlexPopupInterface())
+
+        flex_web_view.isVerticalScrollBarEnabled = false
+        flex_web_view.isHorizontalScrollBarEnabled = false
     }
+
 
     /** FlexWebView Action 설정 */
     private fun setActions() {

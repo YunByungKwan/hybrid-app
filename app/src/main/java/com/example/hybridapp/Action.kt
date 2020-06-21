@@ -2,6 +2,9 @@ package com.example.hybridapp
 
 import android.content.DialogInterface
 import android.os.Build
+import android.util.Log
+import android.view.KeyEvent
+import android.widget.Button
 import androidx.annotation.RequiresApi
 import androidx.fragment.app.FragmentActivity
 import app.dvkyun.flexhybridand.FlexAction
@@ -9,8 +12,10 @@ import com.example.hybridapp.basic.BasicActivity
 import com.example.hybridapp.util.Constants
 import com.example.hybridapp.util.Utils
 import com.example.hybridapp.util.module.*
+import com.google.android.material.bottomsheet.BottomSheetDialog
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import org.json.JSONArray
 import org.json.JSONObject
@@ -18,6 +23,7 @@ import org.json.JSONObject
 object Action {
 
     /**================================= Dialog Action ===========================================*/
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     val dialog: (FlexAction?, JSONArray?) -> Unit = { dialogAction, array ->
         CoroutineScope(Dispatchers.Main).launch {
             val title = array?.getString(0)
@@ -25,37 +31,66 @@ object Action {
             val jsonObject: JSONObject? = array?.get(2) as JSONObject
             val isDialog = array.getBoolean(3)
 
-            if(isDialog) { // Dialog 호출
-                jsonObject?.let {
-                    val basic: String? = Utils.getJsonObjectValue("basic", it)
-                    val destructive: String? = Utils.getJsonObjectValue("destructive", it)
-                    val cancel: String? = Utils.getJsonObjectValue("cancel", it)
+            jsonObject?.let {
+                val dialogKeys = arrayOf("basic", "destructive", "cancel")
+                val basic: String? = Utils.getJsonObjectValue(dialogKeys[0], it)
+                val destructive: String? = Utils.getJsonObjectValue(dialogKeys[1], it)
+                val cancel: String? = Utils.getJsonObjectValue(dialogKeys[2], it)
 
+                if(isDialog) {
                     val posListener = DialogInterface.OnClickListener { _, _ ->
-                        if (basic != null) {
-                            dialogAction?.promiseReturn(basic)
-                        } else {
-                            dialogAction?.resolveVoid()
-                        }
+                        basic?.let { dialogAction?.promiseReturn(dialogKeys[0]) }
+                    }
+                    val neutralListener = DialogInterface.OnClickListener { _, _ ->
+                        destructive?.let { dialogAction?.promiseReturn(dialogKeys[1]) }
                     }
                     val negListener = DialogInterface.OnClickListener { _, _ ->
-                        if (cancel != null) {
-                            dialogAction?.promiseReturn(cancel)
-                        } else {
-                            dialogAction?.resolveVoid()
-                        }
+                        cancel?.let { dialogAction?.promiseReturn(dialogKeys[2]) }
                     }
-                    val cancelListener = {
+                    val exitListener = {
                         dialogAction?.promiseReturn(Constants.RESULT_CANCELED)
                     }
 
                     Dialog.show(
                         title, contents, basic, destructive, cancel,
-                        posListener, null, negListener, cancelListener
+                        posListener, neutralListener, negListener, exitListener
                     )
                 }
-            } else { // Bottom Dialog 호출
-                Snackbar.showShortText(App.activity.findViewById(R.id.constraintLayout), contents!!)
+                else {  // Bottom Dialog (Bottom Sheet Dialog)
+                    val dialog = BottomSheetDialog(App.activity)
+
+                    var posBtn = Dialog.getBtnView(basic)
+                    posBtn?.let { btn ->
+                        btn.setOnClickListener {
+                        dialogAction?.promiseReturn(dialogKeys[0])
+                        dialog.dismiss()
+                        }
+                    }
+
+                    var neutralBtn = Dialog.getBtnView(destructive)
+                    neutralBtn?.let { btn ->
+                        btn.setOnClickListener {
+                            dialogAction?.promiseReturn(dialogKeys[1])
+                            dialog.dismiss()
+                        }
+                    }
+
+                    var negBtn = Dialog.getBtnView(cancel)
+                    negBtn?.let { btn ->
+                        btn.setOnClickListener {
+                        dialogAction?.promiseReturn(dialogKeys[2])
+                        dialog.dismiss()
+                        }
+                    }
+
+                    val exitListener = {
+                        dialogAction?.promiseReturn(Constants.RESULT_CANCELED)
+                    }
+
+                    val btnList = arrayListOf(posBtn, neutralBtn, negBtn)
+                    val dialogLayout = Dialog.getBottomSheetDialogView(title, contents, btnList)
+                    Dialog.bottomSheetshow(dialog, dialogLayout, exitListener)
+                }
             }
         }
     }

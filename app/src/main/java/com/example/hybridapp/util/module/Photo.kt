@@ -163,7 +163,7 @@ object Photo {
     }
 
     /** Uri --> Bitmap */
-    private fun getBitmapFromUri(uri: Uri): Bitmap? {
+    fun getBitmapFromUri(uri: Uri): Bitmap? {
         Constants.LOGD("Call getBitmapFromUri()")
 
         val filePath = getFilePathFromUri(uri)

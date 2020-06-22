@@ -3,13 +3,20 @@ package com.example.hybridapp
 import android.app.Activity
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
+import android.graphics.ImageDecoder
+import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
+import android.provider.MediaStore
+import android.util.Log
 import android.view.View
 import android.view.WindowManager
 import android.view.animation.AnimationUtils
 import android.webkit.WebView
 import android.widget.Button
+import android.widget.ImageView
 import app.dvkyun.flexhybridand.FlexFuncInterface
 import com.example.hybridapp.data.LogUrlRepository
 import com.example.hybridapp.data.LogUrlRoomDatabase
@@ -26,6 +33,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.json.JSONArray
 import org.json.JSONObject
+import java.net.URI
 import kotlin.collections.ArrayList
 
 class MainActivity : BasicActivity() {
@@ -147,13 +155,18 @@ class MainActivity : BasicActivity() {
             }
             Constants.CAMERA_DEVICE_RATIO_REQ_CODE -> {
                 Constants.LOGD("CAMERA DEVICE RATIO in onActivityResult()")
-
                 // 카메라 촬영 성공
                 if(resultOk) {
-                    if(data != null) {
-                        val base64 = Constants.BASE64_URL +
-                            Photo.convertUriToResizingBase64(data.data, ratio, isWidthRatio)
+                    var bitmap: Bitmap? = if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                        ImageDecoder.decodeBitmap(ImageDecoder.createSource(Utils.getOutputMediaFile()!!))
+                    }
+                    else {
+                        MediaStore.Images.Media.getBitmap(contentResolver, Uri.fromFile(Utils.getOutputMediaFile()))
+                    }
 
+                    if(bitmap != null) {
+                        val base64 = Constants.BASE64_URL +
+                                Photo.getBase64FromBitmap(bitmap!!)
                         val returnObj = Utils.createJSONObject(true,
                             base64, null)
                         cameraDeviceAction?.promiseReturn(returnObj)
@@ -183,10 +196,19 @@ class MainActivity : BasicActivity() {
 
                 // 카메라 촬영 성공
                 if(resultOk) {
-                    if(data != null) {
-                        val base64 = Constants.BASE64_URL +
-                                Photo.convertUriToResizingBase64(data.data, ratio, isWidthRatio)
+                    var bitmap: Bitmap? = if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                        ImageDecoder.decodeBitmap(ImageDecoder.createSource(Utils.getOutputMediaFile()!!))
+                    }
+                    else {
+                        MediaStore.Images.Media.getBitmap(contentResolver, Uri.fromFile(Utils.getOutputMediaFile()))
+                    }
 
+                    if(bitmap != null) {
+//                        val base64 = Constants.BASE64_URL +
+//                                Photo.convertUriToResizingBase64(data.getParcelableExtra(MediaStore.EXTRA_OUTPUT), ratio, isWidthRatio)
+
+                        val base64 = Constants.BASE64_URL +
+                                Photo.getBase64FromBitmap(bitmap!!)
                         val returnObj = Utils.createJSONObject(true,
                             base64, null)
                         cameraAction?.promiseReturn(returnObj)
@@ -284,9 +306,18 @@ class MainActivity : BasicActivity() {
                         if(clipData?.itemCount in 0..9) {
                             for(i in 0 until clipData?.itemCount!!) {
                                 val imageUri = clipData.getItemAt(i).uri
+//                                Log.d("dlgodnjs", " aa $imageUri")
+
                                 val base64 = Constants.BASE64_URL +
                                         Photo.convertUriToResizingBase64(imageUri, ratio, isWidthRatio)
                                 base64Images.add(base64)
+
+//                                val mInflater = Utils.getLayoutInflater(this@MainActivity)
+//                                var tempView: View = mInflater.inflate(R.layout.test, null)
+//                                var imgView : ImageView = tempView.findViewById(R.id.test)
+//                                imgView.setImageBitmap(Photo.getBitmapFromUri(imageUri))
+//                                constraintLayout.addView(tempView)
+
                                 Constants.LOGD("${i + 1}번째 : $base64")
                             }
 
@@ -337,6 +368,7 @@ class MainActivity : BasicActivity() {
                                 val imageUri = clipData.getItemAt(idx).uri
                                 val base64 = Constants.BASE64_URL +
                                         Photo.convertUriToResizingBase64(imageUri, ratio, isWidthRatio)
+
                                 base64Images.add(base64)
                             }
                             multiplePhotoAction?.promiseReturn(base64Images)

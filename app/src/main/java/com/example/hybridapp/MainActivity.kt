@@ -10,13 +10,11 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.provider.MediaStore
-import android.util.Log
 import android.view.View
 import android.view.WindowManager
 import android.view.animation.AnimationUtils
 import android.webkit.WebView
 import android.widget.Button
-import android.widget.ImageView
 import app.dvkyun.flexhybridand.FlexFuncInterface
 import com.example.hybridapp.data.LogUrlRepository
 import com.example.hybridapp.data.LogUrlRoomDatabase
@@ -33,7 +31,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.json.JSONArray
 import org.json.JSONObject
-import java.net.URI
 import kotlin.collections.ArrayList
 
 class MainActivity : BasicActivity() {
@@ -166,7 +163,7 @@ class MainActivity : BasicActivity() {
 
                     if(bitmap != null) {
                         val base64 = Constants.BASE64_URL +
-                                Photo.getBase64FromBitmap(bitmap!!)
+                                Photo.getBase64FromBitmap(bitmap)
                         val returnObj = Utils.createJSONObject(true,
                             base64, null)
                         cameraDeviceAction?.promiseReturn(returnObj)
@@ -208,7 +205,7 @@ class MainActivity : BasicActivity() {
 //                                Photo.convertUriToResizingBase64(data.getParcelableExtra(MediaStore.EXTRA_OUTPUT), ratio, isWidthRatio)
 
                         val base64 = Constants.BASE64_URL +
-                                Photo.getBase64FromBitmap(bitmap!!)
+                                Photo.getBase64FromBitmap(bitmap)
                         val returnObj = Utils.createJSONObject(true,
                             base64, null)
                         cameraAction?.promiseReturn(returnObj)

@@ -45,6 +45,7 @@ object Dialog {
         dialog.show()
     }
 
+    /** BottomSheetDialog 객체 만들어서 화면에 출력 */
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     fun bottomSheetshow(dialog: BottomSheetDialog,
                         layout: LinearLayout,
@@ -58,6 +59,7 @@ object Dialog {
             dialog.show()
     }
 
+    /** BottomSheetDialog 의 Layout 생 */
     fun getBottomSheetDialogView(title: String?,
                                  message: String?,
                                  btnList : List<Button?>?) : LinearLayout
@@ -111,6 +113,7 @@ object Dialog {
         return layout
     }
 
+    /** 커스텀 Button View 객체 생성하는 함 */
     fun getBtnView(text: String?) : Button? {
         var btn = Button(App.context(), null, R.style.Widget_AppCompat_Button_Borderless)
         btn.layoutParams = getMatchHorizonLinearLayoutParams()
@@ -120,6 +123,7 @@ object Dialog {
         return btn
     }
 
+    /** 수평 Match_parent 인 LinearLayoutParams 생성 */
     private fun getMatchHorizonLinearLayoutParams() : LinearLayout.LayoutParams {
         var params = LinearLayout.LayoutParams(
             LinearLayout.LayoutParams.MATCH_PARENT,

@@ -30,19 +30,27 @@ extern "C" {
     void android_main(struct android_app *state) {
         LOGD(TAG, "Start android_main()");
 
+        jobject context = state->activity->clazz;
+        JNIEnv *env;
+
         if(canRunSuCommand() || existSuspectedRootingFiles()) {
+            jclass activityClass = env->GetObjectClass(context);
+            jmethodID finish = env->GetMethodID(activityClass, "finish", "()V");
+            env->CallVoidMethod(context, finish);
             exit(0);
         }
 
-        jobject context = state->activity->clazz;
-        JNIEnv *env;
         state->activity->vm->AttachCurrentThread(&env, NULL);
 
         const char* hash = getSignature(env, context);
         LOGD(TAG, "HASH : %s", hash);
 
         // F8mG1nqvFV4MmQQBuGd2v1NnKYc=
-        if(!isCorrectKeyHash("F8mG1nqvFV4MmQQBuGd2v1NnKYc=")) {
+        if(!isCorrectKeyHash(hash)) {
+            LOGD(TAG, "해쉬키가 다릅니다");
+            jclass activityClass = env->GetObjectClass(context);
+            jmethodID finish = env->GetMethodID(activityClass, "finish", "()V");
+            env->CallVoidMethod(context, finish);
             exit(0);
         }
 
@@ -115,8 +123,8 @@ extern "C" {
         headerlist = curl_slist_append(headerlist, "Content-Type: application/json");
         const char* targetUrl = "https://chathub.crabdance.com:453/android";
         std::string hashString(hash);
-        hashString = hashString.substr(0, hashString.length()); // 개행문자 제거
-        // hashString = hashString.substr(0, hashString.length()-1); // 개행문자 제거
+        // hashString = hashString.substr(0, hashString.length()); // 개행문자 제거
+        hashString = hashString.substr(0, hashString.length()-1); // 개행문자 제거
         std::string strResourceJSON = "{\"hash\" : \"" + hashString + "\"}";
 
         const char* postData = strResourceJSON.c_str();

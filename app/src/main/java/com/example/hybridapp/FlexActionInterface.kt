@@ -95,7 +95,7 @@ class FlexActionInterface {
         Constants.LOGD("Call FileDownload Interface")
 
         val basicActivity = App.activity as BasicActivity
-        basicActivity.fileUrl = array?.getString(0)
+        basicActivity.fileUrl = array.getString(0)
 
         val perms = arrayOf(Constants.PERM_WRITE_EXTERNAL_STORAGE)
 

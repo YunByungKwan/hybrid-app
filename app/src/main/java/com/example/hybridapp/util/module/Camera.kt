@@ -2,7 +2,10 @@ package com.example.hybridapp.util.module
 
 import android.content.Intent
 import android.provider.MediaStore
+import android.util.Log
+import androidx.core.content.FileProvider.getUriForFile
 import com.example.hybridapp.App
+import com.example.hybridapp.BuildConfig
 import com.example.hybridapp.basic.BasicActivity
 import com.example.hybridapp.util.Constants
 import com.example.hybridapp.util.Utils
@@ -19,6 +22,11 @@ object Camera {
         val basicActivity = App.activity as BasicActivity
         val packageManager = (App.INSTANCE).packageManager
         val cameraIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+
+        // 카메라 촬영 시 저장할 임시 파일 경로 생성 및 인텐트에 적용
+        val newFile= Utils.getOutputMediaFile()!!
+        val contentUri = getUriForFile(App.context(), BuildConfig.APPLICATION_ID + ".fileprovider", newFile)
+        cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, contentUri)
 
         // 카메라 앱을 사용할 수 있는 경우
         if(Utils.existsReceiveActivity(cameraIntent, packageManager)) {

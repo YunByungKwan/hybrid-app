@@ -1,2 +1,2 @@
 set solib-search-path ./obj/local/armeabi-v7a
-directory C:/Users/ybk/AppData/Local/Android/Sdk/ndk/21.3.6528147/build//../toolchains/llvm/prebuilt/windows-x86_64/sysroot C:/Users/ybk/AppData/Local/Android/Sdk/ndk/21.3.6528147/build//../sources/android/native_app_glue jni jni/curl/include
+directory /Users/leehaewon/Library/Android/sdk/ndk/21.3.6528147/toolchains/llvm/prebuilt/darwin-x86_64/sysroot /Users/leehaewon/Library/Android/sdk/ndk/21.3.6528147/sources/android/native_app_glue jni jni/curl/include

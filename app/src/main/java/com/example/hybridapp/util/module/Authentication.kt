@@ -46,8 +46,10 @@ object Authentication {
                 App.INSTANCE.mainExecutor, getAuthenticationCallback())
             biometricPrompt.authenticate(promptInfo)
         } else {
-            val returnObj = Utils.createJSONObject(true,
-                false, "인증을 진행할 수 없습니다")
+            val returnObj = Utils.createJSONObject(
+                authValue = true,
+                dataValue = false, msgValue = "인증을 진행할 수 없습니다"
+            )
             (App.activity as BasicActivity).authAction?.promiseReturn(returnObj)
         }
     }
@@ -68,8 +70,10 @@ object Authentication {
         override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
             super.onAuthenticationSucceeded(result)
             Constants.LOGD("Call onAuthenticationSucceeded() in AuthenticationCallback()")
-            val returnObj = Utils.createJSONObject(true,
-                true, null)
+            val returnObj = Utils.createJSONObject(
+                authValue = true,
+                dataValue = true, msgValue = null
+            )
             (App.activity as BasicActivity).authAction?.promiseReturn(returnObj)
         }
 
@@ -77,8 +81,10 @@ object Authentication {
         override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
             super.onAuthenticationError(errorCode, errString)
             Constants.LOGE("Call onAuthenticationError() in AuthenticationCallback()")
-            val returnObj = Utils.createJSONObject(true,
-                false, "인증에 실패했습니다")
+            val returnObj = Utils.createJSONObject(
+                authValue = true,
+                dataValue = false, msgValue = "인증에 실패했습니다"
+            )
             (App.activity as BasicActivity).authAction?.promiseReturn(returnObj)
         }
 

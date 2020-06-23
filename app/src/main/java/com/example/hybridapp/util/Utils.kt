@@ -286,7 +286,7 @@ object Utils {
             "test"
         )
 
-        // 디렉토리 생
+        // 디렉토리 생성
         mediaStorageDir.apply {
             if (!exists()) {
                 if (!mkdirs()) {
@@ -340,30 +340,20 @@ object Utils {
     fun createJSONObject(authValue: Boolean?, dataValue: Any?, msgValue: String?): JSONObject {
         val obj = JSONObject()
         obj.put(Constants.OBJ_KEY_AUTH, authValue)
-
-        when(dataValue) {
-            is String -> {
-                obj.put(Constants.OBJ_KEY_DATA, dataValue)
-            }
-            is Boolean -> {
-                obj.put(Constants.OBJ_KEY_DATA, dataValue)
-            }
-            is JSONObject -> {
-                obj.put(Constants.OBJ_KEY_DATA, dataValue)
-            }
-            is Array<*> -> {
-                obj.put(Constants.OBJ_KEY_DATA, dataValue)
-            }
-            is ArrayList<*> -> {
-                obj.put(Constants.OBJ_KEY_DATA, dataValue)
-            }
-            else -> {
-                obj.put(Constants.OBJ_KEY_DATA, null)
-            }
-        }
-
+        obj.put(Constants.OBJ_KEY_DATA, createJsonOfDataValue(dataValue))
         obj.put(Constants.OBJ_KEY_MSG, msgValue)
 
         return obj
+    }
+
+    /** 웹에서 실제로 사용하는 변수들 구분하는 함수 */
+    fun createJsonOfDataValue(dataValue: Any?) : Any? {
+        return when(dataValue) {
+            is String, Boolean -> dataValue
+            is JSONObject -> dataValue
+            is Array<*> -> dataValue
+            is ArrayList<*> -> dataValue
+            else -> null
+        }
     }
 }

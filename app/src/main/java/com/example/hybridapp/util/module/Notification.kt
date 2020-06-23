@@ -48,7 +48,7 @@ object Notification {
         builder.priority = importance
         builder.setAutoCancel(true)
         builder.setContentIntent(pendingIntent)
-        builder.setSmallIcon(R.drawable.ic_launcher_background)
+        builder.setSmallIcon(R.drawable.lotte_noti_logo)
 
         val notificationManager
                 = NotificationManagerCompat.from(App.activity)

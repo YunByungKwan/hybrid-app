@@ -193,8 +193,6 @@ object Photo {
         } finally {
             cursor?.close()
         }
-
-        return ""
     }
 
     /** FilePath의 회전 각도를 반환 */

@@ -9,7 +9,9 @@ import com.example.hybridapp.App
 import com.example.hybridapp.basic.BasicActivity
 import com.example.hybridapp.util.Constants
 import com.example.hybridapp.util.Utils
+import com.example.hybridapp.util.Utils.createJsonOfDataValue
 import com.google.android.gms.auth.api.phone.SmsRetriever
+import org.json.JSONObject
 import java.lang.Exception
 
 /**
@@ -60,8 +62,7 @@ object SMS {
         if(Utils.existsReceiveActivity(sendIntent, packageManager)) {
             basicActivity.startActivityForResult(sendIntent, Constants.SEND_SMS_REQ_CODE)
         } else {
-            val returnObj = Utils.createJSONObject(true,
-                false, "메시지를 보낼 수 없습니다")
+            var returnObj = Utils.createJSONObject(null, false, "메시지를 보낼 수 없습니다")
             basicActivity.sendSmsAction?.promiseReturn(returnObj)
             basicActivity.phoneNumber = null
             basicActivity.smsMessage = null

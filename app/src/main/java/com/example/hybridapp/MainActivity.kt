@@ -396,7 +396,7 @@ class MainActivity : BasicActivity() {
                 Constants.LOGD("SEND SMS in onActivityResult()")
 
                 // Intent.ACTION_SEND는 return값이 없음
-                val returnObj = Utils.createJSONObject(true,
+                val returnObj = Utils.createJSONObject(null,
                     true, null)
                 sendSmsAction?.promiseReturn(returnObj)
                 phoneNumber = null

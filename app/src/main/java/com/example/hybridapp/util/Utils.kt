@@ -27,6 +27,7 @@ import com.example.hybridapp.App
 import com.example.hybridapp.R
 import com.example.hybridapp.basic.BasicActivity
 import com.example.hybridapp.util.module.SharedPreferences
+import kotlinx.android.synthetic.main.activity_main.*
 import org.json.JSONObject
 import java.io.File
 import java.nio.charset.StandardCharsets
@@ -297,6 +298,16 @@ object Utils {
 //        val timeStamp = Utils.getCurrentDateAndTime()
         // 경로 : content://com.example.hybridapp.fileprovider/cameraTest/IMG_TEST.jpg
         return File("${mediaStorageDir.path}${File.separator}IMG_TEST.jpg")
+    }
+
+    /** ProgressBar를 보이게 함 */
+    fun visibleProgressBar() {
+        App.activity.progressBar.visibility = View.VISIBLE
+    }
+
+    /** ProgressBar를 숨김 */
+    fun invisibleProgressBar() {
+        App.activity.progressBar.visibility = View.GONE
     }
 
     /** jsonObject 내 key 파악해서 value 가져오기 */

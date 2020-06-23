@@ -8,24 +8,81 @@ import androidx.core.app.NotificationManagerCompat
 import com.google.zxing.integration.android.IntentIntegrator
 
 class Constants {
-    @Retention(AnnotationRetention.SOURCE)
-    @StringDef()
-    @IntDef(CAMERA_DEVICE_RATIO_REQ_CODE,
-            CAMERA_RATIO_REQ_CODE,
-            PHOTO_DEVICE_RATIO_REQ_CODE,
-            PHOTO_RATIO_REQ_CODE,
-            MULTI_PHOTO_DEVICE_RATIO_REQ_CODE,
-            MULTI_PHOTO_RATIO_REQ_CODE,
-            FILE_UPLOAD_REQ_CODE,
-            QR_REQ_CODE,
-            PERM_CAMERA_REQ_CODE,
-            PERM_FILE_REQ_CODE,
-            PERM_READ_WRITE_REQ_CODE,
-            PERM_LOCATION_REQ_CODE,
-            PERM_SEND_SMS_REQ_CODE)
-    annotation class types
-
    companion object {
+       @Retention(AnnotationRetention.SOURCE)
+       @StringDef(SHARED_APPID_FILE_NAME,
+           SHARED_APPID_KEY,
+           BASE_URL,
+           URL,
+           SHARED_FILE_NAME,
+           SCREEN_WIDTH,
+           SCREEN_HEIGHT,
+           PERM_CAMERA,
+           PERM_WRITE_EXTERNAL_STORAGE,
+           PERM_READ_EXTERNAL_STORAGE,
+           PERM_ACCESS_FINE_LOCATION,
+           PERM_ACCESS_COARSE_LOCATION,
+           PERM_SEND_SMS,
+           TYPE_DIALOG,
+           TYPE_NETWORK,
+           TYPE_CAMERA_DEVICE_RATIO,
+           TYPE_CAMERA_RATIO,
+           TYPE_PHOTO_DEVICE_RATIO,
+           TYPE_PHOTO_RATIO,
+           TYPE_MULTI_PHOTO_DEVICE_RATIO,
+           TYPE_MULTI_PHOTO_RATIO,
+           TYPE_QR_CODE_SCAN,
+           TYPE_SEND_SMS,
+           TYPE_LOCATION,
+           TYPE_AUTH,
+           TYPE_LOCAL_REPO,
+           TAG,
+           TAG_MAIN,
+           MSG_DENIED_PERM,
+           BIO_PROMPT_TITLE,
+           BIO_PROMPT_DESCRIPTION,
+           BIO_PROMPT_SUB_TITLE,
+           BIO_PROMPT_NEGATIVE_BUTTON,
+           BIOMETRIC_SUCCESS,
+           BIOMETRIC_ERROR_NO_HARDWARE,
+           BIOMETRIC_ERROR_HW_UNAVAILABLE,
+           BIOMETRIC_ERROR_NONE_ENROLLED,
+           BASE64_URL,
+           MSG_NO_QR,
+           MSG_NOT_LOAD_QR,
+           MSG_NOT_LOAD_CAMERA,
+           MSG_NOT_LOAD_GALLERY,
+           NOTI_CHANNEL_ID,
+           NOTI_CHANNEL_NAME,
+           NOTI_DESC,
+           MSG_DISCONNECTED,
+           MSG_CELLULAR,
+           MSG_WIFI,
+           MSG_NOT_LOAD_LAT_LOT,
+           OBJ_KEY_AUTH,
+           OBJ_KEY_DATA,
+           OBJ_KEY_MSG,
+           LOG_MSG_NOT_CHANNEL,
+           LOG_LOG_MSG_SMS_SUCCESS,
+           LOG_MSG_SMS_CANCELED,
+           LOG_MSG_SMS_ERROR,
+           LOG_MSG_SMS_TIMEOUT,
+           MSG_NO_ROOTING)
+       @IntDef(CAMERA_DEVICE_RATIO_REQ_CODE,
+           CAMERA_RATIO_REQ_CODE,
+           PHOTO_DEVICE_RATIO_REQ_CODE,
+           PHOTO_RATIO_REQ_CODE,
+           MULTI_PHOTO_DEVICE_RATIO_REQ_CODE,
+           MULTI_PHOTO_RATIO_REQ_CODE,
+           FILE_UPLOAD_REQ_CODE,
+           QR_REQ_CODE,
+           PERM_CAMERA_REQ_CODE,
+           PERM_FILE_REQ_CODE,
+           PERM_READ_WRITE_REQ_CODE,
+           PERM_LOCATION_REQ_CODE,
+           PERM_SEND_SMS_REQ_CODE)
+       annotation class types
+
        /** AppId SharedPreferences filepath */
        const val SHARED_APPID_FILE_NAME = "pref_appid"
        const val SHARED_APPID_KEY = "appId"
@@ -61,27 +118,11 @@ class Constants {
        const val TYPE_LOCATION = "Location"
        const val TYPE_AUTH = "Authentication"
        const val TYPE_LOCAL_REPO = "LocalRepository"
-       const val TYPE_POP_UP = "WebPopup"
-       // const val TYPE_FILE_DOWNLOAD = "FileDownload"
 
        const val TAG = "HybridApp"
        const val TAG_MAIN = "MainActivity class"
 
-       /** 다이얼로그 텍스트 */
-       const val DIAL_TITLE = "알림"
-       const val DIAL_POS = "설정"
-       const val DIAL_NEG = "닫기"
-
-       /** 권한 다이얼로그 텍스트 */
-       const val DIAL_MSG_CAMERA = "앱을 사용하기 위해 카메라 권한이 필요합니다."
-       const val DIAL_MSG_WRITE = "앱을 사용하기 위해 저장소 쓰기 권한이 필요합니다."
-       const val DIAL_MSG_READ_WRITE = "앱을 사용하기 위해 저장소 읽기/쓰기 권한이 필요합니다."
-       const val DIAL_MSG_LOCATION = "앱을 사용하기 위해 위치 권한이 필요합니다."
-       const val DIAL_MSG_SEND_SMS = "앱을 사용하기 위해 SMS 보내기 권한이 필요합니다."
-
-       const val DENIED_DIAL_TITLE = "알림"
        const val MSG_DENIED_PERM = "해당 권한이 거부되었습니다"
-       const val DENIED_DIAL_POS = "확인"
 
        const val BIO_PROMPT_TITLE = "생체 인증"
        const val BIO_PROMPT_DESCRIPTION = "인증을 진행해 주세요."
@@ -119,8 +160,6 @@ class Constants {
        const val MSG_CELLULAR = "Cellular Connection"
        const val MSG_WIFI = "Wifi Connection"
 
-       const val RESULT_CANCELED = "cancel"
-
        /** 위치 텍스트 */
        const val MSG_NOT_LOAD_LAT_LOT = "현재 위도, 경도를 불러올 수 없습니다"
 
@@ -130,17 +169,7 @@ class Constants {
        const val OBJ_KEY_MSG = "msg"
 
        /** 로그 텍스트 */
-       const val LOG_MSG_CAMERA = "Camera app can't be launched."
-       const val LOG_MSG_GALLERY = "Gallery app can't be launched."
        const val LOG_MSG_NOT_CHANNEL = "No notification channel required."
-       const val LOG_PERM_GRANTED_CAMERA = "CAMERA permission is granted."
-       const val LOG_PERM_GRANTED_WRITE = "WRITE EXTERNAL STORAGE permission is granted."
-       const val LOG_PERM_GRANTED_READ_WRITE
-               = "READ/WRITE EXTERNAL STORAGE permission is granted."
-       const val LOG_PERM_GRANTED_LOCATION
-               = "ACCESS FINE/COARSE LOCATION permission is granted."
-       const val LOG_PERM_GRANTED_SEND_SMS = "SEND SMS permission is granted."
-       const val LOG_MSG_SMS_SUCCESS = "문자 메시지를 전송하였습니다."
        const val LOG_LOG_MSG_SMS_SUCCESS = "SMS Status: SUCCESS."
        const val LOG_MSG_SMS_CANCELED = "SMS Status: CANCELED."
        const val LOG_MSG_SMS_ERROR = "SMS Status: ERROR."
@@ -187,6 +216,7 @@ class Constants {
 
        /** 루팅체크 */
        const val MSG_NO_ROOTING = "루팅이 확인되지 않았습니다"
+
        /** Function */
        fun LOGD(message: String) = Log.d(TAG, message)
 

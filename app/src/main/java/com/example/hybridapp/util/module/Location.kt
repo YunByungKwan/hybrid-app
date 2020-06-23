@@ -28,6 +28,8 @@ object Location {
 
         // GPS 사용이 가능한 경우
         if(isLocationEnabled(basicActivity)) {
+            Utils.visibleProgressBar()
+
             val mLocationRequest = getLocationRequest()
             val mFusedLocationClient = LocationServices
                 .getFusedLocationProviderClient(basicActivity)
@@ -84,6 +86,9 @@ object Location {
                 // promiseReturn할 JSONObject 생성
                 val returnObj = Utils.createJSONObject(true,
                     locObj, null)
+
+                Utils.invisibleProgressBar()
+
                 (App.activity as BasicActivity).locationAction?.promiseReturn(returnObj)
             }
         }

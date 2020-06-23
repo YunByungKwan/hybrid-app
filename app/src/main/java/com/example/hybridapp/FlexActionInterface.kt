@@ -43,8 +43,9 @@ class FlexActionInterface {
         SMS.receiveMessage()
     }
 
+    /**============================== Notification Interface =====================================*/
     @FlexFuncInterface
-    fun Notification(array: JSONArray) {
+    fun Notification(array: JSONArray): Boolean {
         // 알림 채널 생성
         val channelId = Constants.NOTI_CHANNEL_ID
         val channelName = Constants.NOTI_CHANNEL_NAME
@@ -69,6 +70,8 @@ class FlexActionInterface {
         val title = obj.get("title").toString()
         val message = obj.get("message").toString()
         Notification.create(channelId, id, title, message, Constants.NOTI_HIGH, pendingIntent)
+
+        return true
     }
 
     /**============================= RootingCheck Interface ======================================*/

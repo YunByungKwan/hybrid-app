@@ -32,19 +32,37 @@ object Action {
                 val basic: String? = Utils.getJsonObjectValue(dialogKeys[0], it)
                 val destructive: String? = Utils.getJsonObjectValue(dialogKeys[1], it)
                 val cancel: String? = Utils.getJsonObjectValue(dialogKeys[2], it)
+                val returnObj = JSONObject()
 
                 if(isDialog) {
                     val posListener = DialogInterface.OnClickListener { _, _ ->
-                        basic?.let { dialogAction?.promiseReturn(dialogKeys[0]) }
+                        basic?.let {
+                            returnObj.put(Constants.OBJ_KEY_MSG, dialogKeys[0])
+                            Constants.LOGD("returnObj['msg'] = " +
+                                    "${returnObj.getString(Constants.OBJ_KEY_MSG)}")
+                            dialogAction?.promiseReturn(returnObj)
+                        }
                     }
                     val neutralListener = DialogInterface.OnClickListener { _, _ ->
-                        destructive?.let { dialogAction?.promiseReturn(dialogKeys[1]) }
+                        destructive?.let {
+                            returnObj.put(Constants.OBJ_KEY_MSG, dialogKeys[1])
+                            Constants.LOGD("returnObj['msg'] = " +
+                                    "${returnObj.getString(Constants.OBJ_KEY_MSG)}")
+                            dialogAction?.promiseReturn(returnObj) }
                     }
                     val negListener = DialogInterface.OnClickListener { _, _ ->
-                        cancel?.let { dialogAction?.promiseReturn(dialogKeys[2]) }
+                        cancel?.let {
+                            returnObj.put(Constants.OBJ_KEY_MSG, dialogKeys[2])
+                            Constants.LOGD("returnObj['msg'] = " +
+                                    "${returnObj.getString(Constants.OBJ_KEY_MSG)}")
+                            dialogAction?.promiseReturn(returnObj)
+                        }
                     }
                     val exitListener = {
-                        dialogAction?.promiseReturn(Constants.RESULT_CANCELED)
+                        returnObj.put(Constants.OBJ_KEY_MSG, dialogKeys[2])
+                        Constants.LOGD("returnObj['msg'] = " +
+                                "${returnObj.getString(Constants.OBJ_KEY_MSG)}")
+                        dialogAction?.promiseReturn(returnObj)
                     }
 
                     Dialog.show(
@@ -58,7 +76,10 @@ object Action {
                     var posBtn = Dialog.getBtnView(basic)
                     posBtn?.let { btn ->
                         btn.setOnClickListener {
-                        dialogAction?.promiseReturn(dialogKeys[0])
+                            returnObj.put(Constants.OBJ_KEY_MSG, dialogKeys[0])
+                            Constants.LOGD("returnObj['msg'] = " +
+                                    "${returnObj.getString(Constants.OBJ_KEY_MSG)}")
+                            dialogAction?.promiseReturn(returnObj)
                         dialog.dismiss()
                         }
                     }
@@ -66,7 +87,10 @@ object Action {
                     var neutralBtn = Dialog.getBtnView(destructive)
                     neutralBtn?.let { btn ->
                         btn.setOnClickListener {
-                            dialogAction?.promiseReturn(dialogKeys[1])
+                            returnObj.put(Constants.OBJ_KEY_MSG, dialogKeys[1])
+                            Constants.LOGD("returnObj['msg'] = " +
+                                    "${returnObj.getString(Constants.OBJ_KEY_MSG)}")
+                            dialogAction?.promiseReturn(returnObj)
                             dialog.dismiss()
                         }
                     }
@@ -74,13 +98,19 @@ object Action {
                     var negBtn = Dialog.getBtnView(cancel)
                     negBtn?.let { btn ->
                         btn.setOnClickListener {
-                        dialogAction?.promiseReturn(dialogKeys[2])
+                            returnObj.put(Constants.OBJ_KEY_MSG, dialogKeys[2])
+                            Constants.LOGD("returnObj['msg'] = " +
+                                    "${returnObj.getString(Constants.OBJ_KEY_MSG)}")
+                            dialogAction?.promiseReturn(returnObj)
                         dialog.dismiss()
                         }
                     }
 
                     val exitListener = {
-                        dialogAction?.promiseReturn(Constants.RESULT_CANCELED)
+                        returnObj.put(Constants.OBJ_KEY_MSG, dialogKeys[2])
+                        Constants.LOGD("returnObj['msg'] = " +
+                                "${returnObj.getString(Constants.OBJ_KEY_MSG)}")
+                        dialogAction?.promiseReturn(returnObj)
                     }
 
                     val btnList = arrayListOf(posBtn, neutralBtn, negBtn)
@@ -365,22 +395,18 @@ object Action {
 
                 SharedPreferences.putData(Constants.SHARED_FILE_NAME, key, value)
 
-                val returnObj = Utils.createJSONObject(null,
-                    null, "데이터를 저장하였습니다")
-                localRepoAction?.promiseReturn(returnObj)
+                localRepoAction?.promiseReturn(true)
             }
             Constants.GET_DATA_CODE -> {
                 val key = array.getString(1)
                 var value = SharedPreferences.getString(Constants.SHARED_FILE_NAME, key)
 
-                val returnObj = Utils.createJSONObject(null,
-                    value, null)
-                localRepoAction?.promiseReturn(returnObj)
+                localRepoAction?.promiseReturn(value)
             }
             Constants.DEL_DATA_CODE -> {
                 val key = array.getString(1)
                 SharedPreferences.removeData(Constants.SHARED_FILE_NAME, key)
-                localRepoAction?.promiseReturn("데이터를 제거하였습니다")
+                localRepoAction?.promiseReturn(true)
             }
         }
     }

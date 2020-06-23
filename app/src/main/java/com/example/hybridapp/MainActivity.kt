@@ -14,6 +14,7 @@ import android.view.View
 import android.view.WindowManager
 import android.view.animation.AnimationUtils
 import android.webkit.WebView
+import android.webkit.WebViewClient
 import android.widget.Button
 import app.dvkyun.flexhybridand.FlexFuncInterface
 import com.example.hybridapp.data.LogUrlRepository
@@ -154,12 +155,16 @@ class MainActivity : BasicActivity() {
                 Constants.LOGD("CAMERA DEVICE RATIO in onActivityResult()")
                 // 카메라 촬영 성공
                 if(resultOk) {
+                    Utils.visibleProgressBar()
+
                     var bitmap: Bitmap? = if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
                         ImageDecoder.decodeBitmap(ImageDecoder.createSource(Utils.getOutputMediaFile()!!))
                     }
                     else {
                         MediaStore.Images.Media.getBitmap(contentResolver, Uri.fromFile(Utils.getOutputMediaFile()))
                     }
+
+                    Utils.invisibleProgressBar()
 
                     if(bitmap != null) {
                         val base64 = Constants.BASE64_URL +
@@ -193,12 +198,16 @@ class MainActivity : BasicActivity() {
 
                 // 카메라 촬영 성공
                 if(resultOk) {
+                    Utils.visibleProgressBar()
+
                     var bitmap: Bitmap? = if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
                         ImageDecoder.decodeBitmap(ImageDecoder.createSource(Utils.getOutputMediaFile()!!))
                     }
                     else {
                         MediaStore.Images.Media.getBitmap(contentResolver, Uri.fromFile(Utils.getOutputMediaFile()))
                     }
+
+                    Utils.invisibleProgressBar()
 
                     if(bitmap != null) {
 //                        val base64 = Constants.BASE64_URL +
@@ -564,11 +573,15 @@ class MainActivity : BasicActivity() {
     * 인터페이스
     */
     inner class FlexPopupInterface{
-
         @FlexFuncInterface
-        fun WebPopup(array: JSONArray) {
-            CoroutineScope(Dispatchers.Main).launch {
+        fun WebPopup(array: JSONArray): JSONObject {
+            // 인터넷이 연결되어 있지 않을 경우
+            if(Network.getStatus(this@MainActivity) == 0) {
+                return Utils.createJSONObject(null,
+                    false, "연결된 네트워크가 없습니다")
+            }
 
+            CoroutineScope(Dispatchers.Main).launch {
                 // 뒷배경 뷰 생성
                 val mInflater = Utils.getLayoutInflater(this@MainActivity)
                 backgroundView = mInflater.inflate(R.layout.background_popup, null)
@@ -587,20 +600,23 @@ class MainActivity : BasicActivity() {
                     popupWidth, popupHeight, R.id.constraintLayout)
 
                 val bottomUp = AnimationUtils.loadAnimation(this@MainActivity,
-                        R.anim.open)
+                    R.anim.open)
                 flex_pop_up_web_view.startAnimation(bottomUp)
                 flex_pop_up_web_view.bringToFront()
 
                 // 닫기 버튼 생성
                 popupCloseButton = Utils.createCloseButton(this@MainActivity,
-                        R.id.constraintLayout)
+                    R.id.constraintLayout)
                 constraintLayout.addView(popupCloseButton)
 
                 popupCloseButton.setOnClickListener {
                     Utils.closePopup(this@MainActivity, constraintLayout, backgroundView,
                         popupCloseButton, flex_pop_up_web_view)
                 }
+
             }
+            Constants.LOGD("Popup returnObj['data'] = true")
+            return Utils.createJSONObject(null, true, null)
         }
     }
 }

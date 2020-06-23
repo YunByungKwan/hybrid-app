@@ -1,5 +1,6 @@
 package com.example.hybridapp.util
 
+import android.annotation.SuppressLint
 import android.app.DownloadManager
 import android.content.Context
 import android.content.Intent
@@ -216,6 +217,7 @@ object Utils {
     }
 
     /** 디바이스 id 가져오기 */
+    @SuppressLint("HardwareIds")
     fun getDeviceId(context: Context): String {
         return Settings.Secure.getString(context.contentResolver, Settings.Secure.ANDROID_ID)
     }
@@ -301,16 +303,6 @@ object Utils {
     fun getJsonObjectValue(key: String, jsonObject: JSONObject) : String? {
         return if(jsonObject.has(key)) jsonObject.get(key).toString() else null
     }
-
-    /** WebView 가로, 세로 스크롤 기능 해제 리스너 */
-//    @SuppressLint("ClickableViewAccessibility")
-//    fun disabledWebViewScroll(webView: FlexWebView) {
-//        webView.setOnTouchListener { _ , event -> run {
-//            when (event.action) { MotionEvent.ACTION_MOVE -> { } }
-//        }
-//        true
-//        }
-//    }
 
     fun getParamsAlignCenterInConstraintLayout(
         width: Int, height: Int, root: Int): ConstraintLayout.LayoutParams {

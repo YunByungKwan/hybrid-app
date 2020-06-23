@@ -1,18 +1,13 @@
 package com.example.hybridapp.util.module
 
-import android.app.PendingIntent
 import android.content.Intent
 import android.content.IntentFilter
 import android.net.Uri
-import android.telephony.SmsManager
 import com.example.hybridapp.App
 import com.example.hybridapp.basic.BasicActivity
 import com.example.hybridapp.util.Constants
 import com.example.hybridapp.util.Utils
-import com.example.hybridapp.util.Utils.createJsonOfDataValue
 import com.google.android.gms.auth.api.phone.SmsRetriever
-import org.json.JSONObject
-import java.lang.Exception
 
 /**
  * 문자 형식

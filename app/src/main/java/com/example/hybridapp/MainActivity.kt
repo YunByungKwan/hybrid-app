@@ -546,6 +546,12 @@ class MainActivity : BasicActivity() {
 
     /** 뒤로가기 두 번 클릭 이벤트  */
     private fun backPressedTwice() {
+        // 뒤로 갈 곳이 있으면 뒤로 간다.
+        if(flex_web_view.canGoBack()) {
+            flex_web_view.goBack()
+            return
+        }
+
         // 두 번 뒤로가기 누를 시 종료
         if(backPressedTwice) {
             super.onBackPressed()

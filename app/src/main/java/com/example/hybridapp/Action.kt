@@ -347,8 +347,10 @@ object Action {
                 Authentication.showPrompt(fragmentActivity)
             } else {
                 Constants.LOGE("You can't call biometric prompt.")
-                val returnObj = Utils.createJSONObject(true,
-                    false, "인증을 진행할 수 없습니다")
+                val returnObj = Utils.createJSONObject(
+                    authValue = true,
+                    dataValue = false, msgValue = "인증을 진행할 수 없습니다"
+                )
                 basicActivity.authAction?.promiseReturn(returnObj)
             }
         }

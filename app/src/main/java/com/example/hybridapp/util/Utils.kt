@@ -285,7 +285,7 @@ object Utils {
             "test"
         )
 
-        // 디렉토리 생
+        // 디렉토리 생성
         mediaStorageDir.apply {
             if (!exists()) {
                 if (!mkdirs()) {

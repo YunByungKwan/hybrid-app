@@ -29,7 +29,7 @@ object Dialog {
              exitListener: () -> Unit?)
     {
         Constants.LOGD("Call show() in Dialog object.")
-
+        Constants.LOGD("title: $title, message: $message, positiveButtonText: $positiveButtonText, negativeButtonText: $negativeButtonText, negativeButtonText: $negativeButtonText")
         val dialog = AlertDialog.Builder(App.activity)
 
         title?.let { dialog.setTitle(title) } ?: dialog.setTitle("")

@@ -118,6 +118,8 @@ class Constants {
        const val TYPE_LOCATION = "Location"
        const val TYPE_AUTH = "Authentication"
        const val TYPE_LOCAL_REPO = "LocalRepository"
+       const val TYPE_WEB_POP_UP = "WebPopup"
+       const val TYPE_DOWNLOAD = "FileDownload"
 
        const val TAG = "HybridApp"
        const val TAG_MAIN = "MainActivity class"

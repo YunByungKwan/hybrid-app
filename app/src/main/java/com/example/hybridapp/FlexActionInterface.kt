@@ -93,25 +93,25 @@ class FlexActionInterface {
     }
 
     /**============================== FileDownload Interface =====================================*/
-    @FlexFuncInterface
-    fun FileDownload(array: JSONArray) {
-        Constants.LOGD("Call FileDownload Interface")
-
-        val basicActivity = App.activity as BasicActivity
-        basicActivity.fileUrl = array.getString(0)
-
-        val perms = arrayOf(Constants.PERM_WRITE_EXTERNAL_STORAGE)
-
-        // 권한이 다 있을 경우
-        if(Utils.existAllPermission(perms)) {
-            Utils.downloadFileFromUrl()
-        }
-        // 권한이 다 있지 않을 경우
-        else {
-            Utils.checkAbsentPerms(perms, Constants.PERM_FILE_REQ_CODE,
-                null)
-        }
-    }
+//    @FlexFuncInterface
+//    fun FileDownload(array: JSONArray) {
+//        Constants.LOGD("Call FileDownload Interface")
+//
+//        val basicActivity = App.activity as BasicActivity
+//        basicActivity.fileUrl = array.getString(0)
+//
+//        val perms = arrayOf(Constants.PERM_WRITE_EXTERNAL_STORAGE)
+//
+//        // 권한이 다 있을 경우
+//        if(Utils.existAllPermission(perms)) {
+//            Utils.downloadFileFromUrl()
+//        }
+//        // 권한이 다 있지 않을 경우
+//        else {
+//            Utils.checkAbsentPerms(perms, Constants.PERM_FILE_REQ_CODE,
+//                null)
+//        }
+//    }
 
     @FlexFuncInterface
     fun LogUrl(array: JSONArray) {

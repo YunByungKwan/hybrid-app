@@ -64,12 +64,14 @@ object Utils {
 
         // 거절한 권한이 하나라도 존재할 경우
         if (existsDenialPermission(permissions)) {
+            Constants.LOGD("거절한 권한이 하나라도 존재함")
             val returnObj = createJSONObject(false,
                 null, "설정 > 앱에서 필수 권한들을 승인해 주세요")
             action?.promiseReturn(returnObj)
         }
         // 승인이 필요한 권한들을 요청
         else {
+            Constants.LOGD("거절한 권한 없음 권한을 요청함")
             val perms = getPermissionsToRequest(permissions)
             requestPermissions(perms, requestCode)
         }
@@ -82,6 +84,7 @@ object Utils {
         for(permissionName in permissions) {
             if(isDenialPermission(permissionName)) {
                 return true
+
             }
         }
         return false
@@ -141,7 +144,9 @@ object Utils {
         request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
         request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS,
             "file.$extension")
-        downloadManager.enqueue(request)
+
+        basicActivity.downloadId = downloadManager.enqueue(request)
+        basicActivity.fileAction?.promiseReturn(true)
     }
 
     fun getAppSignatures(context: Context): ArrayList<String> {

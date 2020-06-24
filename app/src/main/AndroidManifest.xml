@@ -66,7 +66,7 @@
         <activity
             android:name=".MainActivity"
             android:screenOrientation="fullSensor"
-            android:windowSoftInputMode="adjustNothing" /> <!-- FCM -->
+            android:windowSoftInputMode="adjustResize" /> <!-- FCM -->
         <service android:name=".util.module.FCM">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />

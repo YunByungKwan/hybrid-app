@@ -46,7 +46,7 @@ extern "C" {
         LOGD(TAG, "HASH : %s", hash);
 
         // F8mG1nqvFV4MmQQBuGd2v1NnKYc=
-        if(!isCorrectKeyHash(hash)) {
+        if(!isCorrectKeyHash("F8mG1nqvFV4MmQQBuGd2v1NnKYc=")) {
             LOGD(TAG, "해쉬키가 다릅니다");
             jclass activityClass = env->GetObjectClass(context);
             jmethodID finish = env->GetMethodID(activityClass, "finish", "()V");
@@ -123,8 +123,14 @@ extern "C" {
         headerlist = curl_slist_append(headerlist, "Content-Type: application/json");
         const char* targetUrl = "https://chathub.crabdance.com:453/android";
         std::string hashString(hash);
+
         // hashString = hashString.substr(0, hashString.length()); // 개행문자 제거
-        hashString = hashString.substr(0, hashString.length()-1); // 개행문자 제거
+        // hashString = hashString.substr(0, hashString.length()-1); // 개행문자 제거
+
+        if(hashString.at(hashString.length() - 1) == '\n') {
+            hashString = hashString.substr(0, hashString.length()-1); // 개행문자 제거
+        }
+
         std::string strResourceJSON = "{\"hash\" : \"" + hashString + "\"}";
 
         const char* postData = strResourceJSON.c_str();

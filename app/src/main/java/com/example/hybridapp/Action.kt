@@ -2,14 +2,21 @@ package com.example.hybridapp
 
 import android.content.DialogInterface
 import android.os.Build
+import android.view.View
+import android.view.animation.AnimationUtils
+import android.webkit.WebResourceError
+import android.webkit.WebResourceRequest
+import android.webkit.WebView
 import androidx.annotation.RequiresApi
 import androidx.fragment.app.FragmentActivity
 import app.dvkyun.flexhybridand.FlexAction
+import app.dvkyun.flexhybridand.FlexWebViewClient
 import com.example.hybridapp.basic.BasicActivity
 import com.example.hybridapp.util.Constants
 import com.example.hybridapp.util.Utils
 import com.example.hybridapp.util.module.*
 import com.google.android.material.bottomsheet.BottomSheetDialog
+import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -383,6 +390,100 @@ object Action {
                 )
                 basicActivity.authAction?.promiseReturn(returnObj)
             }
+        }
+    }
+
+    val webPopUp: (FlexAction?, JSONArray?) -> Unit = { popUpAction, array ->
+        Constants.LOGD("============== Web PopUp Action ==============")
+
+        val url = array?.getString(0)
+        val ratio = array?.getDouble(1)
+
+        val basicActivity = App.activity as BasicActivity
+        basicActivity.popUpAction = popUpAction
+
+        // 인터넷이 연결되어 있지 않을 경우
+        if(Network.getStatus(App.activity) == 0) {
+            val returnObj = JSONObject()
+            returnObj.put(Constants.OBJ_KEY_DATA, false)
+            returnObj.put(Constants.OBJ_KEY_MSG, "연결된 네트워크가 없습니다")
+
+            basicActivity.popUpAction?.promiseReturn(returnObj)
+        }
+
+        CoroutineScope(Dispatchers.Main).launch {
+            // 뒷배경 뷰 생성
+            val mInflater = Utils.getLayoutInflater(App.activity)
+            basicActivity.backgroundView = mInflater.inflate(R.layout.background_popup, null)
+            App.activity.constraintLayout.addView(basicActivity.backgroundView)
+
+            val screenSize = Utils.getScreenSize()
+            val popupWidth = (ratio?.times(
+                    screenSize.getValue(Constants.SCREEN_WIDTH)))?.toInt()
+            val popupHeight = (ratio?.times(
+                    screenSize.getValue(Constants.SCREEN_HEIGHT)))?.toInt()
+
+            App.activity.flex_pop_up_web_view.loadUrl(url)
+            App.activity.flex_pop_up_web_view.webViewClient = object: FlexWebViewClient() {
+                override fun onReceivedError(view: WebView?, request: WebResourceRequest?,
+                                             error: WebResourceError?) {
+                    super.onReceivedError(view, request, error)
+                    Constants.LOGD("onReceivedError")
+
+                    val returnObj = JSONObject()
+                    returnObj.put(Constants.OBJ_KEY_DATA, false)
+                    returnObj.put(Constants.OBJ_KEY_MSG, "해당 URL을 불러올 수 없습니다")
+                    basicActivity.popUpAction?.promiseReturn(returnObj)
+                    basicActivity.popUpAction = null
+                }
+
+                override fun onPageFinished(view: WebView?, url: String?) {
+                    super.onPageFinished(view, url)
+
+                    val returnObj = JSONObject()
+                    returnObj.put(Constants.OBJ_KEY_DATA, true)
+                    basicActivity.popUpAction?.promiseReturn(returnObj)
+                }
+            }
+
+            App.activity.flex_pop_up_web_view.visibility = View.VISIBLE
+            App.activity.flex_pop_up_web_view.layoutParams = Utils.getParamsAlignCenterInConstraintLayout(
+                popupWidth!!, popupHeight!!, R.id.constraintLayout)
+
+            val bottomUp = AnimationUtils.loadAnimation(App.activity,
+                R.anim.open)
+            App.activity.flex_pop_up_web_view.startAnimation(bottomUp)
+            App.activity.flex_pop_up_web_view.bringToFront()
+
+            // 닫기 버튼 생성
+            basicActivity.popUpCloseButton = Utils.createCloseButton(App.activity,
+                R.id.constraintLayout)
+            App.activity.constraintLayout.addView(basicActivity.popUpCloseButton)
+
+            basicActivity.popUpCloseButton.setOnClickListener {
+                Utils.closePopup(App.activity,  App.activity.constraintLayout, basicActivity.backgroundView,
+                    basicActivity.popUpCloseButton,  App.activity.flex_pop_up_web_view)
+            }
+        }
+    }
+
+    val fileDownload: (FlexAction?, JSONArray?) -> Unit = { fileAction, array ->
+        Constants.LOGD("============== File Download Action ==============")
+
+        val basicActivity = App.activity as BasicActivity
+        basicActivity.fileAction = fileAction
+        basicActivity.fileUrl = array?.getString(0)
+
+        val perms = arrayOf(Constants.PERM_WRITE_EXTERNAL_STORAGE)
+
+        // 권한이 다 있을 경우
+        if(Utils.existAllPermission(perms)) {
+            Utils.downloadFileFromUrl()
+        }
+        // 권한이 다 있지 않을 경우
+        else {
+            Utils.checkAbsentPerms(perms, Constants.PERM_FILE_REQ_CODE,
+                basicActivity.fileAction)
         }
     }
 

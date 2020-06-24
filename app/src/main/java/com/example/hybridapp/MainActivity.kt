@@ -12,11 +12,7 @@ import android.os.Handler
 import android.provider.MediaStore
 import android.view.View
 import android.view.WindowManager
-import android.view.animation.AnimationUtils
 import android.webkit.WebView
-import android.webkit.WebViewClient
-import android.widget.Button
-import app.dvkyun.flexhybridand.FlexFuncInterface
 import com.example.hybridapp.data.LogUrlRepository
 import com.example.hybridapp.data.LogUrlRoomDatabase
 import com.example.hybridapp.util.*
@@ -30,7 +26,6 @@ import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import org.json.JSONArray
 import org.json.JSONObject
 import kotlin.collections.ArrayList
 
@@ -38,8 +33,6 @@ class MainActivity : BasicActivity() {
 
     private lateinit var repository: LogUrlRepository
     private var smsReceiver: SMSReceiver? = null
-    private lateinit var backgroundView: View
-    private lateinit var popupCloseButton: Button
 
     override fun onResume() {
         super.onResume()
@@ -91,10 +84,7 @@ class MainActivity : BasicActivity() {
         WebView.setWebContentsDebuggingEnabled(true)
         flex_web_view.webChromeClient = BasicWebChromeClient(this)
         flex_web_view.webViewClient = BasicWebViewClient()
-//        Utils.disabledWebViewScroll(flex_web_view)
         flex_web_view.addFlexInterface(FlexActionInterface())
-        flex_web_view.addFlexInterface(FlexPopupInterface())
-
         flex_web_view.isVerticalScrollBarEnabled = false
         flex_web_view.isHorizontalScrollBarEnabled = false
     }
@@ -115,6 +105,8 @@ class MainActivity : BasicActivity() {
         flex_web_view.setAction(Constants.TYPE_SEND_SMS, Action.sendSms)
         flex_web_view.setAction(Constants.TYPE_AUTH, Action.authentication)
         flex_web_view.setAction(Constants.TYPE_LOCAL_REPO, Action.localRepository)
+        flex_web_view.setAction(Constants.TYPE_WEB_POP_UP, Action.webPopUp)
+        flex_web_view.setAction(Constants.TYPE_DOWNLOAD, Action.fileDownload)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -434,6 +426,7 @@ class MainActivity : BasicActivity() {
                 }
                 // 권한을 거부한 경우
                 else {
+                    Constants.LOGD("QR코드 권한 거부")
                     qrCodeScanAction?.promiseReturn(deniedObj)
                 }
             }
@@ -444,6 +437,7 @@ class MainActivity : BasicActivity() {
                 }
                 // 권한을 거부한 경우
                 else {
+                    Constants.LOGD("싱글 이미지 권한 거부")
                     photoDeviceAction?.promiseReturn(deniedObj)
                     ratio = null
                     isWidthRatio = null
@@ -467,6 +461,7 @@ class MainActivity : BasicActivity() {
                 }
                 // 권한을 거부한 경우
                 else {
+                    Constants.LOGD("멀티 이미지 권한 거부")
                     multiplePhotoDeviceAction?.promiseReturn(deniedObj)
                     ratio = null
                     isWidthRatio = null
@@ -501,6 +496,7 @@ class MainActivity : BasicActivity() {
                 }
                 // 권한을 거부한 경우
                 else {
+                    Constants.LOGD("카메라 권한 거부")
                     cameraDeviceAction?.promiseReturn(deniedObj)
                     ratio = null
                     isWidthRatio = null
@@ -547,7 +543,7 @@ class MainActivity : BasicActivity() {
         if(flex_pop_up_web_view.visibility == View.VISIBLE) {
             Utils.closePopup(
                 this@MainActivity, constraintLayout,
-                backgroundView, popupCloseButton, flex_pop_up_web_view
+                backgroundView, popUpCloseButton, flex_pop_up_web_view
             )
         } else
             backPressedTwice()
@@ -573,56 +569,5 @@ class MainActivity : BasicActivity() {
         Handler().postDelayed({
             backPressedTwice = false
         }, 2000)
-    }
-
-    /**
-    * 인터페이스
-    */
-    inner class FlexPopupInterface{
-        @FlexFuncInterface
-        fun WebPopup(array: JSONArray): JSONObject {
-            // 인터넷이 연결되어 있지 않을 경우
-            if(Network.getStatus(this@MainActivity) == 0) {
-                return Utils.createJSONObject(null,
-                    false, "연결된 네트워크가 없습니다")
-            }
-
-            CoroutineScope(Dispatchers.Main).launch {
-                // 뒷배경 뷰 생성
-                val mInflater = Utils.getLayoutInflater(this@MainActivity)
-                backgroundView = mInflater.inflate(R.layout.background_popup, null)
-                constraintLayout.addView(backgroundView)
-
-                val url = array.getString(0)
-                val ratio = array.getDouble(1)
-
-                val screenSize = Utils.getScreenSize()
-                val popupWidth = (ratio * screenSize.getValue(Constants.SCREEN_WIDTH)).toInt()
-                val popupHeight = (ratio * screenSize.getValue(Constants.SCREEN_HEIGHT)).toInt()
-
-                flex_pop_up_web_view.loadUrl(url)
-                flex_pop_up_web_view.visibility = View.VISIBLE
-                flex_pop_up_web_view.layoutParams = Utils.getParamsAlignCenterInConstraintLayout(
-                    popupWidth, popupHeight, R.id.constraintLayout)
-
-                val bottomUp = AnimationUtils.loadAnimation(this@MainActivity,
-                    R.anim.open)
-                flex_pop_up_web_view.startAnimation(bottomUp)
-                flex_pop_up_web_view.bringToFront()
-
-                // 닫기 버튼 생성
-                popupCloseButton = Utils.createCloseButton(this@MainActivity,
-                    R.id.constraintLayout)
-                constraintLayout.addView(popupCloseButton)
-
-                popupCloseButton.setOnClickListener {
-                    Utils.closePopup(this@MainActivity, constraintLayout, backgroundView,
-                        popupCloseButton, flex_pop_up_web_view)
-                }
-
-            }
-            Constants.LOGD("Popup returnObj['data'] = true")
-            return Utils.createJSONObject(null, true, null)
-        }
     }
 }

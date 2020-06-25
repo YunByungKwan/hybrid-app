@@ -89,7 +89,6 @@ class MainActivity : BasicActivity() {
         flex_web_view.isHorizontalScrollBarEnabled = false
     }
 
-
     /** FlexWebView Action 설정 */
     private fun setActions() {
         flex_web_view.setAction(Constants.TYPE_DIALOG, Action.dialog)
@@ -145,22 +144,29 @@ class MainActivity : BasicActivity() {
             }
             Constants.CAMERA_DEVICE_RATIO_REQ_CODE -> {
                 Constants.LOGD("CAMERA DEVICE RATIO in onActivityResult()")
+                Utils.visibleProgressBar()
+                // 뒷배경 뷰 생성
+                val mInflater = Utils.getLayoutInflater(App.activity)
+                backgroundView = mInflater.inflate(R.layout.background_popup, null)
+                App.activity.constraintLayout.addView(backgroundView)
+
                 // 카메라 촬영 성공
                 if(resultOk) {
-                    Utils.visibleProgressBar()
-
                     var bitmap: Bitmap? = if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
                         ImageDecoder.decodeBitmap(ImageDecoder.createSource(Utils.getOutputMediaFile()!!))
                     }
                     else {
                         MediaStore.Images.Media.getBitmap(contentResolver, Uri.fromFile(Utils.getOutputMediaFile()))
                     }
+                    val degree = Photo.getDegreesFromPath(Utils.getOutputMediaFile().toString())
+                    Constants.LOGD("Degree: $degree")
 
-                    Utils.invisibleProgressBar()
-
+                    val rotatedBitmap = Photo.rotateBitmap(bitmap, degree)
+                    val resizedBitmap = Photo.resizeBitmapByDeviceRatio(rotatedBitmap!!,
+                        ratio!!, isWidthRatio)
                     if(bitmap != null) {
                         val base64 = Constants.BASE64_URL +
-                                Photo.getBase64FromBitmap(bitmap)
+                                Photo.getBase64FromBitmap(resizedBitmap)
                         val returnObj = Utils.createJSONObject(true,
                             base64, null)
                         cameraDeviceAction?.promiseReturn(returnObj)
@@ -184,6 +190,9 @@ class MainActivity : BasicActivity() {
                     ratio = null
                     isWidthRatio = null
                 }
+
+                constraintLayout.removeView(backgroundView)
+                Utils.invisibleProgressBar()
             }
             Constants.CAMERA_RATIO_REQ_CODE -> {
                 Constants.LOGD("CAMERA DEVICE RATIO in onActivityResult()")
@@ -397,8 +406,8 @@ class MainActivity : BasicActivity() {
                 Constants.LOGD("SEND SMS in onActivityResult()")
 
                 // Intent.ACTION_SEND는 return값이 없음
-                val returnObj = Utils.createJSONObject(null,
-                    true, null)
+                val returnObj = JSONObject()
+                returnObj.put(Constants.OBJ_KEY_DATA, true)
                 sendSmsAction?.promiseReturn(returnObj)
                 phoneNumber = null
                 smsMessage = null

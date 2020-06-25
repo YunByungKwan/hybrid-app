@@ -2,9 +2,11 @@ package com.example.hybridapp.util.module
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.DialogInterface
 import android.location.Location
 import android.location.LocationManager
 import com.example.hybridapp.App
+import com.example.hybridapp.R
 import com.example.hybridapp.basic.BasicActivity
 import com.example.hybridapp.util.Constants
 import com.example.hybridapp.util.Utils
@@ -12,6 +14,7 @@ import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
+import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -28,6 +31,10 @@ object Location {
 
         // GPS 사용이 가능한 경우
         if(isLocationEnabled(basicActivity)) {
+            // 뒷배경 뷰 생성
+            val mInflater = Utils.getLayoutInflater(App.activity)
+            basicActivity.backgroundView = mInflater.inflate(R.layout.background_popup, null)
+            App.activity.constraintLayout.addView(basicActivity.backgroundView)
             Utils.visibleProgressBar()
 
             val mLocationRequest = getLocationRequest()
@@ -39,9 +46,18 @@ object Location {
         }
         // GPS 사용이 불가능한 경우
         else {
-            val returnObj = Utils.createJSONObject(true,
-                null, Constants.MSG_NOT_LOAD_LAT_LOT)
-            basicActivity.locationAction?.promiseReturn(returnObj)
+            val posListener = DialogInterface.OnClickListener { _, _ ->
+                val returnObj = Utils.createJSONObject(true,
+                    null, Constants.MSG_NOT_LOAD_LAT_LOT)
+                basicActivity.locationAction?.promiseReturn(returnObj)
+            }
+
+            Dialog.show("위치 권한", "GPS를 켜야 합니다", "확인",
+                null, null, posListener,
+                null, null,
+                { val returnObj = Utils.createJSONObject(true,
+                    null, Constants.MSG_NOT_LOAD_LAT_LOT)
+                    basicActivity.locationAction?.promiseReturn(returnObj)  })
         }
     }
 
@@ -87,6 +103,8 @@ object Location {
                 val returnObj = Utils.createJSONObject(true,
                     locObj, null)
 
+                val basicActivity = App.activity as BasicActivity
+                basicActivity.constraintLayout.removeView(basicActivity.backgroundView)
                 Utils.invisibleProgressBar()
 
                 (App.activity as BasicActivity).locationAction?.promiseReturn(returnObj)

@@ -69,6 +69,9 @@ class MainActivity : BasicActivity() {
             repository = LogUrlRepository(logUrlDao)
         }
 
+        // Android KeyStore init
+        AndroidKeyStoreUtil.init(App.context())
+
         setFlexWebView()
         setActions()
         window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)

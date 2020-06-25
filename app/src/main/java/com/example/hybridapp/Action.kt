@@ -503,7 +503,7 @@ object Action {
             }
             Constants.GET_DATA_CODE -> {
                 val key = array.getString(1)
-                var value = SharedPreferences.getString(Constants.SHARED_FILE_NAME, key)
+                var value = SharedPreferences.get(Constants.SHARED_FILE_NAME, key, Constants.SHARED_DEFAULT_STRING)
 
                 localRepoAction?.promiseReturn(value)
             }

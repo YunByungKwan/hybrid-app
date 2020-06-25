@@ -212,8 +212,8 @@ object Utils {
 
     /** App id 가져오기 */
     fun getAppId(): String {
-        val appId : String = SharedPreferences.getString(Constants.SHARED_APPID_FILE_NAME,
-            Constants.SHARED_APPID_KEY)
+        val appId : String = SharedPreferences.get(Constants.SHARED_APPID_FILE_NAME,
+            Constants.SHARED_APPID_KEY, Constants.SHARED_DEFAULT_STRING)
 
         return if(appId.isNullOrEmpty()) {
             val uuid: String = UUID.randomUUID().toString()

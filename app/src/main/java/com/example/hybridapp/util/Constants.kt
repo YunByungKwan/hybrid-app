@@ -83,6 +83,11 @@ class Constants {
            PERM_SEND_SMS_REQ_CODE)
        annotation class types
 
+       /** SharedPreferences Default */
+       const val SHARED_DEFAULT_STRING = ""
+       const val SHARED_DEFAULT_NUMBER = 0
+       const val SHARED_DEFAULT_BOOLEAN = false
+
        /** AppId SharedPreferences filepath */
        const val SHARED_APPID_FILE_NAME = "pref_appid"
        const val SHARED_APPID_KEY = "appId"

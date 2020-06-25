@@ -1,74 +1,90 @@
 package com.example.hybridapp.util.module
 
 import android.content.Context
+import android.util.Log
 import com.example.hybridapp.App
+import com.example.hybridapp.util.AndroidKeyStoreUtil
+import com.example.hybridapp.util.Constants.Companion.LOGD
+import java.lang.IllegalArgumentException
 
 object SharedPreferences {
-    
+
     /** 데이터 저장 */
     fun putData(fileName: String, key: String, value: Any?) {
-        val prefs
-                = (App.activity).getSharedPreferences(fileName, Context.MODE_PRIVATE)
+        val prefs = (App.activity).getSharedPreferences(fileName, Context.MODE_PRIVATE)
         val editor = prefs.edit()
 
         when (value) {
-            is Boolean -> {
-                editor.putBoolean(key, value).apply()
-            }
-            is Float -> {
-                editor.putFloat(key, value).apply()
-            }
-            is Int -> {
-                editor.putInt(key, value).apply()
-            }
-            is Long -> {
-                editor.putLong(key, value).apply()
-            }
-            is String -> {
-                editor.putString(key, value).apply()
-            }
-            else -> {
-                editor.putStringSet(key, value as Set<String>).apply()
-            }
+            is Boolean, is Int, is Long, is Float, is String -> putInternalValue(fileName, key, value)
+            // TODO : Set 인 경우 값 하나하나 암호화 처리 필요
+            else -> editor.putStringSet(key, value as Set<String>).apply()
         }
     }
 
-    /** 데이터 불러오기 */
-    fun getBoolean(fileName: String, key: String): Boolean {
-        val prefs
-                = (App.activity).getSharedPreferences(fileName, Context.MODE_PRIVATE)
+    /** 내부에 value 암호화해서 저장 */
+    private fun putInternalValue(fileName: String, key: String, value: Any) {
+        val prefs = (App.activity).getSharedPreferences(fileName, Context.MODE_PRIVATE)
+        val editor = prefs.edit()
 
-        return prefs?.getBoolean(key, false) ?: false
+        try {
+            editor.run {
+                if(value == null) {
+                    remove(key)
+                } else {
+                    val secureValue = AndroidKeyStoreUtil.encrypt(value.toString())
+                    putString(key, secureValue)
+                    Log.d("dlgodnjs", "$value changed : $secureValue is putValue")
+                }
+
+                apply()
+            }
+        }
+        catch (e: Throwable) {
+            LOGD("[SharedPreferences] Data put 진행 중 오류 발생.")
+            e.printStackTrace()
+        }
     }
 
-    fun getFloat(fileName: String, key: String): Float {
-        val prefs
-                = (App.activity).getSharedPreferences(fileName, Context.MODE_PRIVATE)
 
-        return prefs?.getFloat(key, 0F) ?: 0F
+    /** 내부에서 value 불러와서 복호화 */
+    private fun getInternalValue(fileName: String, key: String, defaultValue: Any) : Any? {
+        val pref = (App.activity).getSharedPreferences(fileName, Context.MODE_PRIVATE)
+        val beforeValue = pref.getString(key, "")
 
+        if(beforeValue.isNullOrEmpty()) {
+            return defaultValue
+        }
+
+        val value = AndroidKeyStoreUtil.decrypt(beforeValue)
+        Log.d("dlgodnjs", "$beforeValue is changed : $value is getValue")
+        return when (defaultValue) {
+            is Boolean -> value.toBoolean()
+            is Int -> value.toInt()
+            is Float -> value.toFloat()
+            is Long -> value.toLong()
+            is String -> value
+            else -> throw IllegalArgumentException("defaultValue only could be one of these types: Boolean, Int, Long, String")
+        }
     }
 
-    fun getInt(fileName: String, key: String): Int {
-        val prefs
-                = (App.activity).getSharedPreferences(fileName, Context.MODE_PRIVATE)
+    /** 데이터 불러오기
+     *  하나로 합칠 수 없다. (Any 가 리턴일 경우 일일히 type을 cast 해야하기 때문에
+     * */
+    fun get(fileName: String, key: String, defaultValue: Boolean) : Boolean =
+        getInternalValue(fileName, key, defaultValue) as Boolean
 
-        return prefs?.getInt(key, 0) ?: 0
-    }
+    fun get(fileName: String, key: String, defaultValue: String) : String =
+        getInternalValue(fileName, key, defaultValue) as String
 
-    fun getLong(fileName: String, key: String): Long {
-        val prefs
-                = (App.activity).getSharedPreferences(fileName, Context.MODE_PRIVATE)
+    fun get(fileName: String, key: String, defaultValue: Float) : Float =
+        getInternalValue(fileName, key, defaultValue) as Float
 
-        return prefs?.getLong(key, 0) ?: 0
-    }
+    fun get(fileName: String, key: String, defaultValue: Int) : Int =
+        getInternalValue(fileName, key, defaultValue) as Int
 
-    fun getString(fileName: String, key: String): String {
-        val prefs
-                = (App.activity).getSharedPreferences(fileName, Context.MODE_PRIVATE)
+    fun get(fileName: String, key: String, defaultValue: Long) : Long =
+        getInternalValue(fileName, key, defaultValue) as Long
 
-        return if(prefs != null) prefs.getString(key, "")!! else ""
-    }
 
     /** 데이터 제거 */
     fun removeData(fileName: String, key: String) {

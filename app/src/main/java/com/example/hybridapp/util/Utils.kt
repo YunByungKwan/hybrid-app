@@ -30,6 +30,7 @@ import com.example.hybridapp.util.module.SharedPreferences
 import kotlinx.android.synthetic.main.activity_main.*
 import org.json.JSONObject
 import java.io.File
+import java.lang.Exception
 import java.nio.charset.StandardCharsets
 import java.security.MessageDigest
 import java.security.NoSuchAlgorithmException
@@ -129,24 +130,28 @@ object Utils {
         val mimeType = mimeTypeMap.getMimeTypeFromExtension(extension)
         Constants.LOGD("MimeType: $mimeType")
 
-        val downloadManager = (App.activity).getSystemService(
-            AppCompatActivity.DOWNLOAD_SERVICE) as DownloadManager
-        val request = DownloadManager.Request(Uri.parse(basicActivity.fileUrl))
-        request.setMimeType(mimeType)
-        request.setDescription("Downloading File...")
-        request.setAllowedOverMetered(true)
-        request.setAllowedOverRoaming(true)
-        request.setTitle("file")
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            request.setRequiresCharging(false)
-        }
-        request.allowScanningByMediaScanner()
-        request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
-        request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS,
-            "file.$extension")
+        try {
+            val downloadManager = (App.activity).getSystemService(
+                AppCompatActivity.DOWNLOAD_SERVICE) as DownloadManager
+            val request = DownloadManager.Request(Uri.parse(basicActivity.fileUrl))
+            request.setMimeType(mimeType)
+            request.setDescription("Downloading File...")
+            request.setAllowedOverMetered(true)
+            request.setAllowedOverRoaming(true)
+            request.setTitle("file")
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                request.setRequiresCharging(false)
+            }
+            request.allowScanningByMediaScanner()
+            request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
+            request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS,
+                "file.$extension")
 
-        basicActivity.downloadId = downloadManager.enqueue(request)
-        basicActivity.fileAction?.promiseReturn(true)
+            basicActivity.downloadId = downloadManager.enqueue(request)
+            basicActivity.fileAction?.promiseReturn(true)
+        } catch(e: Exception) {
+            basicActivity.fileAction?.promiseReturn(false)
+        }
     }
 
     fun getAppSignatures(context: Context): ArrayList<String> {

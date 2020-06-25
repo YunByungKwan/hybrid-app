@@ -25,6 +25,9 @@ object Camera {
         // 카메라 촬영 시 저장할 임시 파일 경로 생성 및 인텐트에 적용
         val newFile= Utils.getOutputMediaFile()!!
         val contentUri = getUriForFile(App.context(), BuildConfig.APPLICATION_ID + ".fileprovider", newFile)
+//        val filePath = Photo.getFilePathFromUri(contentUri)
+//        val degree = Photo.getDegreesFromPath(filePath)
+//        Constants.LOGD("Degree: ${degree}")
         cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, contentUri)
 
         // 카메라 앱을 사용할 수 있는 경우

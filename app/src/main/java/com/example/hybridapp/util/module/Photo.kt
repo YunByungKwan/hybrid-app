@@ -196,7 +196,7 @@ object Photo {
     }
 
     /** FilePath의 회전 각도를 반환 */
-    private fun getDegreesFromPath(filePath: String): Int {
+    fun getDegreesFromPath(filePath: String): Int {
         Constants.LOGD("Call getDegreesFromPath()")
 
         val exif = ExifInterface(filePath)
@@ -250,7 +250,7 @@ object Photo {
     }
 
     /** 비트맵 회전 */
-    private fun rotateBitmap(bitmap: Bitmap?, degree: Int): Bitmap? {
+    fun rotateBitmap(bitmap: Bitmap?, degree: Int): Bitmap? {
         Constants.LOGD("Call rotateBitmap()")
 
         if(bitmap == null) {
@@ -282,7 +282,7 @@ object Photo {
     }
 
     /** 디바이스 화면 비율에 맞게 리사이즈 */
-    private fun resizeBitmapByDeviceRatio(bitmap: Bitmap, ratio: Double, isWidthRatio: Boolean?): Bitmap {
+    fun resizeBitmapByDeviceRatio(bitmap: Bitmap, ratio: Double, isWidthRatio: Boolean?): Bitmap {
         Constants.LOGD("Call resizeBitmapByDeviceRatio()")
         val screenWidth = Utils.getScreenSize().getValue(Constants.SCREEN_WIDTH)
         val screenHeight = Utils.getScreenSize().getValue(Constants.SCREEN_HEIGHT)
@@ -313,7 +313,7 @@ object Photo {
     }
 
     /** 이미지 비율에 맞게 리사이즈 */
-    private fun resizeBitmapByRatio(bitmap: Bitmap, ratio: Double): Bitmap {
+    fun resizeBitmapByRatio(bitmap: Bitmap, ratio: Double): Bitmap {
         Constants.LOGD("Call resizeBitmapByRatio()")
 
         val width = (bitmap.width * ratio).toInt()

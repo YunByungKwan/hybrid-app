@@ -150,12 +150,12 @@ class MainActivity : BasicActivity() {
                 Utils.visibleProgressBar()
                 // 뒷배경 뷰 생성
                 val mInflater = Utils.getLayoutInflater(App.activity)
-                backgroundView = mInflater.inflate(R.layout.background_popup, null)
+                backgroundView = mInflater.inflate(R.layout.background_popup, constraintLayout)
                 App.activity.constraintLayout.addView(backgroundView)
 
                 // 카메라 촬영 성공
                 if(resultOk) {
-                    var bitmap: Bitmap? = if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                    val bitmap: Bitmap? = if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
                         ImageDecoder.decodeBitmap(ImageDecoder.createSource(Utils.getOutputMediaFile()!!))
                     }
                     else {
@@ -204,7 +204,7 @@ class MainActivity : BasicActivity() {
                 if(resultOk) {
                     Utils.visibleProgressBar()
 
-                    var bitmap: Bitmap? = if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                    val bitmap: Bitmap? = if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
                         ImageDecoder.decodeBitmap(ImageDecoder.createSource(Utils.getOutputMediaFile()!!))
                     }
                     else {
@@ -280,20 +280,20 @@ class MainActivity : BasicActivity() {
 
                 // 사진 불러오기 성공
                 if(resultOk) {
-                    if(data != null) {
+                    ratio = if(data != null) {
                         val base64 = Constants.BASE64_URL +
                                 Photo.convertUriToResizingBase64(data.data, ratio, isWidthRatio)
 
                         val returnObj = Utils.createJSONObject(true,
                             base64, null)
                         photoAction?.promiseReturn(returnObj)
-                        ratio = null
+                        null
                     } else {
                         Constants.LOGE("사진이 존재하지 않습니다")
                         val returnObj = Utils.createJSONObject(true,
                             null, "사진이 존재하지 않습니다")
                         photoAction?.promiseReturn(returnObj)
-                        ratio = null
+                        null
                     }
                 }
                 // 사진 불러오기 실패

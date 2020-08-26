@@ -14,6 +14,7 @@ import androidx.appcompat.app.AlertDialog
 import com.example.hybridapp.App
 import com.example.hybridapp.R
 import com.example.hybridapp.util.Constants
+import com.example.hybridapp.util.Utils
 import com.google.android.material.bottomsheet.BottomSheetDialog
 
 object Dialog {
@@ -28,8 +29,8 @@ object Dialog {
              negativeListener: DialogInterface.OnClickListener?,
              exitListener: () -> Unit?)
     {
-        Constants.LOGD("Call show() in Dialog object.")
-        Constants.LOGD("title: $title, message: $message, positiveButtonText: $positiveButtonText, negativeButtonText: $negativeButtonText, negativeButtonText: $negativeButtonText")
+        Utils.LOGD("Call show() in Dialog object.")
+        Utils.LOGD("title: $title, message: $message, positiveButtonText: $positiveButtonText, negativeButtonText: $negativeButtonText, negativeButtonText: $negativeButtonText")
         val dialog = AlertDialog.Builder(App.activity)
 
         title?.let { dialog.setTitle(title) } ?: dialog.setTitle("")

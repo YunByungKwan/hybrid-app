@@ -1,29 +1,28 @@
 package com.example.hybridapp.util.module
 
-import android.app.DownloadManager
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import com.example.hybridapp.App
-import com.example.hybridapp.basic.BasicActivity
+import com.example.hybridapp.R
 import com.example.hybridapp.util.Constants
+import com.example.hybridapp.util.Utils
 import com.google.android.gms.auth.api.phone.SmsRetriever
 import com.google.android.gms.common.api.CommonStatusCodes
 import com.google.android.gms.common.api.Status
-import org.json.JSONObject
 
 class SMSReceiver: BroadcastReceiver() {
     val smsRetrievedAction = "com.google.android.gms.auth.api.phone.SMS_RETRIEVED"
 
     override fun onReceive(context: Context, intent: Intent) {
-        Constants.LOGD("Call onReceive() in SMSReceiver.")
+        Utils.LOGD("Call onReceive() in SMSReceiver.")
 
 //        val id = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1)
 //        val basicActivity = App.activity as BasicActivity
 //        if(id == basicActivity.downloadId) {
-//            Constants.LOGD("Download Completed")
+//            Utils.LOGD("Download Completed")
 //            val returnObj = JSONObject()
-//            returnObj.put(Constants.OBJ_KEY_DATA, true)
+//            returnObj.put(getString(R.string.obj_KEY_DATA, true)
 //            basicActivity.fileAction?.promiseReturn()
 //        }
 
@@ -33,19 +32,19 @@ class SMSReceiver: BroadcastReceiver() {
 
             when (status.statusCode) {
                 CommonStatusCodes.SUCCESS -> {
-                    Constants.LOGD(Constants.LOG_LOG_MSG_SMS_SUCCESS)
+                    Utils.LOGD(App.INSTANCE.getString(R.string.log_msg_sms_success))
 
                     val message = extras.get(SmsRetriever.EXTRA_SMS_MESSAGE) as String
-                    Constants.LOGD("Message: $message")
+                    Utils.LOGD("Message: $message")
                 }
                 CommonStatusCodes.CANCELED -> {
-                    Constants.LOGD(Constants.LOG_MSG_SMS_CANCELED)
+                    Utils.LOGD(App.INSTANCE.getString(R.string.log_msg_sms_canceled))
                 }
                 CommonStatusCodes.ERROR -> {
-                    Constants.LOGD(Constants.LOG_MSG_SMS_ERROR)
+                    Utils.LOGD(App.INSTANCE.getString(R.string.log_msg_sms_error))
                 }
                 CommonStatusCodes.TIMEOUT-> {
-                    Constants.LOGD(Constants.LOG_MSG_SMS_TIMEOUT)
+                    Utils.LOGD(App.INSTANCE.getString(R.string.log_msg_sms_timeout))
                 }
             }
         }

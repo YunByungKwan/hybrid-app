@@ -12,6 +12,7 @@ import android.os.Environment
 import android.provider.Settings
 import android.util.Base64
 import android.util.DisplayMetrics
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -61,18 +62,18 @@ object Utils {
 
     /** 위험 권한이 없을 경우 */
     fun checkAbsentPerms(permissions: Array<out String>, requestCode: Int, action: FlexAction?) {
-        Constants.LOGD("Call checkAbsentPerms()")
+        LOGD("Call checkAbsentPerms()")
 
         // 거절한 권한이 하나라도 존재할 경우
         if (existsDenialPermission(permissions)) {
-            Constants.LOGD("거절한 권한이 하나라도 존재함")
+            LOGD("거절한 권한이 하나라도 존재함")
             val returnObj = createJSONObject(false,
                 null, "설정 > 앱에서 필수 권한들을 승인해 주세요")
             action?.promiseReturn(returnObj)
         }
         // 승인이 필요한 권한들을 요청
         else {
-            Constants.LOGD("거절한 권한 없음 권한을 요청함")
+            LOGD("거절한 권한 없음 권한을 요청함")
             val perms = getPermissionsToRequest(permissions)
             requestPermissions(perms, requestCode)
         }
@@ -110,7 +111,7 @@ object Utils {
 
     /** 다수 권한 요청 */
     fun requestPermissions(permissions: Array<out String>, requestCode: Int) {
-        Constants.LOGD("Call requestPermissions()")
+        LOGD("Call requestPermissions()")
 
         ActivityCompat.requestPermissions(App.activity, permissions, requestCode)
     }
@@ -121,14 +122,14 @@ object Utils {
 
     /** url로부터 파일을 다운받음 */
     fun downloadFileFromUrl() {
-        Constants.LOGD("Call downloadFileFromUrl()")
+        LOGD("Call downloadFileFromUrl()")
 
         val basicActivity = App.activity as BasicActivity
         val mimeTypeMap = MimeTypeMap.getSingleton()
         val extension = MimeTypeMap.getFileExtensionFromUrl(basicActivity.fileUrl)
-        Constants.LOGD("extension: $extension")
+        LOGD("extension: $extension")
         val mimeType = mimeTypeMap.getMimeTypeFromExtension(extension)
-        Constants.LOGD("MimeType: $mimeType")
+        LOGD("MimeType: $mimeType")
 
         try {
             val downloadManager = (App.activity).getSystemService(
@@ -168,10 +169,10 @@ object Utils {
                 if (hash != null) {
                     appCodes.add(String.format("%s", hash))
                 }
-                Constants.LOGD(String.format("이 값을 SMS 뒤에 써서 보내주면 됩니다 : %s", hash))
+                LOGD(String.format("이 값을 SMS 뒤에 써서 보내주면 됩니다 : %s", hash))
             }
         } catch (e: PackageManager.NameNotFoundException) {
-            Constants.LOGE("Unable to find package to obtain hash. : $e")
+            LOGE("Unable to find package to obtain hash. : $e")
         }
 
         return appCodes
@@ -179,7 +180,7 @@ object Utils {
 
     /** Hash값 반환 */
     private fun getHash(packageName: String, signature: String): String? {
-        Constants.LOGE("getHash")
+        LOGE("getHash")
         val appInfo = "$packageName $signature"
 
         try {
@@ -194,11 +195,11 @@ object Utils {
 
             var base64Hash = encode11DigitsBase64String(hashSignature)
 
-            Constants.LOGD(String.format("\nPackage : %s\nHash : %s", packageName, base64Hash))
+            LOGD(String.format("\nPackage : %s\nHash : %s", packageName, base64Hash))
 
             return base64Hash
         } catch (e: NoSuchAlgorithmException) {
-            Constants.LOGE("hash:NoSuchAlgorithm : $e")
+            LOGE("hash:NoSuchAlgorithm : $e")
         }
 
         return null
@@ -212,13 +213,14 @@ object Utils {
 
     /** App id 가져오기 */
     fun getAppId(): String {
-        val appId : String = SharedPreferences.get(Constants.SHARED_APPID_FILE_NAME,
-            Constants.SHARED_APPID_KEY, Constants.SHARED_DEFAULT_STRING)
+        val appId : String = SharedPreferences.get(App.INSTANCE.getString(R.string.shared_appid_file_name),
+            App.INSTANCE.getString(R.string.shared_appid_key),
+            App.INSTANCE.getString(R.string.shared_default_string))
 
         return if(appId.isNullOrEmpty()) {
             val uuid: String = UUID.randomUUID().toString()
-            SharedPreferences.putData(Constants.SHARED_APPID_FILE_NAME,
-                Constants.SHARED_APPID_KEY, uuid)
+            SharedPreferences.putData(App.INSTANCE.getString(R.string.shared_appid_file_name),
+                App.INSTANCE.getString(R.string.shared_appid_key), uuid)
 
             uuid
         }
@@ -259,7 +261,7 @@ object Utils {
         val width = displayMetrics.widthPixels
         val height = displayMetrics.heightPixels
 
-        return mapOf(Constants.SCREEN_WIDTH to width, Constants.SCREEN_HEIGHT to height)
+        return mapOf(App.INSTANCE.getString(R.string.screen_width) to width, App.INSTANCE.getString(R.string.screen_height) to height)
     }
 
     /** 닫기 버튼 동적 생성 */
@@ -327,7 +329,7 @@ object Utils {
 
     fun getParamsAlignCenterInConstraintLayout(
         width: Int, height: Int, root: Int): ConstraintLayout.LayoutParams {
-        val params = getParamsInConstraintLayout(width, height)
+        val params = ConstraintLayout.LayoutParams(width, height)
         params.topToTop = root
         params.bottomToBottom = root
         params.endToEnd = root
@@ -336,28 +338,23 @@ object Utils {
         return params
     }
 
-    fun getParamsInConstraintLayout(width: Int, height: Int): ConstraintLayout.LayoutParams {
-        return ConstraintLayout.LayoutParams(width, height)
-    }
-
     /**================================== JSONObject 관련 ========================================*/
 
     /** JSONObject 생성
-     *
      * Parameter:
      * Boolean, String
      */
     fun createJSONObject(authValue: Boolean?, dataValue: Any?, msgValue: String?): JSONObject {
         val obj = JSONObject()
-        obj.put(Constants.OBJ_KEY_AUTH, authValue)
-        obj.put(Constants.OBJ_KEY_DATA, createJsonOfDataValue(dataValue))
-        obj.put(Constants.OBJ_KEY_MSG, msgValue)
+        obj.put(App.INSTANCE.getString(R.string.obj_key_auth), authValue)
+        obj.put(App.INSTANCE.getString(R.string.obj_key_data), createJsonOfDataValue(dataValue))
+        obj.put(App.INSTANCE.getString(R.string.obj_key_msg), msgValue)
 
         return obj
     }
 
     /** 웹에서 실제로 사용하는 변수들 구분하는 함수 */
-    fun createJsonOfDataValue(dataValue: Any?) : Any? {
+    private fun createJsonOfDataValue(dataValue: Any?) : Any? {
         return when(dataValue) {
             is String, Boolean -> dataValue
             is JSONObject -> dataValue
@@ -366,4 +363,9 @@ object Utils {
             else -> null
         }
     }
+
+    /** Function */
+    fun LOGD(message: String) = Log.d(App.INSTANCE.getString(R.string.tag), message)
+
+    fun LOGE(message: String) = Log.e(App.INSTANCE.getString(R.string.tag), message)
 }

@@ -4,7 +4,9 @@ import android.app.PendingIntent
 import android.content.Intent
 import android.os.Build
 import com.example.hybridapp.MainActivity
+import com.example.hybridapp.R
 import com.example.hybridapp.util.Constants
+import com.example.hybridapp.util.Utils
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 
@@ -16,24 +18,24 @@ import com.google.firebase.messaging.RemoteMessage
 class FCM: FirebaseMessagingService() {
 
     override fun onNewToken(token: String) {
-        Constants.LOGD("Call onNewToken() in FCM class.")
-        Constants.LOGD("Token: $token")
+        Utils.LOGD("Call onNewToken() in FCM class.")
+        Utils.LOGD("Token: $token")
     }
 
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
-        Constants.LOGD("Call onMessageReceived() in FCM class.")
+        Utils.LOGD("Call onMessageReceived() in FCM class.")
 
         if(remoteMessage.notification != null) {
-            val channelId = Constants.NOTI_CHANNEL_ID
-            val channelName = Constants.NOTI_CHANNEL_NAME
-            val description = Constants.NOTI_DESC
+            val channelId = getString(R.string.noti_channel_id)
+            val channelName = getString(R.string.noti_channel_name)
+            val description = getString(R.string.noti_desc)
             val importance = Constants.NOTI_DEFAULT
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 Notification.createChannel(channelId, channelName, description,
                     importance, true)
             } else {
-                Constants.LOGE(Constants.LOG_MSG_NOT_CHANNEL)
+                Utils.LOGE(getString(R.string.log_msg_not_channel))
             }
 
             val title = remoteMessage.notification!!.title
@@ -46,7 +48,7 @@ class FCM: FirebaseMessagingService() {
             Notification.create(channelId, Constants.NOTIFICATION_ID, title!!, message!!,
                 importance, pendingIntent)
 
-            Constants.LOGD("Notification Title: $title, message: $message")
+            Utils.LOGD("Notification Title: $title, message: $message")
         }
     }
 }

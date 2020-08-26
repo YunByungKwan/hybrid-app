@@ -1,15 +1,10 @@
 package com.example.hybridapp
 
-import android.app.DownloadManager
 import android.app.PendingIntent
 import android.content.Intent
-import android.net.Uri
 import android.os.Build
-import android.os.Environment
 import android.util.Log
-import androidx.appcompat.app.AppCompatActivity
 import app.dvkyun.flexhybridand.FlexFuncInterface
-import com.example.hybridapp.basic.BasicActivity
 import com.example.hybridapp.data.LogUrlRepository
 import com.example.hybridapp.data.LogUrlRoomDatabase
 import com.example.hybridapp.util.Constants
@@ -47,15 +42,15 @@ class FlexActionInterface {
     @FlexFuncInterface
     fun Notification(array: JSONArray): Boolean {
         // 알림 채널 생성
-        val channelId = Constants.NOTI_CHANNEL_ID
-        val channelName = Constants.NOTI_CHANNEL_NAME
-        val description = Constants.NOTI_DESC
+        val channelId = App.INSTANCE.getString(R.string.noti_channel_id)
+        val channelName = App.INSTANCE.getString(R.string.noti_channel_name)
+        val description = App.INSTANCE.getString(R.string.noti_desc)
         val importance = Constants.NOTI_HIGH
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             Notification.createChannel(channelId, channelName, description, importance, true)
         } else {
-            Constants.LOGE(Constants.LOG_MSG_NOT_CHANNEL)
+            Utils.LOGE(App.INSTANCE.getString(R.string.log_msg_not_channel))
         }
 
         val intent = Intent(App.INSTANCE, MainActivity::class.java).apply {
@@ -77,7 +72,7 @@ class FlexActionInterface {
     /**============================= RootingCheck Interface ======================================*/
     @FlexFuncInterface
     fun RootingCheck(array: JSONArray): String {
-        return Constants.MSG_NO_ROOTING
+        return App.INSTANCE.getString(R.string.msg_no_rooting)
     }
 
     /**=============================== UniqueAppID Interface =====================================*/
@@ -92,27 +87,6 @@ class FlexActionInterface {
         return Utils.getDeviceId(App.INSTANCE)
     }
 
-    /**============================== FileDownload Interface =====================================*/
-//    @FlexFuncInterface
-//    fun FileDownload(array: JSONArray) {
-//        Constants.LOGD("Call FileDownload Interface")
-//
-//        val basicActivity = App.activity as BasicActivity
-//        basicActivity.fileUrl = array.getString(0)
-//
-//        val perms = arrayOf(Constants.PERM_WRITE_EXTERNAL_STORAGE)
-//
-//        // 권한이 다 있을 경우
-//        if(Utils.existAllPermission(perms)) {
-//            Utils.downloadFileFromUrl()
-//        }
-//        // 권한이 다 있지 않을 경우
-//        else {
-//            Utils.checkAbsentPerms(perms, Constants.PERM_FILE_REQ_CODE,
-//                null)
-//        }
-//    }
-
     @FlexFuncInterface
     fun LogUrl(array: JSONArray) {
         CoroutineScope(Dispatchers.Default).launch {
@@ -120,7 +94,7 @@ class FlexActionInterface {
             val repository = LogUrlRepository(logUrlDao)
             val logUrls = repository.allLogUrls
             for(i in logUrls) {
-                Log.e(Constants.TAG_MAIN, "${i.id}, ${i.visitingTime}, ${i.visitingUrl}")
+                Log.e(App.INSTANCE.getString(R.string.tag_main), "${i.id}, ${i.visitingTime}, ${i.visitingUrl}")
             }
         }
     }

@@ -4,7 +4,7 @@ import android.content.Context
 import android.util.Log
 import com.example.hybridapp.App
 import com.example.hybridapp.util.AndroidKeyStoreUtil
-import com.example.hybridapp.util.Constants.Companion.LOGD
+import com.example.hybridapp.util.Utils
 import java.lang.IllegalArgumentException
 
 object SharedPreferences {
@@ -40,7 +40,7 @@ object SharedPreferences {
             }
         }
         catch (e: Throwable) {
-            LOGD("[SharedPreferences] Data put 진행 중 오류 발생.")
+            Utils.LOGD("[SharedPreferences] Data put 진행 중 오류 발생.")
             e.printStackTrace()
         }
     }

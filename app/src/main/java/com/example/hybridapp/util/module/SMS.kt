@@ -25,7 +25,7 @@ object SMS {
 
     /** SMS Receiver 등록 */
     fun registerReceiver(receiver: SMSReceiver?) {
-        Constants.LOGD("Call registerReceiver() in SMS object.")
+        Utils.LOGD("Call registerReceiver() in SMS object.")
         val filter = IntentFilter()
         filter.addAction(receiver!!.smsRetrievedAction)
         App.activity.registerReceiver(receiver, filter)
@@ -33,18 +33,18 @@ object SMS {
 
     /** SMS Receiver 해제 */
     fun unregisterReceiver(receiver: SMSReceiver?) {
-        Constants.LOGD("Call unregisterReceiver() in SMS object.")
+        Utils.LOGD("Call unregisterReceiver() in SMS object.")
 
         if(receiver != null) {
             App.activity.unregisterReceiver(receiver)
         } else {
-            Constants.LOGD("SMS Receiver is null.")
+            Utils.LOGD("SMS Receiver is null.")
         }
     }
 
     /** 문자 메시지를 보냄  */
     fun sendMessage() {
-        Constants.LOGD("Call sendMessage() in SMS object.")
+        Utils.LOGD("Call sendMessage() in SMS object.")
 
         val basicActivity = App.activity as BasicActivity
         val packageManager = App.INSTANCE.packageManager
@@ -67,21 +67,21 @@ object SMS {
 
     /** 문자 메시지를 받음 */
     fun receiveMessage() {
-        Constants.LOGD("Call receiveMessage() in SMS object.")
+        Utils.LOGD("Call receiveMessage() in SMS object.")
 
         val client = SmsRetriever.getClient(App.activity)
         val task = client.startSmsRetriever()
         task.addOnCompleteListener {
-            Constants.LOGD("Call addOnCompleteListener in SMS object.")
+            Utils.LOGD("Call addOnCompleteListener in SMS object.")
         }
         task.addOnSuccessListener {
-            Constants.LOGD("Call addOnSuccessListener in SMS object.")
+            Utils.LOGD("Call addOnSuccessListener in SMS object.")
         }
         task.addOnFailureListener {
-            Constants.LOGD("Call addOnFailureListener in SMS object.")
+            Utils.LOGD("Call addOnFailureListener in SMS object.")
         }
         task.addOnCanceledListener {
-            Constants.LOGD("Call addOnCanceledListener in SMS object.")
+            Utils.LOGD("Call addOnCanceledListener in SMS object.")
         }
     }
 }

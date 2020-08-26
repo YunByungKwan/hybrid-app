@@ -7,8 +7,6 @@ import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
 import android.util.Base64
 import android.util.Log
-import com.example.hybridapp.util.Constants.Companion.LOGD
-import com.example.hybridapp.util.Constants.Companion.LOGE
 import java.math.BigInteger
 import java.security.GeneralSecurityException
 import java.security.KeyPairGenerator
@@ -54,7 +52,7 @@ object AndroidKeyStoreUtil {
 
     internal fun init(applicationContext: Context) {
         if (isSupported) {
-            LOGD("Already init twice!")
+            Utils.LOGD("Already init twice!")
             return
         }
 
@@ -68,7 +66,7 @@ object AndroidKeyStoreUtil {
         var result: Boolean = if (keyStore.containsAlias(alias)) {
             true
         } else {
-            LOGD("No keypair for $alias, creating a new one")
+            Utils.LOGD("No keypair for $alias, creating a new one")
 
             // 안드로이드 M(API 23) 이상인 경우 RSA 알고리즘 사용 가능
             if (initAndroidM(alias)) {
@@ -107,13 +105,13 @@ object AndroidKeyStoreUtil {
                         initialize(spec)
                         generateKeyPair()
                 } else {
-                    LOGE("Keystore 는 M(API 23) 이상부터 정상 작동됨.")
+                    Utils.LOGE("Keystore 는 M(API 23) 이상부터 정상 작동됨.")
 
                     return false
                 }
             })
 
-            LOGD("Random keypair with " +
+            Utils.LOGD("Random keypair with " +
                     "${KeyProperties.KEY_ALGORITHM_RSA} " +
                     "${KeyProperties.BLOCK_MODE_CBC} " +
                     "${KeyProperties.ENCRYPTION_PADDING_RSA_PKCS1} is created.")
@@ -121,7 +119,7 @@ object AndroidKeyStoreUtil {
             return true
         } catch (e: GeneralSecurityException) {
             // 아주 가끔 몇몇 기기들은 오류가 발생하기도 한다.
-            LOGE("It seems that this device does not support RSA algorithm!!")
+            Utils.LOGE("It seems that this device does not support RSA algorithm!!")
 
             return false
         }
@@ -150,11 +148,11 @@ object AndroidKeyStoreUtil {
                 generateKeyPair()
             })
 
-            LOGD("Random RSA algorithm keypair is created.")
+            Utils.LOGD("Random RSA algorithm keypair is created.")
 
             return true
         } catch (e: GeneralSecurityException) {
-            LOGE("It seems that this device does not support encryption!!")
+            Utils.LOGE("It seems that this device does not support encryption!!")
 
             return false
         }

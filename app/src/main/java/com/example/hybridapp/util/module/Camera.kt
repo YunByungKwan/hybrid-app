@@ -4,10 +4,11 @@ import android.content.Intent
 import android.provider.MediaStore
 import androidx.core.content.FileProvider.getUriForFile
 import com.example.hybridapp.App
-import com.example.hybridapp.BuildConfig
+import com.example.hybridapp.R
 import com.example.hybridapp.basic.BasicActivity
 import com.example.hybridapp.util.Constants
 import com.example.hybridapp.util.Utils
+import com.google.firebase.BuildConfig
 
 
 object Camera {
@@ -16,7 +17,7 @@ object Camera {
      * CameraByDeviceRatio, CameraByRatio에서 호출
      */
     fun request() {
-        Constants.LOGD("Call request() in Camera object.")
+        Utils.LOGD("Call request() in Camera object.")
 
         val basicActivity = App.activity as BasicActivity
         val packageManager = (App.INSTANCE).packageManager
@@ -27,7 +28,7 @@ object Camera {
         val contentUri = getUriForFile(App.context(), BuildConfig.APPLICATION_ID + ".fileprovider", newFile)
 //        val filePath = Photo.getFilePathFromUri(contentUri)
 //        val degree = Photo.getDegreesFromPath(filePath)
-//        Constants.LOGD("Degree: ${degree}")
+//        Utils.LOGD("Degree: ${degree}")
         cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, contentUri)
 
         // 카메라 앱을 사용할 수 있는 경우
@@ -46,7 +47,7 @@ object Camera {
         // 카메라 앱을 사용할 수 없는 경우
         else {
             val returnObj = Utils.createJSONObject(true,
-                null, Constants.MSG_NOT_LOAD_CAMERA)
+                null, App.context().getString(R.string.msg_not_load_camera))
 
             // 디바이스 기준일 경우
             if(basicActivity.isWidthRatio != null) {

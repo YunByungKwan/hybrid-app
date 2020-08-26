@@ -11,6 +11,7 @@ import androidx.core.app.NotificationManagerCompat
 import com.example.hybridapp.App
 import com.example.hybridapp.R
 import com.example.hybridapp.util.Constants
+import com.example.hybridapp.util.Utils
 
 object Notification {
 
@@ -22,8 +23,6 @@ object Notification {
     fun createChannel(channelId: String, name: String, description: String, importance: Int,
                        showBadge: Boolean)
     {
-        Constants.LOGD("Create Notification Channel.")
-
         val mChannel = NotificationChannel(channelId, name, importance)
         mChannel.description = description
         mChannel.setShowBadge(showBadge)
@@ -40,7 +39,7 @@ object Notification {
     /** 알림 생성 */
     fun create(channelId: String, notificationId: Int, title: String, message: String,
                importance: Int, pendingIntent: PendingIntent) {
-        Constants.LOGD("Create Notification.")
+        Utils.LOGD("Create Notification.")
 
         val builder = NotificationCompat.Builder(App.activity, channelId)
         builder.setContentTitle(title)

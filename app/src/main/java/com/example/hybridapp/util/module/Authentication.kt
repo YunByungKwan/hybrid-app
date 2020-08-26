@@ -5,6 +5,7 @@ import androidx.biometric.BiometricManager
 import androidx.biometric.BiometricPrompt
 import androidx.fragment.app.FragmentActivity
 import com.example.hybridapp.App
+import com.example.hybridapp.R
 import com.example.hybridapp.basic.BasicActivity
 import com.example.hybridapp.util.Constants
 import com.example.hybridapp.util.Utils
@@ -16,19 +17,19 @@ object Authentication {
         val biometricManager = BiometricManager.from(App.INSTANCE)
         when (biometricManager.canAuthenticate()) {
             BiometricManager.BIOMETRIC_SUCCESS -> {
-                Constants.LOGD(Constants.BIOMETRIC_SUCCESS)
+                Utils.LOGD(App.context().getString(R.string.biometric_success))
                 return true
             }
             BiometricManager.BIOMETRIC_ERROR_NO_HARDWARE -> {
-                Constants.LOGD(Constants.BIOMETRIC_ERROR_NO_HARDWARE)
+                Utils.LOGD(App.context().getString(R.string.biometric_error_no_hardware))
                 return false
             }
             BiometricManager.BIOMETRIC_ERROR_HW_UNAVAILABLE -> {
-                Constants.LOGD(Constants.BIOMETRIC_ERROR_HW_UNAVAILABLE)
+                Utils.LOGD(App.context().getString(R.string.biometric_error_hw_unavailable))
                 return false
             }
             BiometricManager.BIOMETRIC_ERROR_NONE_ENROLLED -> {
-                Constants.LOGD(Constants.BIOMETRIC_ERROR_NONE_ENROLLED)
+                Utils.LOGD(App.context().getString(R.string.biometric_error_none_enrolled))
                 return false
             }
         }
@@ -37,7 +38,7 @@ object Authentication {
 
     /** 생체 인증 다이얼로그 띄우기 */
     fun showPrompt(fragmentActivity: FragmentActivity){
-        Constants.LOGD("Call showPrompt()")
+        Utils.LOGD("Call showPrompt()")
 
         val promptInfo = getBiometricPromptInfo()
 
@@ -56,10 +57,10 @@ object Authentication {
 
     private fun getBiometricPromptInfo(): BiometricPrompt.PromptInfo {
         return BiometricPrompt.PromptInfo.Builder()
-        .setTitle(Constants.BIO_PROMPT_TITLE)
-        .setDescription(Constants.BIO_PROMPT_DESCRIPTION)
-        .setSubtitle(Constants.BIO_PROMPT_SUB_TITLE)
-        .setNegativeButtonText(Constants.BIO_PROMPT_NEGATIVE_BUTTON)
+        .setTitle(App.context().getString(R.string.bio_prompt_title))
+        .setDescription(App.context().getString(R.string.bio_prompt_description))
+        .setSubtitle(App.context().getString(R.string.bio_prompt_sub_title))
+        .setNegativeButtonText(App.context().getString(R.string.bio_prompt_negative_button))
         .build()
     }
 
@@ -69,7 +70,7 @@ object Authentication {
         // 인증 성공시
         override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
             super.onAuthenticationSucceeded(result)
-            Constants.LOGD("Call onAuthenticationSucceeded() in AuthenticationCallback()")
+            Utils.LOGD("Call onAuthenticationSucceeded() in AuthenticationCallback()")
             val returnObj = Utils.createJSONObject(
                 authValue = true,
                 dataValue = true, msgValue = null
@@ -80,7 +81,7 @@ object Authentication {
         // 인증 취소 버튼 클릭시, 인증에 실패시
         override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
             super.onAuthenticationError(errorCode, errString)
-            Constants.LOGE("Call onAuthenticationError() in AuthenticationCallback()")
+            Utils.LOGE("Call onAuthenticationError() in AuthenticationCallback()")
             val returnObj = Utils.createJSONObject(
                 authValue = true,
                 dataValue = false, msgValue = "인증에 실패했습니다"
@@ -91,7 +92,7 @@ object Authentication {
         // 인증이 일치하지 않을 경우, 여러번 틀렸을 경우
         override fun onAuthenticationFailed() {
             super.onAuthenticationFailed()
-            Constants.LOGE("Call onAuthenticationFailed() in AuthenticationCallback()")
+            Utils.LOGE("Call onAuthenticationFailed() in AuthenticationCallback()")
         }
     }
 }

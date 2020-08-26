@@ -11,6 +11,7 @@ import android.provider.MediaStore
 import android.util.Base64
 import android.util.Log
 import com.example.hybridapp.App
+import com.example.hybridapp.R
 import com.example.hybridapp.basic.BasicActivity
 import com.example.hybridapp.util.Constants
 import com.example.hybridapp.util.Utils
@@ -23,7 +24,7 @@ object Photo {
 
     /** 갤러리 호출 (1장) */
     fun requestImage() {
-        Constants.LOGD("Call requestImage()")
+        Utils.LOGD("Call requestImage()")
 
         val basicActivity = App.activity as BasicActivity
         val packageManager = App.INSTANCE.packageManager
@@ -45,7 +46,7 @@ object Photo {
         // 갤러리 앱을 사용할 수 없는 경우
         else {
             val returnObj = Utils.createJSONObject(true,
-                null, Constants.MSG_NOT_LOAD_GALLERY)
+                null, App.context().getString(R.string.msg_not_load_gallery))
 
             // 디바이스 기준일 경우
             if(basicActivity.isWidthRatio != null) {
@@ -63,7 +64,7 @@ object Photo {
 
     /** 갤러리 호출 (여러 장) */
     fun requestMultipleImages() {
-        Constants.LOGD("Call requestMultipleImages()")
+        Utils.LOGD("Call requestMultipleImages()")
 
         val packageManager = App.INSTANCE.packageManager
         val basicActivity = App.activity as BasicActivity
@@ -85,7 +86,7 @@ object Photo {
         // 갤러리 앱을 사용할 수 있는 경우
         else {
             val returnObj = Utils.createJSONObject(true,
-                null, Constants.MSG_NOT_LOAD_GALLERY)
+                null, App.INSTANCE.getString(R.string.msg_not_load_gallery))
 
             // 디바이스 기준일 경우
             if(basicActivity.isWidthRatio != null) {
@@ -122,7 +123,7 @@ object Photo {
 
     /** 비트맵 리사이징 후 base64로 변환 */
     fun convertUriToResizingBase64(imageUri: Uri?, ratio: Double?, isWidthRatio: Boolean?): String {
-        Constants.LOGD("Call convertUriToResizingBase64()")
+        Utils.LOGD("Call convertUriToResizingBase64()")
 
         val bitmap = getBitmapFromUri(imageUri!!)
 
@@ -155,7 +156,7 @@ object Photo {
 
     /** Uri->Base64로 변환 */
     fun getBase64FromUri(uri: Uri): String {
-        Constants.LOGD("Call getBase64FromUri()")
+        Utils.LOGD("Call getBase64FromUri()")
 
         val bitmap = getBitmapFromUri(uri)
 
@@ -164,7 +165,7 @@ object Photo {
 
     /** Uri --> Bitmap */
     fun getBitmapFromUri(uri: Uri): Bitmap? {
-        Constants.LOGD("Call getBitmapFromUri()")
+        Utils.LOGD("Call getBitmapFromUri()")
 
         val filePath = getFilePathFromUri(uri)
         val degrees = getDegreesFromPath(filePath)
@@ -175,7 +176,7 @@ object Photo {
 
     /** Uri --> File Path */
     fun getFilePathFromUri(uri: Uri): String {
-        Constants.LOGD("Call getFilePathFromUri()")
+        Utils.LOGD("Call getFilePathFromUri()")
 
         var cursor: Cursor? = null
 
@@ -187,7 +188,7 @@ object Photo {
             val columnIndex = cursor!!.getColumnIndexOrThrow(MediaStore.Images.Media.DATA)
             cursor.moveToFirst()
 
-            Constants.LOGD("Uri --> File path: ${uri.path} --> ${cursor.getString(columnIndex)!!}")
+            Utils.LOGD("Uri --> File path: ${uri.path} --> ${cursor.getString(columnIndex)!!}")
 
             return cursor.getString(columnIndex)!!
         } finally {
@@ -197,7 +198,7 @@ object Photo {
 
     /** FilePath의 회전 각도를 반환 */
     fun getDegreesFromPath(filePath: String): Int {
-        Constants.LOGD("Call getDegreesFromPath()")
+        Utils.LOGD("Call getDegreesFromPath()")
 
         val exif = ExifInterface(filePath)
         val orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION,
@@ -208,23 +209,23 @@ object Photo {
 
     /** exifInterface orientation --> degrees */
     private fun getDegreesFromExifOrientation(orientation: Int): Int {
-        Constants.LOGD("Call getDegreesFromExifOrientation()")
+        Utils.LOGD("Call getDegreesFromExifOrientation()")
 
         return when(orientation) {
             ExifInterface.ORIENTATION_ROTATE_90 -> {
-                Constants.LOGD("$orientation --> 90")
+                Utils.LOGD("$orientation --> 90")
                 90
             }
             ExifInterface.ORIENTATION_ROTATE_180 -> {
-                Constants.LOGD("$orientation --> 180")
+                Utils.LOGD("$orientation --> 180")
                 180
             }
             ExifInterface.ORIENTATION_ROTATE_270 -> {
-                Constants.LOGD("$orientation --> 270")
+                Utils.LOGD("$orientation --> 270")
                 270
             }
             else -> {
-                Constants.LOGD("$orientation --> 0")
+                Utils.LOGD("$orientation --> 0")
                 0
             }
         }
@@ -232,7 +233,7 @@ object Photo {
 
     /** 파일 경로로부터 비트맵 생성 */
     private fun createBitmapFromFilePath(filePath: String): Bitmap? {
-        Constants.LOGD("Call createBitmapFromFilePath()")
+        Utils.LOGD("Call createBitmapFromFilePath()")
 
         var bitmap: Bitmap? = null
 
@@ -251,10 +252,10 @@ object Photo {
 
     /** 비트맵 회전 */
     fun rotateBitmap(bitmap: Bitmap?, degree: Int): Bitmap? {
-        Constants.LOGD("Call rotateBitmap()")
+        Utils.LOGD("Call rotateBitmap()")
 
         if(bitmap == null) {
-            Constants.LOGE("Bitmap is null")
+            Utils.LOGE("Bitmap is null")
 
             return null
         }
@@ -271,7 +272,7 @@ object Photo {
 
     /** Bitmap --> Base64 */
     fun getBase64FromBitmap(bitmap: Bitmap): String {
-        Constants.LOGD("Call getBase64FromBitmap() " +
+        Utils.LOGD("Call getBase64FromBitmap() " +
                 "Bitmap width: ${bitmap.width}, height: ${bitmap.height}")
 
         val byteArrayOutputStream = ByteArrayOutputStream()
@@ -283,30 +284,30 @@ object Photo {
 
     /** 디바이스 화면 비율에 맞게 리사이즈 */
     fun resizeBitmapByDeviceRatio(bitmap: Bitmap, ratio: Double, isWidthRatio: Boolean?): Bitmap {
-        Constants.LOGD("Call resizeBitmapByDeviceRatio()")
-        val screenWidth = Utils.getScreenSize().getValue(Constants.SCREEN_WIDTH)
-        val screenHeight = Utils.getScreenSize().getValue(Constants.SCREEN_HEIGHT)
+        Utils.LOGD("Call resizeBitmapByDeviceRatio()")
+        val screenWidth = Utils.getScreenSize().getValue(App.INSTANCE.getString(R.string.screen_width))
+        val screenHeight = Utils.getScreenSize().getValue(App.INSTANCE.getString(R.string.screen_height))
 
-        Constants.LOGD("screenWidth: $screenWidth screenHeight: $screenHeight")
-        Constants.LOGD("bitmap Width: ${bitmap.width} bitmap Height: ${bitmap.height}")
+        Utils.LOGD("screenWidth: $screenWidth screenHeight: $screenHeight")
+        Utils.LOGD("bitmap Width: ${bitmap.width} bitmap Height: ${bitmap.height}")
 
-        Constants.LOGD("ratio: $ratio")
+        Utils.LOGD("ratio: $ratio")
         return if(isWidthRatio!!) {
-            Constants.LOGD("Resize bitmap by device width ratio(${ratio*100}%)")
+            Utils.LOGD("Resize bitmap by device width ratio(${ratio*100}%)")
 
             val resizeWidth = (screenWidth * ratio).toInt()
             val resizeHeight = (bitmap.height * ((screenWidth * ratio) / bitmap.width)).toInt()
 
-            Constants.LOGD("resizeWidth : $resizeWidth resizeHeight : $resizeHeight")
+            Utils.LOGD("resizeWidth : $resizeWidth resizeHeight : $resizeHeight")
 
             Bitmap.createScaledBitmap(bitmap, resizeWidth, resizeHeight, true)
         } else {
-            Constants.LOGD("Resize bitmap by device height ratio(${ratio*100}%)")
+            Utils.LOGD("Resize bitmap by device height ratio(${ratio*100}%)")
 
             val resizeWidth = (bitmap.width * ((screenHeight * ratio) / bitmap.height)).toInt()
             val resizeHeight = (screenHeight * ratio).toInt()
 
-            Constants.LOGD("resizeWidth : $resizeWidth resizeHeight : $resizeHeight")
+            Utils.LOGD("resizeWidth : $resizeWidth resizeHeight : $resizeHeight")
 
             Bitmap.createScaledBitmap(bitmap, resizeWidth, resizeHeight, true)
         }
@@ -314,12 +315,13 @@ object Photo {
 
     /** 이미지 비율에 맞게 리사이즈 */
     fun resizeBitmapByRatio(bitmap: Bitmap, ratio: Double): Bitmap {
-        Constants.LOGD("Call resizeBitmapByRatio()")
+        Utils.LOGD("Call resizeBitmapByRatio()")
 
         val width = (bitmap.width * ratio).toInt()
         val height = (bitmap.height * ratio).toInt()
-        Constants.LOGD("Resize width: $width, height: $height")
+        Utils.LOGD("Resize width: $width, height: $height")
 
         return Bitmap.createScaledBitmap(bitmap, width, height, false)
     }
+
 }

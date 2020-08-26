@@ -6,6 +6,7 @@ import android.webkit.ValueCallback
 import android.webkit.WebView
 import app.dvkyun.flexhybridand.FlexWebChromeClient
 import com.example.hybridapp.util.Constants
+import com.example.hybridapp.util.Utils
 
 class BasicWebChromeClient(activity: BasicActivity): FlexWebChromeClient(activity) {
 
@@ -16,7 +17,7 @@ class BasicWebChromeClient(activity: BasicActivity): FlexWebChromeClient(activit
     /** 웹뷰 파일 다운로드시 호출 */
     override fun onShowFileChooser(webView: WebView?, filePathCallback: ValueCallback<Array<Uri>>?,
         fileChooserParams: FileChooserParams?): Boolean {
-        Constants.LOGD("Call function onShowFileChooser() in BasicWebChromeClient class.")
+        Utils.LOGD("Call function onShowFileChooser() in BasicWebChromeClient class.")
 
         mFilePatCallback = filePathCallback
 

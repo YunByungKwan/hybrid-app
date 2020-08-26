@@ -5,6 +5,7 @@ import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.os.Build
 import com.example.hybridapp.util.Constants
+import com.example.hybridapp.util.Utils
 
 /**
  * activeNetworkInfo is deprecated in API level 29(Q)
@@ -25,13 +26,11 @@ object Network {
      * 2 : 와이파이 연결됨
      */
     fun getStatus(context: Context): Int {
-        Constants.LOGD("Call getStatus() in Network object.")
+        Utils.LOGD("Call getStatus() in Network object.")
         val manager = getConnectivityManager(context)
 
         // 현재 버전이 M보다 크거나 같을 경우
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            Constants.LOGD("Current version >= M")
-
             val network = manager.activeNetwork ?: return Constants.NET_STAT_DISCONNECTED
             val capabilities
                     = manager.getNetworkCapabilities(network) ?: return Constants.NET_STAT_DISCONNECTED
@@ -47,8 +46,6 @@ object Network {
                 }
             }
         } else { // 현재 버전이 M보다 작은 경우
-            Constants.LOGD("Current version < M")
-
             val network = manager.activeNetworkInfo
                 ?: return Constants.NET_STAT_DISCONNECTED
             return when(network.type) {

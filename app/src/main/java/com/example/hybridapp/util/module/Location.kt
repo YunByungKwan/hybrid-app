@@ -25,7 +25,7 @@ object Location {
     /** 현재 위치의 위도,경도 가져오기 */
     @SuppressLint("MissingPermission")
     fun getCurrentLatAndLot() {
-        Constants.LOGD("Call getCurrentLatAndLot() in Location object.")
+        Utils.LOGD("Call getCurrentLatAndLot() in Location object.")
 
         val basicActivity = App.activity as BasicActivity
 
@@ -48,7 +48,7 @@ object Location {
         else {
             val posListener = DialogInterface.OnClickListener { _, _ ->
                 val returnObj = Utils.createJSONObject(true,
-                    null, Constants.MSG_NOT_LOAD_LAT_LOT)
+                    null, App.INSTANCE.getString(R.string.msg_not_load_lat_lot))
                 basicActivity.locationAction?.promiseReturn(returnObj)
             }
 
@@ -56,7 +56,7 @@ object Location {
                 null, null, posListener,
                 null, null,
                 { val returnObj = Utils.createJSONObject(true,
-                    null, Constants.MSG_NOT_LOAD_LAT_LOT)
+                    null, App.INSTANCE.getString(R.string.msg_not_load_lat_lot))
                     basicActivity.locationAction?.promiseReturn(returnObj)  })
         }
     }
@@ -72,7 +72,7 @@ object Location {
 
     /** LocationRequest 생성 후 반환 */
     private fun getLocationRequest(): LocationRequest {
-        Constants.LOGD("Call getLocationRequest() in Location object.")
+        Utils.LOGD("Call getLocationRequest() in Location object.")
 
         val mLocationRequest = LocationRequest()
         mLocationRequest.priority = LocationRequest.PRIORITY_HIGH_ACCURACY
@@ -87,12 +87,12 @@ object Location {
     private val mLocationCallback = object : LocationCallback() {
         override fun onLocationResult(locationResult: LocationResult) {
             CoroutineScope(Dispatchers.Main).launch {
-                Constants.LOGD("Call onLocationResult() in LocationCallback object.")
+                Utils.LOGD("Call onLocationResult() in LocationCallback object.")
 
                 var mLastLocation: Location = locationResult.lastLocation
                 val latitude = mLastLocation.latitude.toString()
                 val longitude = mLastLocation.longitude.toString()
-                Constants.LOGD("Latitude: $latitude, Longitude: $longitude")
+                Utils.LOGD("Latitude: $latitude, Longitude: $longitude")
 
                 // 위도, 경도에 대한 JSONObject 생성
                 val locObj = JSONObject()

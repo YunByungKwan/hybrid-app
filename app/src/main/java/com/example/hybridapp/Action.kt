@@ -44,31 +44,31 @@ object Action {
                 if(isDialog) {
                     val posListener = DialogInterface.OnClickListener { _, _ ->
                         basic?.let {
-                            returnObj.put(Constants.OBJ_KEY_MSG, dialogKeys[0])
-                            Constants.LOGD("returnObj['msg'] = " +
-                                    "${returnObj.getString(Constants.OBJ_KEY_MSG)}")
+                            returnObj.put(App.INSTANCE.getString(R.string.obj_key_msg), dialogKeys[0])
+                            Utils.LOGD("returnObj['msg'] = " +
+                                    "${returnObj.getString(App.INSTANCE.getString(R.string.obj_key_msg))}")
                             dialogAction?.promiseReturn(returnObj)
                         }
                     }
                     val neutralListener = DialogInterface.OnClickListener { _, _ ->
                         destructive?.let {
-                            returnObj.put(Constants.OBJ_KEY_MSG, dialogKeys[1])
-                            Constants.LOGD("returnObj['msg'] = " +
-                                    "${returnObj.getString(Constants.OBJ_KEY_MSG)}")
+                            returnObj.put(App.INSTANCE.getString(R.string.obj_key_msg), dialogKeys[1])
+                            Utils.LOGD("returnObj['msg'] = " +
+                                    "${returnObj.getString(App.INSTANCE.getString(R.string.obj_key_msg))}")
                             dialogAction?.promiseReturn(returnObj) }
                     }
                     val negListener = DialogInterface.OnClickListener { _, _ ->
                         cancel?.let {
-                            returnObj.put(Constants.OBJ_KEY_MSG, dialogKeys[2])
-                            Constants.LOGD("returnObj['msg'] = " +
-                                    "${returnObj.getString(Constants.OBJ_KEY_MSG)}")
+                            returnObj.put(App.INSTANCE.getString(R.string.obj_key_msg), dialogKeys[2])
+                            Utils.LOGD("returnObj['msg'] = " +
+                                    "${returnObj.getString(App.INSTANCE.getString(R.string.obj_key_msg))}")
                             dialogAction?.promiseReturn(returnObj)
                         }
                     }
                     val exitListener = {
-                        returnObj.put(Constants.OBJ_KEY_MSG, dialogKeys[2])
-                        Constants.LOGD("returnObj['msg'] = " +
-                                "${returnObj.getString(Constants.OBJ_KEY_MSG)}")
+                        returnObj.put(App.INSTANCE.getString(R.string.obj_key_msg), dialogKeys[2])
+                        Utils.LOGD("returnObj['msg'] = " +
+                                "${returnObj.getString(App.INSTANCE.getString(R.string.obj_key_msg))}")
                         dialogAction?.promiseReturn(returnObj)
                     }
 
@@ -83,9 +83,9 @@ object Action {
                     var posBtn = Dialog.getBtnView(basic)
                     posBtn?.let { btn ->
                         btn.setOnClickListener {
-                            returnObj.put(Constants.OBJ_KEY_MSG, dialogKeys[0])
-                            Constants.LOGD("returnObj['msg'] = " +
-                                    "${returnObj.getString(Constants.OBJ_KEY_MSG)}")
+                            returnObj.put(App.INSTANCE.getString(R.string.obj_key_msg), dialogKeys[0])
+                            Utils.LOGD("returnObj['msg'] = " +
+                                    "${returnObj.getString(App.INSTANCE.getString(R.string.obj_key_msg))}")
                             dialogAction?.promiseReturn(returnObj)
                         dialog.dismiss()
                         }
@@ -94,9 +94,9 @@ object Action {
                     var neutralBtn = Dialog.getBtnView(destructive)
                     neutralBtn?.let { btn ->
                         btn.setOnClickListener {
-                            returnObj.put(Constants.OBJ_KEY_MSG, dialogKeys[1])
-                            Constants.LOGD("returnObj['msg'] = " +
-                                    "${returnObj.getString(Constants.OBJ_KEY_MSG)}")
+                            returnObj.put(App.INSTANCE.getString(R.string.obj_key_msg), dialogKeys[1])
+                            Utils.LOGD("returnObj['msg'] = " +
+                                    "${returnObj.getString(App.INSTANCE.getString(R.string.obj_key_msg))}")
                             dialogAction?.promiseReturn(returnObj)
                             dialog.dismiss()
                         }
@@ -105,18 +105,18 @@ object Action {
                     var negBtn = Dialog.getBtnView(cancel)
                     negBtn?.let { btn ->
                         btn.setOnClickListener {
-                            returnObj.put(Constants.OBJ_KEY_MSG, dialogKeys[2])
-                            Constants.LOGD("returnObj['msg'] = " +
-                                    "${returnObj.getString(Constants.OBJ_KEY_MSG)}")
+                            returnObj.put(App.INSTANCE.getString(R.string.obj_key_msg), dialogKeys[2])
+                            Utils.LOGD("returnObj['msg'] = " +
+                                    "${returnObj.getString(App.INSTANCE.getString(R.string.obj_key_msg))}")
                             dialogAction?.promiseReturn(returnObj)
                         dialog.dismiss()
                         }
                     }
 
                     val exitListener = {
-                        returnObj.put(Constants.OBJ_KEY_MSG, dialogKeys[2])
-                        Constants.LOGD("returnObj['msg'] = " +
-                                "${returnObj.getString(Constants.OBJ_KEY_MSG)}")
+                        returnObj.put(App.INSTANCE.getString(R.string.obj_key_msg), dialogKeys[2])
+                        Utils.LOGD("returnObj['msg'] = " +
+                                "${returnObj.getString(App.INSTANCE.getString(R.string.obj_key_msg))}")
                         dialogAction?.promiseReturn(returnObj)
                     }
 
@@ -134,18 +134,18 @@ object Action {
             val returnObj = JSONObject()
             when(Network.getStatus(App.activity)) {
                 Constants.NET_STAT_CELLULAR -> {
-                    returnObj.put(Constants.OBJ_KEY_DATA, Constants.NET_STAT_CELLULAR)
-                    returnObj.put(Constants.OBJ_KEY_MSG, Constants.MSG_CELLULAR)
+                    returnObj.put(App.INSTANCE.getString(R.string.obj_key_data), Constants.NET_STAT_CELLULAR)
+                    returnObj.put(App.INSTANCE.getString(R.string.obj_key_msg), App.INSTANCE.getString(R.string.msg_cellular))
                     networkAction?.promiseReturn(returnObj)
                 }
                 Constants.NET_STAT_WIFI -> {
-                    returnObj.put(Constants.OBJ_KEY_DATA, Constants.NET_STAT_WIFI)
-                    returnObj.put(Constants.OBJ_KEY_MSG, Constants.MSG_WIFI)
+                    returnObj.put(App.INSTANCE.getString(R.string.obj_key_data), Constants.NET_STAT_WIFI)
+                    returnObj.put(App.INSTANCE.getString(R.string.obj_key_msg), App.INSTANCE.getString(R.string.msg_wifi))
                     networkAction?.promiseReturn(returnObj)
                 }
                 else -> {
-                    returnObj.put(Constants.OBJ_KEY_DATA, Constants.NET_STAT_DISCONNECTED)
-                    returnObj.put(Constants.OBJ_KEY_MSG, Constants.MSG_DISCONNECTED)
+                    returnObj.put(App.INSTANCE.getString(R.string.obj_key_data), Constants.NET_STAT_DISCONNECTED)
+                    returnObj.put(App.INSTANCE.getString(R.string.obj_key_msg), App.INSTANCE.getString(R.string.msg_disconnected))
                     networkAction?.promiseReturn(returnObj)
                 }
             }
@@ -154,7 +154,7 @@ object Action {
 
     /**================================= QR Code Action ==========================================*/
     val qrCode: (FlexAction?, JSONArray?) -> Unit = { qrCodeAction, _->
-        Constants.LOGD("============== QR Code Action ==============")
+        Utils.LOGD("============== QR Code Action ==============")
 
         val basicActivity = App.activity as BasicActivity
         basicActivity.qrCodeScanAction = qrCodeAction
@@ -175,14 +175,14 @@ object Action {
     /**================================ Photo Device Action ======================================*/
     val photoByDeviceRatio: (FlexAction?, JSONArray?) -> Unit = { photoDeviceAction, array ->
         CoroutineScope(Dispatchers.Main).launch {
-            Constants.LOGD("============== Photo By Device Ratio Action ==============")
+            Utils.LOGD("============== Photo By Device Ratio Action ==============")
 
             val basicActivity = App.activity as BasicActivity
             basicActivity.photoDeviceAction = photoDeviceAction
             basicActivity.ratio = array?.getDouble(0)
             basicActivity.isWidthRatio = array?.getBoolean(1)
 
-            Constants.LOGD("basicActivity.ratio : ${basicActivity.ratio}, " +
+            Utils.LOGD("basicActivity.ratio : ${basicActivity.ratio}, " +
                     "basicActivity.isWidthRatio : ${basicActivity.isWidthRatio}")
 
             val perms = arrayOf(Constants.PERM_WRITE_EXTERNAL_STORAGE,
@@ -203,7 +203,7 @@ object Action {
     /**==================================== Photo Action =========================================*/
     val photoByRatio: (FlexAction?, JSONArray?) -> Unit = { photoAction, array ->
         CoroutineScope(Dispatchers.Main).launch {
-            Constants.LOGD("============== Photo By Ratio Action ==============")
+            Utils.LOGD("============== Photo By Ratio Action ==============")
 
             val basicActivity = App.activity as BasicActivity
             basicActivity.photoAction = photoAction
@@ -227,14 +227,14 @@ object Action {
     /**=============================== Multi Photo Device Action =================================*/
     val multiPhotoByDeviceRatio: (FlexAction?, JSONArray?) -> Unit = { multiplePhotoDeviceAction, array ->
         CoroutineScope(Dispatchers.Main).launch {
-            Constants.LOGD("============== Multi Photo By Device Ratio Action ==============")
+            Utils.LOGD("============== Multi Photo By Device Ratio Action ==============")
 
             val basicActivity = App.activity as BasicActivity
             basicActivity.multiplePhotoDeviceAction = multiplePhotoDeviceAction
             basicActivity.ratio = array?.getDouble(0)
             basicActivity.isWidthRatio = array?.getBoolean(1)
 
-            Constants.LOGD("basicActivity.ratio : ${basicActivity.ratio}, " +
+            Utils.LOGD("basicActivity.ratio : ${basicActivity.ratio}, " +
                     "basicActivity.isWidthRatio : ${basicActivity.isWidthRatio}")
 
             val perms = arrayOf(Constants.PERM_WRITE_EXTERNAL_STORAGE,
@@ -278,7 +278,7 @@ object Action {
     /**=================================== Camera Action =========================================*/
     val cameraByDeviceRatio: (FlexAction?, JSONArray?) -> Unit = { cameraDeviceAction, array ->
         CoroutineScope(Dispatchers.Main).launch {
-            Constants.LOGD("============== Camera By Device Ratio Action ==============")
+            Utils.LOGD("============== Camera By Device Ratio Action ==============")
 
             val basicActivity = App.activity as BasicActivity
             basicActivity.cameraDeviceAction = cameraDeviceAction
@@ -301,7 +301,7 @@ object Action {
 
     val cameraByRatio: (FlexAction?, JSONArray?) -> Unit = { cameraAction, array ->
         CoroutineScope(Dispatchers.Main).launch {
-            Constants.LOGD("============== Camera By Ratio Action ==============")
+            Utils.LOGD("============== Camera By Ratio Action ==============")
 
             val basicActivity = App.activity as BasicActivity
             basicActivity.cameraAction = cameraAction
@@ -324,7 +324,7 @@ object Action {
     /**=================================== Location Action =======================================*/
     val location: (FlexAction?, JSONArray?) -> Unit = { locationAction, _->
         CoroutineScope(Dispatchers.Main).launch {
-            Constants.LOGD("============== Location Action ==============")
+            Utils.LOGD("============== Location Action ==============")
 
             // inject action
             val basicActivity = App.activity as BasicActivity
@@ -348,7 +348,7 @@ object Action {
     /**================================= SEND SMS Action =========================================*/
     val sendSms: (FlexAction?, JSONArray?) -> Unit = { sendSmsAction, array ->
         CoroutineScope(Dispatchers.Main).launch {
-            Constants.LOGD("============== Send SMS Action ==============")
+            Utils.LOGD("============== Send SMS Action ==============")
 
             // inject action
             val basicActivity = App.activity as BasicActivity
@@ -374,7 +374,7 @@ object Action {
     @RequiresApi(Build.VERSION_CODES.P)
     val authentication: (FlexAction?, JSONArray?) -> Unit = { authAction, _->
         CoroutineScope(Dispatchers.Main).launch {
-            Constants.LOGD("============== Authentication Action ==============")
+            Utils.LOGD("============== Authentication Action ==============")
 
             val fragmentActivity = App.activity as FragmentActivity
             val basicActivity = App.activity as BasicActivity
@@ -383,7 +383,7 @@ object Action {
             if(Authentication.canAuthenticate()) {
                 Authentication.showPrompt(fragmentActivity)
             } else {
-                Constants.LOGE("You can't call biometric prompt.")
+                Utils.LOGE("You can't call biometric prompt.")
                 val returnObj = Utils.createJSONObject(
                     authValue = true,
                     dataValue = false, msgValue = "인증을 진행할 수 없습니다"
@@ -394,7 +394,7 @@ object Action {
     }
 
     val webPopUp: (FlexAction?, JSONArray?) -> Unit = { popUpAction, array ->
-        Constants.LOGD("============== Web PopUp Action ==============")
+        Utils.LOGD("============== Web PopUp Action ==============")
 
         val url = array?.getString(0)
         val ratio = array?.getDouble(1)
@@ -405,8 +405,8 @@ object Action {
         // 인터넷이 연결되어 있지 않을 경우
         if(Network.getStatus(App.activity) == 0) {
             val returnObj = JSONObject()
-            returnObj.put(Constants.OBJ_KEY_DATA, false)
-            returnObj.put(Constants.OBJ_KEY_MSG, "연결된 네트워크가 없습니다")
+            returnObj.put(App.INSTANCE.getString(R.string.obj_key_data), false)
+            returnObj.put(App.INSTANCE.getString(R.string.obj_key_msg), "연결된 네트워크가 없습니다")
 
             basicActivity.popUpAction?.promiseReturn(returnObj)
         }
@@ -419,20 +419,20 @@ object Action {
 
             val screenSize = Utils.getScreenSize()
             val popupWidth = (ratio?.times(
-                    screenSize.getValue(Constants.SCREEN_WIDTH)))?.toInt()
+                    screenSize.getValue(App.INSTANCE.getString(R.string.screen_width))))?.toInt()
             val popupHeight = (ratio?.times(
-                    screenSize.getValue(Constants.SCREEN_HEIGHT)))?.toInt()
+                    screenSize.getValue(App.INSTANCE.getString(R.string.screen_height))))?.toInt()
 
             App.activity.flex_pop_up_web_view.loadUrl(url)
             App.activity.flex_pop_up_web_view.webViewClient = object: FlexWebViewClient() {
                 override fun onReceivedError(view: WebView?, request: WebResourceRequest?,
                                              error: WebResourceError?) {
                     super.onReceivedError(view, request, error)
-                    Constants.LOGD("onReceivedError")
+                    Utils.LOGD("onReceivedError")
 
                     val returnObj = JSONObject()
-                    returnObj.put(Constants.OBJ_KEY_DATA, false)
-                    returnObj.put(Constants.OBJ_KEY_MSG, "해당 URL을 불러올 수 없습니다")
+                    returnObj.put(App.INSTANCE.getString(R.string.obj_key_data), false)
+                    returnObj.put(App.INSTANCE.getString(R.string.obj_key_msg), "해당 URL을 불러올 수 없습니다")
                     basicActivity.popUpAction?.promiseReturn(returnObj)
                     basicActivity.popUpAction = null
                 }
@@ -441,7 +441,7 @@ object Action {
                     super.onPageFinished(view, url)
 
                     val returnObj = JSONObject()
-                    returnObj.put(Constants.OBJ_KEY_DATA, true)
+                    returnObj.put(App.INSTANCE.getString(R.string.obj_key_data), true)
                     basicActivity.popUpAction?.promiseReturn(returnObj)
                 }
             }
@@ -469,7 +469,7 @@ object Action {
 
     /**================================ FileDownload Action ======================================*/
     val fileDownload: (FlexAction?, JSONArray?) -> Unit = { fileAction, array ->
-        Constants.LOGD("============== File Download Action ==============")
+        Utils.LOGD("============== File Download Action ==============")
 
         val basicActivity = App.activity as BasicActivity
         basicActivity.fileAction = fileAction
@@ -490,26 +490,27 @@ object Action {
 
     /**============================ Local Repository Action ======================================*/
     val localRepository: (FlexAction?, JSONArray?) -> Unit = { localRepoAction, array ->
-        Constants.LOGD("============== Local Repository Action ==============")
+        Utils.LOGD("============== Local Repository Action ==============")
 
         when (array!!.getInt(0)) {
             Constants.PUT_DATA_CODE -> {
                 val key = array.getString(1)
                 val value = array.getString(2)
 
-                SharedPreferences.putData(Constants.SHARED_FILE_NAME, key, value)
+                SharedPreferences.putData(App.INSTANCE.getString(R.string.shared_file_name), key, value)
 
                 localRepoAction?.promiseReturn(true)
             }
             Constants.GET_DATA_CODE -> {
                 val key = array.getString(1)
-                var value = SharedPreferences.get(Constants.SHARED_FILE_NAME, key, Constants.SHARED_DEFAULT_STRING)
+                var value = SharedPreferences.get(App.INSTANCE.getString(R.string.shared_file_name),
+                    key, App.INSTANCE.getString(R.string.shared_default_string))
 
                 localRepoAction?.promiseReturn(value)
             }
             Constants.DEL_DATA_CODE -> {
                 val key = array.getString(1)
-                SharedPreferences.removeData(Constants.SHARED_FILE_NAME, key)
+                SharedPreferences.removeData(App.INSTANCE.getString(R.string.shared_file_name), key)
                 localRepoAction?.promiseReturn(true)
             }
         }

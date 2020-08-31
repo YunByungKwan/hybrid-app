@@ -80,8 +80,8 @@ class MainActivity : BasicActivity() {
 
     /** 기본, 팝업 FlexView 설정 */
     private fun setFlexWebView() {
-        flex_pop_up_web_view.setBaseUrl(App.INSTANCE.getString(R.string.base_url))
-        flex_web_view.setBaseUrl(App.INSTANCE.getString(R.string.base_url))
+        flex_pop_up_web_view.baseUrl = App.INSTANCE.getString(R.string.base_url)
+        flex_web_view.baseUrl = App.INSTANCE.getString(R.string.base_url)
         flex_web_view.loadUrl(App.INSTANCE.getString(R.string.url))
         flex_web_view.settings.setSupportMultipleWindows(true)
         WebView.setWebContentsDebuggingEnabled(true)

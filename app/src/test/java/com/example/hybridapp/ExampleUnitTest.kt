@@ -1,5 +1,6 @@
 package com.example.hybridapp
 
+import app.dvkyun.flexhybridand.FlexData
 import org.junit.Test
 
 import org.junit.Assert.*
@@ -12,6 +13,8 @@ import org.junit.Assert.*
 class ExampleUnitTest {
     @Test
     fun addition_isCorrect() {
-        assertEquals(4, 2 + 2)
+        val b = FlexData(100)
+        val a: Int = b.to()
+        val c = b.asInt()
     }
 }

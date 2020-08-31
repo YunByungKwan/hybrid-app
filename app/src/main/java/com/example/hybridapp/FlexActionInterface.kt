@@ -4,6 +4,7 @@ import android.app.PendingIntent
 import android.content.Intent
 import android.os.Build
 import android.util.Log
+import app.dvkyun.flexhybridand.FlexData
 import app.dvkyun.flexhybridand.FlexFuncInterface
 import com.example.hybridapp.data.LogUrlRepository
 import com.example.hybridapp.data.LogUrlRoomDatabase
@@ -20,10 +21,10 @@ class FlexActionInterface {
 
     /**================================= Toast Interface =========================================*/
     @FlexFuncInterface
-    fun Toast(array: JSONArray) {
+    fun Toast(array: Array<FlexData>) {
         CoroutineScope(Dispatchers.Main).launch {
-            val message = array.getString(0)
-            val isShortToast = array.getBoolean(1)
+            val message = array[0].asString()!!
+            val isShortToast = array[1].asBoolean()!!
 
             if(isShortToast) {
                 Toast.showShortText(message)
@@ -34,13 +35,13 @@ class FlexActionInterface {
     }
 
     @FlexFuncInterface
-    fun ReceiveSMS(array: JSONArray) {
+    fun ReceiveSMS(array: Array<FlexData>) {
         SMS.receiveMessage()
     }
 
     /**============================== Notification Interface =====================================*/
     @FlexFuncInterface
-    fun Notification(array: JSONArray): Boolean {
+    fun Notification(array: Array<FlexData>): Boolean {
         // 알림 채널 생성
         val channelId = App.INSTANCE.getString(R.string.noti_channel_id)
         val channelName = App.INSTANCE.getString(R.string.noti_channel_name)
@@ -61,9 +62,9 @@ class FlexActionInterface {
 
         // 알림 생성
         val id = Constants.NOTIFICATION_ID
-        val obj = array.get(0) as JSONObject
-        val title = obj.get("title").toString()
-        val message = obj.get("message").toString()
+        val obj = array[0].asMap()!!
+        val title = obj["title"]!!.asString()!!
+        val message = obj["message"]!!.asString()!!
         Notification.create(channelId, id, title, message, Constants.NOTI_HIGH, pendingIntent)
 
         return true
@@ -71,24 +72,24 @@ class FlexActionInterface {
 
     /**============================= RootingCheck Interface ======================================*/
     @FlexFuncInterface
-    fun RootingCheck(array: JSONArray): String {
+    fun RootingCheck(array: Array<FlexData>): String {
         return App.INSTANCE.getString(R.string.msg_no_rooting)
     }
 
     /**=============================== UniqueAppID Interface =====================================*/
     @FlexFuncInterface
-    fun UniqueAppID(array: JSONArray): String {
+    fun UniqueAppID(array: Array<FlexData>): String {
         return Utils.getAppId()
     }
 
     /**============================== UniqueDeviceID Interface ===================================*/
     @FlexFuncInterface
-    fun UniqueDeviceID(array: JSONArray): String {
+    fun UniqueDeviceID(array: Array<FlexData>): String {
         return Utils.getDeviceId(App.INSTANCE)
     }
 
     @FlexFuncInterface
-    fun LogUrl(array: JSONArray) {
+    fun LogUrl(array: Array<FlexData>) {
         CoroutineScope(Dispatchers.Default).launch {
             val logUrlDao = LogUrlRoomDatabase.getDatabase(App.INSTANCE).logUrlDao()
             val repository = LogUrlRepository(logUrlDao)

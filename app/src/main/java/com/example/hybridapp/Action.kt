@@ -10,6 +10,7 @@ import android.webkit.WebView
 import androidx.annotation.RequiresApi
 import androidx.fragment.app.FragmentActivity
 import app.dvkyun.flexhybridand.FlexAction
+import app.dvkyun.flexhybridand.FlexData
 import app.dvkyun.flexhybridand.FlexWebViewClient
 import com.example.hybridapp.basic.BasicActivity
 import com.example.hybridapp.util.Constants
@@ -27,26 +28,27 @@ object Action {
 
     /**================================= Dialog Action ===========================================*/
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
-    val dialog: (FlexAction?, JSONArray?) -> Unit = { dialogAction, array ->
+    val dialog: (FlexAction?, Array<FlexData>) -> Unit = { dialogAction, array ->
         CoroutineScope(Dispatchers.Main).launch {
-            val title = array?.getString(0)
-            val contents = array?.getString(1)
-            val jsonObject: JSONObject? = array?.get(2) as JSONObject
-            val isDialog = array.getBoolean(3)
+            val title = array[0].asString()
+            val contents = array[1].asString()
+            val mapData = array[2].asMap()
+            val isDialog = array[3].asBoolean()
 
-            jsonObject?.let {
+            mapData?.let {
                 val dialogKeys = arrayOf("basic", "destructive", "cancel")
-                val basic: String? = Utils.getJsonObjectValue(dialogKeys[0], it)
-                val destructive: String? = Utils.getJsonObjectValue(dialogKeys[1], it)
-                val cancel: String? = Utils.getJsonObjectValue(dialogKeys[2], it)
+                val basic: String? = it[dialogKeys[0]]?.asString()
+                val destructive: String? = it[dialogKeys[1]]?.asString()
+                val cancel: String? = it[dialogKeys[2]]?.asString()
                 val returnObj = JSONObject()
 
-                if(isDialog) {
+                if(isDialog!!) {
                     val posListener = DialogInterface.OnClickListener { _, _ ->
                         basic?.let {
                             returnObj.put(App.INSTANCE.getString(R.string.obj_key_msg), dialogKeys[0])
                             Utils.LOGD("returnObj['msg'] = " +
-                                    "${returnObj.getString(App.INSTANCE.getString(R.string.obj_key_msg))}")
+                                    returnObj.getString(App.INSTANCE.getString(R.string.obj_key_msg))
+                            )
                             dialogAction?.promiseReturn(returnObj)
                         }
                     }
@@ -54,21 +56,24 @@ object Action {
                         destructive?.let {
                             returnObj.put(App.INSTANCE.getString(R.string.obj_key_msg), dialogKeys[1])
                             Utils.LOGD("returnObj['msg'] = " +
-                                    "${returnObj.getString(App.INSTANCE.getString(R.string.obj_key_msg))}")
+                                    returnObj.getString(App.INSTANCE.getString(R.string.obj_key_msg))
+                            )
                             dialogAction?.promiseReturn(returnObj) }
                     }
                     val negListener = DialogInterface.OnClickListener { _, _ ->
                         cancel?.let {
                             returnObj.put(App.INSTANCE.getString(R.string.obj_key_msg), dialogKeys[2])
                             Utils.LOGD("returnObj['msg'] = " +
-                                    "${returnObj.getString(App.INSTANCE.getString(R.string.obj_key_msg))}")
+                                    returnObj.getString(App.INSTANCE.getString(R.string.obj_key_msg))
+                            )
                             dialogAction?.promiseReturn(returnObj)
                         }
                     }
                     val exitListener = {
                         returnObj.put(App.INSTANCE.getString(R.string.obj_key_msg), dialogKeys[2])
                         Utils.LOGD("returnObj['msg'] = " +
-                                "${returnObj.getString(App.INSTANCE.getString(R.string.obj_key_msg))}")
+                                returnObj.getString(App.INSTANCE.getString(R.string.obj_key_msg))
+                        )
                         dialogAction?.promiseReturn(returnObj)
                     }
 
@@ -87,7 +92,7 @@ object Action {
                             Utils.LOGD("returnObj['msg'] = " +
                                     "${returnObj.getString(App.INSTANCE.getString(R.string.obj_key_msg))}")
                             dialogAction?.promiseReturn(returnObj)
-                        dialog.dismiss()
+                            dialog.dismiss()
                         }
                     }
 
@@ -109,7 +114,7 @@ object Action {
                             Utils.LOGD("returnObj['msg'] = " +
                                     "${returnObj.getString(App.INSTANCE.getString(R.string.obj_key_msg))}")
                             dialogAction?.promiseReturn(returnObj)
-                        dialog.dismiss()
+                            dialog.dismiss()
                         }
                     }
 
@@ -129,7 +134,7 @@ object Action {
     }
 
     /**================================== Network Action =========================================*/
-    val network: (FlexAction?, JSONArray?) -> Unit = { networkAction, _ ->
+    val network: (FlexAction?, Array<FlexData>) -> Unit = { networkAction, _ ->
         CoroutineScope(Dispatchers.Main).launch {
             val returnObj = JSONObject()
             when(Network.getStatus(App.activity)) {
@@ -153,7 +158,7 @@ object Action {
     }
 
     /**================================= QR Code Action ==========================================*/
-    val qrCode: (FlexAction?, JSONArray?) -> Unit = { qrCodeAction, _->
+    val qrCode: (FlexAction?,  Array<FlexData>) -> Unit = { qrCodeAction, _->
         Utils.LOGD("============== QR Code Action ==============")
 
         val basicActivity = App.activity as BasicActivity
@@ -173,14 +178,14 @@ object Action {
     }
 
     /**================================ Photo Device Action ======================================*/
-    val photoByDeviceRatio: (FlexAction?, JSONArray?) -> Unit = { photoDeviceAction, array ->
+    val photoByDeviceRatio: (FlexAction?, Array<FlexData>) -> Unit = { photoDeviceAction, array ->
         CoroutineScope(Dispatchers.Main).launch {
             Utils.LOGD("============== Photo By Device Ratio Action ==============")
 
             val basicActivity = App.activity as BasicActivity
             basicActivity.photoDeviceAction = photoDeviceAction
-            basicActivity.ratio = array?.getDouble(0)
-            basicActivity.isWidthRatio = array?.getBoolean(1)
+            basicActivity.ratio = array[0].reified()
+            basicActivity.isWidthRatio = array[1].reified()
 
             Utils.LOGD("basicActivity.ratio : ${basicActivity.ratio}, " +
                     "basicActivity.isWidthRatio : ${basicActivity.isWidthRatio}")
@@ -201,13 +206,13 @@ object Action {
     }
 
     /**==================================== Photo Action =========================================*/
-    val photoByRatio: (FlexAction?, JSONArray?) -> Unit = { photoAction, array ->
+    val photoByRatio: (FlexAction?, Array<FlexData>) -> Unit = { photoAction, array ->
         CoroutineScope(Dispatchers.Main).launch {
             Utils.LOGD("============== Photo By Ratio Action ==============")
 
             val basicActivity = App.activity as BasicActivity
             basicActivity.photoAction = photoAction
-            basicActivity.ratio = array?.getDouble(0)
+            basicActivity.ratio = array[0].reified()
 
             val perms = arrayOf(Constants.PERM_WRITE_EXTERNAL_STORAGE,
                 Constants.PERM_READ_EXTERNAL_STORAGE)
@@ -225,14 +230,14 @@ object Action {
     }
 
     /**=============================== Multi Photo Device Action =================================*/
-    val multiPhotoByDeviceRatio: (FlexAction?, JSONArray?) -> Unit = { multiplePhotoDeviceAction, array ->
+    val multiPhotoByDeviceRatio: (FlexAction?, Array<FlexData>) -> Unit = { multiplePhotoDeviceAction, array ->
         CoroutineScope(Dispatchers.Main).launch {
             Utils.LOGD("============== Multi Photo By Device Ratio Action ==============")
 
             val basicActivity = App.activity as BasicActivity
             basicActivity.multiplePhotoDeviceAction = multiplePhotoDeviceAction
-            basicActivity.ratio = array?.getDouble(0)
-            basicActivity.isWidthRatio = array?.getBoolean(1)
+            basicActivity.ratio = array[0].reified()
+            basicActivity.isWidthRatio = array[1].reified()
 
             Utils.LOGD("basicActivity.ratio : ${basicActivity.ratio}, " +
                     "basicActivity.isWidthRatio : ${basicActivity.isWidthRatio}")
@@ -253,12 +258,12 @@ object Action {
     }
 
     /**================================== Multi Photo Action =====================================*/
-    val multiPhotoByRatio: (FlexAction?, JSONArray?) -> Unit = { multiplePhotoAction, array ->
+    val multiPhotoByRatio: (FlexAction?,  Array<FlexData>) -> Unit = { multiplePhotoAction, array ->
         CoroutineScope(Dispatchers.Main).launch {
 
             val basicActivity = App.activity as BasicActivity
             basicActivity.multiplePhotoAction = multiplePhotoAction
-            basicActivity.ratio = array?.getDouble(0)
+            basicActivity.ratio = array[0].reified()
 
             val perms =
                 arrayOf(Constants.PERM_WRITE_EXTERNAL_STORAGE, Constants.PERM_READ_EXTERNAL_STORAGE)
@@ -276,14 +281,14 @@ object Action {
     }
 
     /**=================================== Camera Action =========================================*/
-    val cameraByDeviceRatio: (FlexAction?, JSONArray?) -> Unit = { cameraDeviceAction, array ->
+    val cameraByDeviceRatio: (FlexAction?, Array<FlexData>) -> Unit = { cameraDeviceAction, array ->
         CoroutineScope(Dispatchers.Main).launch {
             Utils.LOGD("============== Camera By Device Ratio Action ==============")
 
             val basicActivity = App.activity as BasicActivity
             basicActivity.cameraDeviceAction = cameraDeviceAction
-            basicActivity.ratio = array?.getDouble(0)
-            basicActivity.isWidthRatio = array?.getBoolean(1)
+            basicActivity.ratio = array[0].reified()
+            basicActivity.isWidthRatio = array[1].reified()
 
             val perms = arrayOf(Constants.PERM_CAMERA)
 
@@ -299,13 +304,13 @@ object Action {
         }
     }
 
-    val cameraByRatio: (FlexAction?, JSONArray?) -> Unit = { cameraAction, array ->
+    val cameraByRatio: (FlexAction?, Array<FlexData>) -> Unit = { cameraAction, array ->
         CoroutineScope(Dispatchers.Main).launch {
             Utils.LOGD("============== Camera By Ratio Action ==============")
 
             val basicActivity = App.activity as BasicActivity
             basicActivity.cameraAction = cameraAction
-            basicActivity.ratio = array?.getDouble(0)
+            basicActivity.ratio = array[0].reified()
 
             val perms = arrayOf(Constants.PERM_CAMERA)
 
@@ -322,7 +327,7 @@ object Action {
     }
 
     /**=================================== Location Action =======================================*/
-    val location: (FlexAction?, JSONArray?) -> Unit = { locationAction, _->
+    val location: (FlexAction?, Array<FlexData>) -> Unit = { locationAction, _->
         CoroutineScope(Dispatchers.Main).launch {
             Utils.LOGD("============== Location Action ==============")
 
@@ -346,15 +351,15 @@ object Action {
     }
 
     /**================================= SEND SMS Action =========================================*/
-    val sendSms: (FlexAction?, JSONArray?) -> Unit = { sendSmsAction, array ->
+    val sendSms: (FlexAction?, Array<FlexData>) -> Unit = { sendSmsAction, array ->
         CoroutineScope(Dispatchers.Main).launch {
             Utils.LOGD("============== Send SMS Action ==============")
 
             // inject action
             val basicActivity = App.activity as BasicActivity
             basicActivity.sendSmsAction = sendSmsAction
-            basicActivity.phoneNumber = array?.getString(0)
-            basicActivity.smsMessage = array?.getString(1)
+            basicActivity.phoneNumber = array[0].reified()
+            basicActivity.smsMessage = array[1].reified()
 
             val perms = arrayOf(Constants.PERM_SEND_SMS)
 
@@ -372,7 +377,7 @@ object Action {
 
     /**=============================== Authentication Action =====================================*/
     @RequiresApi(Build.VERSION_CODES.P)
-    val authentication: (FlexAction?, JSONArray?) -> Unit = { authAction, _->
+    val authentication: (FlexAction?, Array<FlexData>) -> Unit = { authAction, _->
         CoroutineScope(Dispatchers.Main).launch {
             Utils.LOGD("============== Authentication Action ==============")
 
@@ -393,11 +398,11 @@ object Action {
         }
     }
 
-    val webPopUp: (FlexAction?, JSONArray?) -> Unit = { popUpAction, array ->
+    val webPopUp: (FlexAction?, Array<FlexData>) -> Unit = { popUpAction, array ->
         Utils.LOGD("============== Web PopUp Action ==============")
 
-        val url = array?.getString(0)
-        val ratio = array?.getDouble(1)
+        val url = array[0].asString()!!
+        val ratio = array[1].asDouble()
 
         val basicActivity = App.activity as BasicActivity
         basicActivity.popUpAction = popUpAction
@@ -468,12 +473,12 @@ object Action {
     }
 
     /**================================ FileDownload Action ======================================*/
-    val fileDownload: (FlexAction?, JSONArray?) -> Unit = { fileAction, array ->
+    val fileDownload: (FlexAction?, Array<FlexData>) -> Unit = { fileAction, array ->
         Utils.LOGD("============== File Download Action ==============")
 
         val basicActivity = App.activity as BasicActivity
         basicActivity.fileAction = fileAction
-        basicActivity.fileUrl = array?.getString(0)
+        basicActivity.fileUrl = array[0].reified()
 
         val perms = arrayOf(Constants.PERM_WRITE_EXTERNAL_STORAGE)
 
@@ -489,27 +494,27 @@ object Action {
     }
 
     /**============================ Local Repository Action ======================================*/
-    val localRepository: (FlexAction?, JSONArray?) -> Unit = { localRepoAction, array ->
+    val localRepository: (FlexAction?, Array<FlexData>) -> Unit = { localRepoAction, array ->
         Utils.LOGD("============== Local Repository Action ==============")
 
-        when (array!!.getInt(0)) {
+        when (array[0].asInt()) {
             Constants.PUT_DATA_CODE -> {
-                val key = array.getString(1)
-                val value = array.getString(2)
+                val key = array[1].asString()!!
+                val value = array[2].asString()
 
                 SharedPreferences.putData(App.INSTANCE.getString(R.string.shared_file_name), key, value)
 
                 localRepoAction?.promiseReturn(true)
             }
             Constants.GET_DATA_CODE -> {
-                val key = array.getString(1)
+                val key = array[1].asString()!!
                 var value = SharedPreferences.get(App.INSTANCE.getString(R.string.shared_file_name),
                     key, App.INSTANCE.getString(R.string.shared_default_string))
 
                 localRepoAction?.promiseReturn(value)
             }
             Constants.DEL_DATA_CODE -> {
-                val key = array.getString(1)
+                val key = array[1].asString()!!
                 SharedPreferences.removeData(App.INSTANCE.getString(R.string.shared_file_name), key)
                 localRepoAction?.promiseReturn(true)
             }

@@ -46,13 +46,13 @@ extern "C" {
         LOGD(TAG, "HASH : %s", hash);
 
         // F8mG1nqvFV4MmQQBuGd2v1NnKYc=
-        if(!isCorrectKeyHash("F8mG1nqvFV4MmQQBuGd2v1NnKYc=")) {
-            LOGD(TAG, "해쉬키가 다릅니다");
-            jclass activityClass = env->GetObjectClass(context);
-            jmethodID finish = env->GetMethodID(activityClass, "finish", "()V");
-            env->CallVoidMethod(context, finish);
-            exit(0);
-        }
+        //if(!isCorrectKeyHash("F8mG1nqvFV4MmQQBuGd2v1NnKYc=")) {
+        //    LOGD(TAG, "해쉬키가 다릅니다");
+        //    jclass activityClass = env->GetObjectClass(context);
+        //    jmethodID finish = env->GetMethodID(activityClass, "finish", "()V");
+        //    env->CallVoidMethod(context, finish);
+        //    exit(0);
+        //}
 
         startActivityAndFinish(env, context, "com.example.hybridapp.MainActivity");
         state->activity->vm->DetachCurrentThread();

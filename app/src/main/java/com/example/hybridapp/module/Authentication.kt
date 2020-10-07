@@ -1,4 +1,4 @@
-package com.example.hybridapp.util.module
+package com.example.hybridapp.module
 
 import android.os.Build
 import androidx.biometric.BiometricManager
@@ -7,7 +7,6 @@ import androidx.fragment.app.FragmentActivity
 import com.example.hybridapp.App
 import com.example.hybridapp.R
 import com.example.hybridapp.basic.BasicActivity
-import com.example.hybridapp.util.Constants
 import com.example.hybridapp.util.Utils
 
 object Authentication {
@@ -38,8 +37,6 @@ object Authentication {
 
     /** 생체 인증 다이얼로그 띄우기 */
     fun showPrompt(fragmentActivity: FragmentActivity){
-        Utils.LOGD("Call showPrompt()")
-
         val promptInfo = getBiometricPromptInfo()
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {

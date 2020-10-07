@@ -1,11 +1,10 @@
-package com.example.hybridapp.util.module
+package com.example.hybridapp.module
 
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import com.example.hybridapp.App
 import com.example.hybridapp.R
-import com.example.hybridapp.util.Constants
 import com.example.hybridapp.util.Utils
 import com.google.android.gms.auth.api.phone.SmsRetriever
 import com.google.android.gms.common.api.CommonStatusCodes

@@ -27,7 +27,7 @@ import app.dvkyun.flexhybridand.FlexAction
 import com.example.hybridapp.App
 import com.example.hybridapp.R
 import com.example.hybridapp.basic.BasicActivity
-import com.example.hybridapp.util.module.SharedPreferences
+import com.example.hybridapp.module.SharedPreferences
 import kotlinx.android.synthetic.main.activity_main.*
 import org.json.JSONObject
 import java.io.File
@@ -62,8 +62,6 @@ object Utils {
 
     /** 위험 권한이 없을 경우 */
     fun checkAbsentPerms(permissions: Array<out String>, requestCode: Int, action: FlexAction?) {
-        LOGD("Call checkAbsentPerms()")
-
         // 거절한 권한이 하나라도 존재할 경우
         if (existsDenialPermission(permissions)) {
             LOGD("거절한 권한이 하나라도 존재함")
@@ -122,8 +120,6 @@ object Utils {
 
     /** url로부터 파일을 다운받음 */
     fun downloadFileFromUrl() {
-        LOGD("Call downloadFileFromUrl()")
-
         val basicActivity = App.activity as BasicActivity
         val mimeTypeMap = MimeTypeMap.getSingleton()
         val extension = MimeTypeMap.getFileExtensionFromUrl(basicActivity.fileUrl)

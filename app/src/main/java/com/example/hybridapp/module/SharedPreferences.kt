@@ -1,4 +1,4 @@
-package com.example.hybridapp.util.module
+package com.example.hybridapp.module
 
 import android.content.Context
 import android.util.Log

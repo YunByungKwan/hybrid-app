@@ -1,14 +1,16 @@
-package com.example.hybridapp.util.module
+package com.example.hybridapp.module
 
+import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.DialogInterface
 import android.location.Location
 import android.location.LocationManager
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.result.registerForActivityResult
 import com.example.hybridapp.App
 import com.example.hybridapp.R
 import com.example.hybridapp.basic.BasicActivity
-import com.example.hybridapp.util.Constants
 import com.example.hybridapp.util.Utils
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
@@ -20,15 +22,26 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.json.JSONObject
 
-object Location {
+class Location {
+
+    private val basicActivity = App.activity as BasicActivity
+    private val deniedObj = Utils.createJSONObject(false, null,
+        basicActivity.getString(R.string.msg_denied_perm))
+
+    val requestPermissionResult = basicActivity.registerForActivityResult(
+        ActivityResultContracts.RequestPermission(), Manifest.permission.READ_EXTERNAL_STORAGE
+    ) { isGranted ->
+        if(isGranted) {
+            getCurrentLatAndLot()
+        } else {
+            basicActivity.locationAction!!.promiseReturn(deniedObj)
+        }
+    }
+
 
     /** 현재 위치의 위도,경도 가져오기 */
     @SuppressLint("MissingPermission")
     fun getCurrentLatAndLot() {
-        Utils.LOGD("Call getCurrentLatAndLot() in Location object.")
-
-        val basicActivity = App.activity as BasicActivity
-
         // GPS 사용이 가능한 경우
         if(isLocationEnabled(basicActivity)) {
             // 뒷배경 뷰 생성

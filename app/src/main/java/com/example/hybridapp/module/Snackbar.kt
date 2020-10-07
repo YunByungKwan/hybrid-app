@@ -1,4 +1,4 @@
-package com.example.hybridapp.util.module
+package com.example.hybridapp.module
 
 import android.view.View
 import com.google.android.material.snackbar.Snackbar

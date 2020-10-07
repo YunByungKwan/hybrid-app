@@ -21,27 +21,10 @@ class Constants {
        const val PERM_SEND_SMS = Manifest.permission.SEND_SMS
 
        /** Permission Code */
-       const val PERM_QR_REQ_CODE = 1001
        const val PERM_FILE_REQ_CODE = 1002
-       const val PERM_LOCATION_REQ_CODE = 1006
-       const val PERM_SEND_SMS_REQ_CODE = 1007
-       const val PERM_CAMERA_DEVICE_REQ_CODE = 1008
-       const val PERM_CAMERA_REQ_CODE = 1009
-       const val PERM_PHOTO_DEVICE_REQ_CODE = 1010
-       const val PERM_PHOTO_REQ_CODE = 1011
-       const val PERM_MUL_PHOTO_DEVICE_REQ_CODE = 1012
-       const val PERM_MUL_PHOTO_REQ_CODE = 1013
 
        /** Intent Request Code */
-       const val CAMERA_DEVICE_RATIO_REQ_CODE = 10001
-       const val CAMERA_RATIO_REQ_CODE = 10002
-       const val PHOTO_DEVICE_RATIO_REQ_CODE = 10003
-       const val PHOTO_RATIO_REQ_CODE = 10004
-       const val MULTI_PHOTO_DEVICE_RATIO_REQ_CODE = 10005
-       const val MULTI_PHOTO_RATIO_REQ_CODE = 10006
        const val FILE_UPLOAD_REQ_CODE = 10007
-       const val QR_REQ_CODE = IntentIntegrator.REQUEST_CODE // 49374
-       const val SEND_SMS_REQ_CODE = 10008
 
        /** Notification Text */
        const val NOTIFICATION_ID = 101

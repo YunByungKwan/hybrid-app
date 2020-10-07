@@ -1,4 +1,4 @@
-package com.example.hybridapp.util.module
+package com.example.hybridapp.module
 
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -10,7 +10,6 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.example.hybridapp.App
 import com.example.hybridapp.R
-import com.example.hybridapp.util.Constants
 import com.example.hybridapp.util.Utils
 
 object Notification {
@@ -39,8 +38,6 @@ object Notification {
     /** 알림 생성 */
     fun create(channelId: String, notificationId: Int, title: String, message: String,
                importance: Int, pendingIntent: PendingIntent) {
-        Utils.LOGD("Create Notification.")
-
         val builder = NotificationCompat.Builder(App.activity, channelId)
         builder.setContentTitle(title)
         builder.setContentText(message)

@@ -16,8 +16,6 @@ class BasicWebViewClient: FlexWebViewClient() {
     /** 웹뷰 url 변경시 호출됨 */
     override fun doUpdateVisitedHistory(view: WebView?, url: String?, isReload: Boolean) {
         CoroutineScope(Dispatchers.Default).launch {
-            Utils.LOGD("Call function doUpdateVisitedHistory() in BasicWebViewClient class.")
-
             val currentDateTime = Utils.getCurrentDateAndTime()
 
             if(url != null) {

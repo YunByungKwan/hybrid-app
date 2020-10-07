@@ -1,9 +1,9 @@
-package com.example.hybridapp.util.module
+package com.example.hybridapp.module
 
 import android.widget.Toast
 import com.example.hybridapp.App
 
-object Toast {
+class Toast {
 
     /** 짧은 Toast 메시지 출력 */
     fun showShortText(message: String)

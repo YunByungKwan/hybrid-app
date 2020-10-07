@@ -1,14 +1,16 @@
 package com.example.hybridapp.basic
 
 import android.annotation.SuppressLint
+import android.os.Bundle
 import android.view.View
 import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
 import app.dvkyun.flexhybridand.FlexAction
+import com.example.hybridapp.module.*
 
 @SuppressLint("Registered")
 open class BasicActivity: AppCompatActivity() {
-    
+
     /** 액션 인스턴스 */
     var cameraDeviceAction: FlexAction? = null
     var cameraAction: FlexAction? = null
@@ -40,5 +42,25 @@ open class BasicActivity: AppCompatActivity() {
     lateinit var popUpCloseButton: Button
 
     /** 뒤로가기 두 번 방지 Boolean */
-    var backPressedTwice: Boolean = false
+    var isPressedTwice: Boolean = false
+
+    /** Module */
+    var toast: Toast? = null
+    var qrCode: QRCode? = null
+    var camera: Camera? = null
+    var photo: Photo? = null
+    var location: Location? = null
+    var sms: SMS? = null
+
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        toast = Toast()
+        qrCode = QRCode()
+        camera = Camera()
+        photo = Photo()
+        location = Location()
+        sms = SMS()
+    }
 }

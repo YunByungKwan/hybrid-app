@@ -1,13 +1,18 @@
-package com.example.hybridapp.util.module
+package com.example.hybridapp.module
 
+import android.Manifest
 import android.content.Intent
 import android.content.IntentFilter
 import android.net.Uri
+import androidx.activity.result.ActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.result.registerForActivityResult
 import com.example.hybridapp.App
+import com.example.hybridapp.R
 import com.example.hybridapp.basic.BasicActivity
-import com.example.hybridapp.util.Constants
 import com.example.hybridapp.util.Utils
 import com.google.android.gms.auth.api.phone.SmsRetriever
+import org.json.JSONObject
 
 /**
  * 문자 형식
@@ -21,11 +26,37 @@ import com.google.android.gms.auth.api.phone.SmsRetriever
  * amvosl3kf/u
  */
 
-object SMS {
+class SMS {
+
+    private val basicActivity = App.activity as BasicActivity
+    private val deniedObj = Utils.createJSONObject(false, null,
+        basicActivity.getString(R.string.msg_denied_perm))
+
+    /** onRequestPermissionResult */
+    val requestPermissionResult = basicActivity.registerForActivityResult(
+        ActivityResultContracts.RequestPermission(), Manifest.permission.READ_EXTERNAL_STORAGE) { isGranted ->
+        if(isGranted) {
+            sendMessage()
+        } else {
+            basicActivity.sendSmsAction!!.promiseReturn(deniedObj)
+            basicActivity.phoneNumber = null
+            basicActivity.smsMessage = null
+        }
+    }
+
+    /** onActivityResult */
+    private val activityResult = basicActivity.registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()) { result: ActivityResult ->
+        // Intent.ACTION_SEND는 return값이 없음
+        val returnObj = JSONObject()
+        returnObj.put(App.INSTANCE.getString(R.string.obj_key_data), true)
+        basicActivity.sendSmsAction!!.promiseReturn(returnObj)
+        basicActivity.phoneNumber = null
+        basicActivity.smsMessage = null
+    }
 
     /** SMS Receiver 등록 */
     fun registerReceiver(receiver: SMSReceiver?) {
-        Utils.LOGD("Call registerReceiver() in SMS object.")
         val filter = IntentFilter()
         filter.addAction(receiver!!.smsRetrievedAction)
         App.activity.registerReceiver(receiver, filter)
@@ -33,8 +64,6 @@ object SMS {
 
     /** SMS Receiver 해제 */
     fun unregisterReceiver(receiver: SMSReceiver?) {
-        Utils.LOGD("Call unregisterReceiver() in SMS object.")
-
         if(receiver != null) {
             App.activity.unregisterReceiver(receiver)
         } else {
@@ -44,9 +73,6 @@ object SMS {
 
     /** 문자 메시지를 보냄  */
     fun sendMessage() {
-        Utils.LOGD("Call sendMessage() in SMS object.")
-
-        val basicActivity = App.activity as BasicActivity
         val packageManager = App.INSTANCE.packageManager
 
         val sendIntent = Intent(Intent.ACTION_SEND).apply {
@@ -55,7 +81,7 @@ object SMS {
         }
 
         if(Utils.existsReceiveActivity(sendIntent, packageManager)) {
-            basicActivity.startActivityForResult(sendIntent, Constants.SEND_SMS_REQ_CODE)
+            activityResult.launch(sendIntent)
         } else {
             var returnObj = Utils.createJSONObject(null, false, "메시지를 보낼 수 없습니다")
             basicActivity.sendSmsAction?.promiseReturn(returnObj)
@@ -67,8 +93,6 @@ object SMS {
 
     /** 문자 메시지를 받음 */
     fun receiveMessage() {
-        Utils.LOGD("Call receiveMessage() in SMS object.")
-
         val client = SmsRetriever.getClient(App.activity)
         val task = client.startSmsRetriever()
         task.addOnCompleteListener {

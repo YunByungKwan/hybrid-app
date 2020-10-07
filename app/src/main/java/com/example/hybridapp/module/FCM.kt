@@ -1,4 +1,4 @@
-package com.example.hybridapp.util.module
+package com.example.hybridapp.module
 
 import android.app.PendingIntent
 import android.content.Intent

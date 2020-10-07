@@ -41,12 +41,12 @@ class App : Application() {
 
         }
 
-        override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {
-
+        override fun onActivityCreated(_activity: Activity, savedInstanceState: Bundle?) {
+            activity = _activity
         }
 
         override fun onActivityResumed(_activity: Activity) {
-            activity = _activity
+            //activity = _activity
         }
     }
 

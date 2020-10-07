@@ -354,10 +354,10 @@ dependencies {
 ```
 
 #### 함수
-- fun requestImage(action: FlexAction?, ratio: Double?, isWidthRatio: Boolean?)<br>
+- fun takeSingleImage(action: FlexAction?, ratio: Double?, isWidthRatio: Boolean?)<br>
 : 갤러리 앱을 호출 (1장)
 
-- fun requestMultipleImages(action: FlexAction?, ratio: Double, isWidthRatio: Boolean?)<br>
+- fun takeMultipleImages(action: FlexAction?, ratio: Double, isWidthRatio: Boolean?)<br>
 : 갤러리 앱을 호출 (여러 장)
 
 - private fun getSinglePhotoIntent(): Intent<br>
@@ -403,8 +403,8 @@ dependencies {
 ```kotlin
 ...
 Camera.request(cameraDeviceAction, ratio, isWidthRatio)
-Photo.requestImage(photoDeviceAction, ratio, isWidthRatio)
-Photo.requestMultipleImages(multiplePhotoDeviceAction, ratio!!, isWidthRatio!!)
+Photo.takeSingleImage(photoDeviceAction, ratio, isWidthRatio)
+Photo.takeMultipleImages(multiplePhotoDeviceAction, ratio!!, isWidthRatio!!)
 ...
 ```
 

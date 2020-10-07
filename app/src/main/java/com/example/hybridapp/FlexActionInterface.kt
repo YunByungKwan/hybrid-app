@@ -6,18 +6,22 @@ import android.os.Build
 import android.util.Log
 import app.dvkyun.flexhybridand.FlexData
 import app.dvkyun.flexhybridand.FlexFuncInterface
+import com.example.hybridapp.basic.BasicActivity
 import com.example.hybridapp.data.LogUrlRepository
 import com.example.hybridapp.data.LogUrlRoomDatabase
 import com.example.hybridapp.util.Constants
 import com.example.hybridapp.util.Utils
-import com.example.hybridapp.util.module.*
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import org.json.JSONArray
-import org.json.JSONObject
+import com.example.hybridapp.module.*
+import kotlinx.coroutines.*
 
 class FlexActionInterface {
+
+    val basicActivity = App.activity as BasicActivity
+
+    @FlexFuncInterface
+    suspend fun ReceiveSMS2(array: Array<FlexData>): Map<String, *> = withContext(Dispatchers.Main) {
+        HashMap<String, Any>()
+    }
 
     /**================================= Toast Interface =========================================*/
     @FlexFuncInterface
@@ -27,16 +31,16 @@ class FlexActionInterface {
             val isShortToast = array[1].asBoolean()!!
 
             if(isShortToast) {
-                Toast.showShortText(message)
+                (App.activity as BasicActivity).toast!!.showShortText(message)
             } else {
-                Toast.showLongText(message)
+                (App.activity as BasicActivity).toast!!.showLongText(message)
             }
         }
     }
 
     @FlexFuncInterface
     fun ReceiveSMS(array: Array<FlexData>) {
-        SMS.receiveMessage()
+        basicActivity.sms!!.receiveMessage()
     }
 
     /**============================== Notification Interface =====================================*/

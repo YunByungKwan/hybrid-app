@@ -21,20 +21,17 @@ import kotlinx.coroutines.launch
 
 class MainActivity : BasicActivity() {
 
-    private lateinit var repository: LogUrlRepository
-    private var smsReceiver: SMSReceiver? = null
-
     override fun onResume() {
         super.onResume()
 
         if(smsReceiver == null) {
             smsReceiver = SMSReceiver()
         }
-        sms!!.registerReceiver(smsReceiver)
+        smsInstance!!.registerReceiver(smsReceiver)
     }
 
     override fun onPause() {
-        sms!!.unregisterReceiver(smsReceiver)
+        smsInstance!!.unregisterReceiver(smsReceiver)
         super.onPause()
     }
 
@@ -50,18 +47,13 @@ class MainActivity : BasicActivity() {
     /** 시작 시 기본 초기화 함수 */
     private fun init() {
         CoroutineScope(Dispatchers.Default).launch {
-            val logUrlDao
-                    = LogUrlRoomDatabase.getDatabase(this@MainActivity).logUrlDao()
+            val logUrlDao = LogUrlRoomDatabase.getDatabase(this@MainActivity).logUrlDao()
             repository = LogUrlRepository(logUrlDao)
         }
-
         // Android KeyStore init
         AndroidKeyStoreUtil.init(App.context())
-
         setFlexWebView()
-        setActions()
         window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
-
     }
 
     /** 기본, 팝업 FlexView 설정 */
@@ -73,36 +65,37 @@ class MainActivity : BasicActivity() {
         WebView.setWebContentsDebuggingEnabled(true)
         flex_web_view.webChromeClient = BasicWebChromeClient(this)
         flex_web_view.webViewClient = BasicWebViewClient()
-        flex_web_view.addFlexInterface(FlexActionInterface())
+        flex_web_view.addFlexInterface(Toast)
+        flex_web_view.addFlexInterface(Notification)
+        flex_web_view.addFlexInterface(Utils)
+        flex_web_view.addFlexInterface(smsInstance!!)
         flex_web_view.isVerticalScrollBarEnabled = false
         flex_web_view.isHorizontalScrollBarEnabled = false
-    }
 
-    /** FlexWebView Action 설정 */
-    private fun setActions() {
-        flex_web_view.setAction(getString(R.string.type_dialog), Action.dialog)
-        flex_web_view.mapInterface(getString(R.string.type_network), Action.network)
-        flex_web_view.setAction(getString(R.string.type_camera_device_ratio), Action.cameraByDeviceRatio)
-        flex_web_view.setAction(getString(R.string.type_camera_ratio), Action.cameraByRatio)
-        flex_web_view.setAction(getString(R.string.type_photo_device_ratio), Action.photoByDeviceRatio)
-        flex_web_view.setAction(getString(R.string.type_photo_ratio), Action.photoByRatio)
-        flex_web_view.setAction(getString(R.string.type_multi_photo_device_ratio), Action.multiPhotoByDeviceRatio)
-        flex_web_view.setAction(getString(R.string.type_multi_photo_ratio), Action.multiPhotoByRatio)
-        flex_web_view.setAction(getString(R.string.type_qr_code_scan), Action.qrCode)
-        flex_web_view.setAction(getString(R.string.type_location), Action.location)
-        flex_web_view.setAction(getString(R.string.type_send_sms), Action.sendSms)
-        flex_web_view.setAction(getString(R.string.type_auth), Action.authentication)
-        flex_web_view.setAction(getString(R.string.type_local_repo), Action.localRepository)
-        flex_web_view.setAction(getString(R.string.type_web_pop_up), Action.webPopUp)
-        flex_web_view.setAction(getString(R.string.type_download), Action.fileDownload)
-        //flex_web_view.mapInterface("network2", Action.network2)
+        /** FlexWebView Action 설정 */
+        flex_web_view.setAction(getString(R.string.type_dialog), Dialog.showAction)
+        flex_web_view.mapInterface(getString(R.string.type_network), Network.getStatusAction)
+        flex_web_view.setAction(getString(R.string.type_camera_device_ratio), cameraInstance!!.actionByDeviceRatio)
+        flex_web_view.setAction(getString(R.string.type_camera_ratio), cameraInstance!!.actionByRatio)
+        flex_web_view.setAction(getString(R.string.type_photo_device_ratio), photoInstance!!.actionByDeviceRatioSingle)
+        flex_web_view.setAction(getString(R.string.type_photo_ratio), photoInstance!!.actionByRatioSingle)
+        flex_web_view.setAction(getString(R.string.type_multi_photo_device_ratio), photoInstance!!.actionByDeviceRatioMulti)
+        flex_web_view.setAction(getString(R.string.type_multi_photo_ratio), photoInstance!!.actionByRatioMulti)
+        flex_web_view.setAction(getString(R.string.type_qr_code_scan), qrInstance!!.scanAction)
+        flex_web_view.setAction(getString(R.string.type_location), locInstance!!.findAction)
+        flex_web_view.setAction(getString(R.string.type_send_sms), smsInstance!!.sendAction)
+        flex_web_view.setAction(getString(R.string.type_auth), Authentication.authentication)
+        flex_web_view.setAction(getString(R.string.type_local_repo), Utils.localRepository)
+        flex_web_view.setAction(getString(R.string.type_web_pop_up), Utils.webPopUp)
+        flex_web_view.setAction(getString(R.string.type_download), Utils.downloadAction)
     }
 
     /** 뒤로 가기 버튼 클릭 이벤트 */
     override fun onBackPressed() {
         if(isPopupOpen()) {
-            Utils.closePopup(this@MainActivity, constraintLayout,
-                backgroundView, popUpCloseButton, flex_pop_up_web_view)
+            Utils.removeBackgroundViewFrom(App.activity.constraintLayout)
+            Utils.removeCloseButtonFrom(App.activity.constraintLayout)
+            Utils.hidePopUpView(this@MainActivity, flex_pop_up_web_view)
         } else {
             backPressed()
         }
@@ -126,8 +119,7 @@ class MainActivity : BasicActivity() {
             super.onBackPressed()
         } else {
             isPressedTwice = true
-            toast!!.showShortText(getString(R.string.back_pressed))
-
+            Toast.showShortToast(getString(R.string.back_pressed))
             Handler(Looper.getMainLooper()).postDelayed({
                 isPressedTwice = false
             }, 2000)

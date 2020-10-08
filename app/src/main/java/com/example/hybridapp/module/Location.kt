@@ -7,10 +7,14 @@ import android.content.DialogInterface
 import android.location.Location
 import android.location.LocationManager
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.result.launch
 import androidx.activity.result.registerForActivityResult
+import app.dvkyun.flexhybridand.FlexAction
+import app.dvkyun.flexhybridand.FlexLambda
 import com.example.hybridapp.App
 import com.example.hybridapp.R
 import com.example.hybridapp.basic.BasicActivity
+import com.example.hybridapp.util.Constants
 import com.example.hybridapp.util.Utils
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
@@ -20,21 +24,38 @@ import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.json.JSONObject
 
-class Location {
+class Location(private val basicActivity: BasicActivity) {
 
-    private val basicActivity = App.activity as BasicActivity
-    private val deniedObj = Utils.createJSONObject(false, null,
-        basicActivity.getString(R.string.msg_denied_perm))
+    var locationAction: FlexAction? = null
 
-    val requestPermissionResult = basicActivity.registerForActivityResult(
+    /**=================================== Location Action =======================================*/
+    val findAction = FlexLambda.action { action, _->
+        withContext(Dispatchers.Main) {
+            locationAction = action
+
+            if(Utils.existAllPermission(arrayOf(
+                    Constants.PERM_ACCESS_FINE_LOCATION,
+                    Constants.PERM_ACCESS_COARSE_LOCATION))) {
+                basicActivity.locInstance!!.getCurrentLatAndLot()
+            } else {
+                basicActivity.locInstance!!.requestPermissionResult.launch()
+            }
+        }
+    }
+
+
+    private val requestPermissionResult = basicActivity.registerForActivityResult(
         ActivityResultContracts.RequestPermission(), Manifest.permission.READ_EXTERNAL_STORAGE
     ) { isGranted ->
         if(isGranted) {
             getCurrentLatAndLot()
         } else {
-            basicActivity.locationAction!!.promiseReturn(deniedObj)
+            val deniedObj = Utils.createJSONObject(false, null,
+                basicActivity.getString(R.string.msg_denied_perm))
+            locationAction!!.promiseReturn(deniedObj)
         }
     }
 
@@ -62,7 +83,7 @@ class Location {
             val posListener = DialogInterface.OnClickListener { _, _ ->
                 val returnObj = Utils.createJSONObject(true,
                     null, App.INSTANCE.getString(R.string.msg_not_load_lat_lot))
-                basicActivity.locationAction?.promiseReturn(returnObj)
+                locationAction?.promiseReturn(returnObj)
             }
 
             Dialog.show("위치 권한", "GPS를 켜야 합니다", "확인",
@@ -70,7 +91,7 @@ class Location {
                 null, null,
                 { val returnObj = Utils.createJSONObject(true,
                     null, App.INSTANCE.getString(R.string.msg_not_load_lat_lot))
-                    basicActivity.locationAction?.promiseReturn(returnObj)  })
+                    locationAction?.promiseReturn(returnObj)  })
         }
     }
 
@@ -120,7 +141,7 @@ class Location {
                 basicActivity.constraintLayout.removeView(basicActivity.backgroundView)
                 Utils.invisibleProgressBar()
 
-                (App.activity as BasicActivity).locationAction?.promiseReturn(returnObj)
+                locationAction?.promiseReturn(returnObj)
             }
         }
     }

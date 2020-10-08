@@ -16,7 +16,7 @@ class App : Application() {
         registerActivityLifecycleCallbacks(MyActivityLifecycleCallbacks())
     }
 
-    override fun registerActivityLifecycleCallbacks(callback: ActivityLifecycleCallbacks?) {
+     override fun registerActivityLifecycleCallbacks(callback: ActivityLifecycleCallbacks?) {
         super.registerActivityLifecycleCallbacks(callback)
     }
 
@@ -46,7 +46,7 @@ class App : Application() {
         }
 
         override fun onActivityResumed(_activity: Activity) {
-            //activity = _activity
+
         }
     }
 
@@ -54,8 +54,6 @@ class App : Application() {
         lateinit var INSTANCE: App
         lateinit var activity: Activity
 
-        fun context() : Context {
-            return INSTANCE.applicationContext
-        }
+        fun context(): Context =  INSTANCE.applicationContext
     }
 }

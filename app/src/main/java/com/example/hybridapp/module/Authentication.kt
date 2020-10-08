@@ -1,18 +1,50 @@
 package com.example.hybridapp.module
 
 import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.biometric.BiometricManager
 import androidx.biometric.BiometricPrompt
 import androidx.fragment.app.FragmentActivity
+import app.dvkyun.flexhybridand.FlexAction
+import app.dvkyun.flexhybridand.FlexData
+import app.dvkyun.flexhybridand.FlexLambda
 import com.example.hybridapp.App
 import com.example.hybridapp.R
 import com.example.hybridapp.basic.BasicActivity
 import com.example.hybridapp.util.Utils
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Dispatchers.Main
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 object Authentication {
 
+    var authAction: FlexAction? = null
+
+    /**======================================= Action ============================================*/
+    @RequiresApi(Build.VERSION_CODES.P)
+    val authentication
+            = FlexLambda.action { action, _->
+        withContext(Main) {
+            val fragmentActivity = App.activity as FragmentActivity
+            authAction = action
+
+            if(canAuthenticate()) {
+                showPrompt(fragmentActivity)
+            } else {
+                Utils.LOGE("You can't call biometric prompt.")
+                val returnObj = Utils.createJSONObject(
+                    authValue = true,
+                    dataValue = false, msgValue = "인증을 진행할 수 없습니다"
+                )
+                authAction?.promiseReturn(returnObj)
+            }
+        }
+    }
+
     /** 생체 인증이 가능한지 판별 */
-    fun canAuthenticate(): Boolean {
+    private fun canAuthenticate(): Boolean {
         val biometricManager = BiometricManager.from(App.INSTANCE)
         when (biometricManager.canAuthenticate()) {
             BiometricManager.BIOMETRIC_SUCCESS -> {
@@ -36,7 +68,7 @@ object Authentication {
     }
 
     /** 생체 인증 다이얼로그 띄우기 */
-    fun showPrompt(fragmentActivity: FragmentActivity){
+    private fun showPrompt(fragmentActivity: FragmentActivity){
         val promptInfo = getBiometricPromptInfo()
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
@@ -48,7 +80,7 @@ object Authentication {
                 authValue = true,
                 dataValue = false, msgValue = "인증을 진행할 수 없습니다"
             )
-            (App.activity as BasicActivity).authAction?.promiseReturn(returnObj)
+            authAction?.promiseReturn(returnObj)
         }
     }
 
@@ -72,7 +104,7 @@ object Authentication {
                 authValue = true,
                 dataValue = true, msgValue = null
             )
-            (App.activity as BasicActivity).authAction?.promiseReturn(returnObj)
+            authAction?.promiseReturn(returnObj)
         }
 
         // 인증 취소 버튼 클릭시, 인증에 실패시
@@ -83,7 +115,7 @@ object Authentication {
                 authValue = true,
                 dataValue = false, msgValue = "인증에 실패했습니다"
             )
-            (App.activity as BasicActivity).authAction?.promiseReturn(returnObj)
+            authAction?.promiseReturn(returnObj)
         }
 
         // 인증이 일치하지 않을 경우, 여러번 틀렸을 경우

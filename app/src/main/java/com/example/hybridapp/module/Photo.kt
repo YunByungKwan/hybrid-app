@@ -14,22 +14,99 @@ import android.util.Base64
 import android.util.Log
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.result.launch
 import androidx.activity.result.registerForActivityResult
+import app.dvkyun.flexhybridand.FlexAction
+import app.dvkyun.flexhybridand.FlexLambda
 import com.example.hybridapp.App
 import com.example.hybridapp.R
 import com.example.hybridapp.basic.BasicActivity
+import com.example.hybridapp.util.Constants
 import com.example.hybridapp.util.Utils
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import org.json.JSONObject
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileInputStream
 import java.lang.Exception
 
-class Photo {
+class Photo(private val basicActivity: BasicActivity) {
 
-    private val basicActivity = App.activity as BasicActivity
-    private val deniedObj = Utils.createJSONObject(false, null,
-        basicActivity.getString(R.string.msg_denied_perm))
+    var photoDeviceAction: FlexAction? = null
+    var photoAction: FlexAction? = null
+    var multiplePhotoDeviceAction: FlexAction? = null
+    var multiplePhotoAction: FlexAction? = null
+
+    var ratio: Double? = null
+    var isWidthRatio: Boolean? = null
+
+    /**======================================== Action ===========================================*/
+    val actionByDeviceRatioSingle
+            = FlexLambda.action{ action, array ->
+        withContext(Dispatchers.Main) {
+            photoDeviceAction = action
+            ratio = array[0].reified()
+            isWidthRatio = array[1].reified()
+
+            if(Utils.existAllPermission(arrayOf(
+                    Constants.PERM_WRITE_EXTERNAL_STORAGE,
+                    Constants.PERM_READ_EXTERNAL_STORAGE))) {
+                basicActivity.photoInstance!!.takeSingleImage()
+            } else {
+                basicActivity.photoInstance!!.requestPermissionResultByDeviceSingle.launch()
+            }
+        }
+    }
+
+    val actionByRatioSingle
+            = FlexLambda.action { action, array ->
+        withContext(Dispatchers.Main) {
+            photoAction = action
+            ratio = array[0].reified()
+
+            if(Utils.existAllPermission(arrayOf(
+                    Constants.PERM_WRITE_EXTERNAL_STORAGE,
+                    Constants.PERM_READ_EXTERNAL_STORAGE))) {
+                basicActivity.photoInstance!!.takeSingleImage()
+            } else {
+                basicActivity.photoInstance!!.requestPermissionResultSingle.launch()
+            }
+        }
+    }
+
+    val actionByDeviceRatioMulti
+            = FlexLambda.action { action, array ->
+        withContext(Dispatchers.Main) {
+            multiplePhotoDeviceAction = action
+            ratio = array[0].reified()
+            isWidthRatio = array[1].reified()
+
+            if(Utils.existAllPermission(arrayOf(
+                    Constants.PERM_WRITE_EXTERNAL_STORAGE,
+                    Constants.PERM_READ_EXTERNAL_STORAGE))) {
+                basicActivity.photoInstance!!.takeMultipleImages()
+            } else {
+                basicActivity.photoInstance!!.requestPermissionResultByDeviceMulti.launch()
+            }
+        }
+    }
+
+    val actionByRatioMulti
+            = FlexLambda.action { action, array ->
+        withContext(Dispatchers.Main) {
+            multiplePhotoAction = action
+            ratio = array[0].reified()
+
+            if(Utils.existAllPermission(arrayOf(
+                    Constants.PERM_WRITE_EXTERNAL_STORAGE,
+                    Constants.PERM_READ_EXTERNAL_STORAGE))) {
+                basicActivity.photoInstance!!.takeMultipleImages()
+            } else {
+                basicActivity.photoInstance!!.requestPermissionResultMulti.launch()
+            }
+        }
+    }
 
     /** onRequestPermissionResult */
     val requestPermissionResultByDeviceSingle = basicActivity.registerForActivityResult(
@@ -37,9 +114,11 @@ class Photo {
         if(isGranted) {
             takeSingleImage()
         } else {
-            basicActivity.photoDeviceAction?.promiseReturn(deniedObj)
-            basicActivity.ratio = null
-            basicActivity.isWidthRatio = null
+            val deniedObj = Utils.createJSONObject(false, null,
+                basicActivity.getString(R.string.msg_denied_perm))
+            photoDeviceAction?.promiseReturn(deniedObj)
+            ratio = null
+            isWidthRatio = null
         }
     }
 
@@ -48,8 +127,10 @@ class Photo {
         if(isGranted) {
             takeSingleImage()
         } else {
-            basicActivity.photoAction?.promiseReturn(deniedObj)
-            basicActivity.ratio = null
+            val deniedObj = Utils.createJSONObject(false, null,
+                basicActivity.getString(R.string.msg_denied_perm))
+            photoAction?.promiseReturn(deniedObj)
+            ratio = null
         }
     }
 
@@ -58,9 +139,11 @@ class Photo {
         if(isGranted) {
             takeSingleImage()
         } else {
-            basicActivity.multiplePhotoDeviceAction?.promiseReturn(deniedObj)
-            basicActivity.ratio = null
-            basicActivity.isWidthRatio = null
+            val deniedObj = Utils.createJSONObject(false, null,
+                basicActivity.getString(R.string.msg_denied_perm))
+            multiplePhotoDeviceAction?.promiseReturn(deniedObj)
+            ratio = null
+            isWidthRatio = null
         }
     }
 
@@ -69,8 +152,10 @@ class Photo {
         if(isGranted) {
             takeSingleImage()
         } else {
-            basicActivity.multiplePhotoAction?.promiseReturn(deniedObj)
-            basicActivity.ratio = null
+            val deniedObj = Utils.createJSONObject(false, null,
+                basicActivity.getString(R.string.msg_denied_perm))
+            multiplePhotoAction?.promiseReturn(deniedObj)
+            ratio = null
         }
     }
 
@@ -83,20 +168,20 @@ class Photo {
         if(result.resultCode == Activity.RESULT_OK) {
             if(data != null) {
                 val base64 = App.INSTANCE.getString(R.string.base64_url) +
-                        convertUriToResizingBase64(data.data, basicActivity.ratio, basicActivity.isWidthRatio)
+                        convertUriToResizingBase64(data.data, ratio, isWidthRatio)
 
                 val returnObj = Utils.createJSONObject(true,
                     base64, null)
-                basicActivity.photoDeviceAction?.promiseReturn(returnObj)
-                basicActivity.ratio = null
-                basicActivity.isWidthRatio = null
+                photoDeviceAction?.promiseReturn(returnObj)
+                ratio = null
+                isWidthRatio = null
             } else {
                 Utils.LOGE("사진이 존재하지 않습니다")
                 val returnObj = Utils.createJSONObject(true,
                     null, "사진이 존재하지 않습니다")
-                basicActivity.photoDeviceAction?.promiseReturn(returnObj)
-                basicActivity.ratio = null
-                basicActivity.isWidthRatio = null
+                photoDeviceAction?.promiseReturn(returnObj)
+                ratio = null
+                isWidthRatio = null
             }
         }
         // 사진 불러오기 실패
@@ -104,9 +189,9 @@ class Photo {
             Utils.LOGE("취소되었습니다")
             val returnObj = Utils.createJSONObject(true,
                 null, "취소되었습니다")
-            basicActivity.photoDeviceAction?.promiseReturn(returnObj)
-            basicActivity.ratio = null
-            basicActivity.isWidthRatio = null
+            photoDeviceAction?.promiseReturn(returnObj)
+            ratio = null
+            isWidthRatio = null
         }
     }
 
@@ -117,19 +202,19 @@ class Photo {
 
         // 사진 불러오기 성공
         if(result.resultCode == Activity.RESULT_OK) {
-            basicActivity.ratio = if(data != null) {
+            ratio = if(data != null) {
                 val base64 = App.INSTANCE.getString(R.string.base64_url) +
-                        basicActivity.photo!!.convertUriToResizingBase64(data.data, basicActivity.ratio, basicActivity.isWidthRatio)
+                        basicActivity.photoInstance!!.convertUriToResizingBase64(data.data, ratio, isWidthRatio)
 
                 val returnObj = Utils.createJSONObject(true,
                     base64, null)
-                basicActivity.photoAction?.promiseReturn(returnObj)
+                photoAction?.promiseReturn(returnObj)
                 null
             } else {
                 Utils.LOGE("사진이 존재하지 않습니다")
                 val returnObj = Utils.createJSONObject(true,
                     null, "사진이 존재하지 않습니다")
-                basicActivity.photoAction?.promiseReturn(returnObj)
+                photoAction?.promiseReturn(returnObj)
                 null
             }
         }
@@ -138,8 +223,8 @@ class Photo {
             Utils.LOGE("취소되었습니다")
             val returnObj = Utils.createJSONObject(true,
                 null, "취소되었습니다")
-            basicActivity.photoAction?.promiseReturn(returnObj)
-            basicActivity.ratio = null
+            photoAction?.promiseReturn(returnObj)
+            ratio = null
         }
     }
 
@@ -156,7 +241,7 @@ class Photo {
                     for(i in 0 until clipData?.itemCount!!) {
                         val imageUri = clipData.getItemAt(i).uri
                         val base64 = App.INSTANCE.getString(R.string.base64_url) +
-                                basicActivity.photo!!.convertUriToResizingBase64(imageUri, basicActivity.ratio, basicActivity.isWidthRatio)
+                                basicActivity.photoInstance!!.convertUriToResizingBase64(imageUri, ratio, isWidthRatio)
                         base64Images.add(base64)
                         Utils.LOGD("${i + 1}번째 : $base64")
                     }
@@ -165,24 +250,24 @@ class Photo {
                     returnObj.put(App.INSTANCE.getString(R.string.obj_key_auth), true)
                     returnObj.put(App.INSTANCE.getString(R.string.obj_key_data), base64Images.toTypedArray())
                     returnObj.put(App.INSTANCE.getString(R.string.obj_key_msg), null)
-                    basicActivity.multiplePhotoDeviceAction?.promiseReturn(returnObj)
-                    basicActivity.ratio = null
-                    basicActivity.isWidthRatio = null
+                    multiplePhotoDeviceAction?.promiseReturn(returnObj)
+                    ratio = null
+                    isWidthRatio = null
                 } else {
-                    basicActivity.toast!!.showLongText("10장 이상의 사진을 첨부할 수 없습니다")
+                    Toast.showLongToast("10장 이상의 사진을 첨부할 수 없습니다")
                     val returnObj = Utils.createJSONObject(true,
                         null, "10장 이상의 사진을 첨부할 수 없습니다")
-                    basicActivity.multiplePhotoDeviceAction?.promiseReturn(returnObj)
-                    basicActivity.ratio = null
-                    basicActivity.isWidthRatio = null
+                    multiplePhotoDeviceAction?.promiseReturn(returnObj)
+                    ratio = null
+                    isWidthRatio = null
                 }
             } else {
                 Utils.LOGE("Data is null")
                 val returnObj = Utils.createJSONObject(true,
                     null, "사진을 첨부할 수 없습니다")
-                basicActivity.multiplePhotoDeviceAction?.promiseReturn(returnObj)
-                basicActivity.ratio = null
-                basicActivity.isWidthRatio = null
+                multiplePhotoDeviceAction?.promiseReturn(returnObj)
+                ratio = null
+                isWidthRatio = null
             }
         }
         // 사진 불러오기 실패
@@ -190,9 +275,9 @@ class Photo {
             Utils.LOGE("MULTI PHOTO BY DEVICE RATIO RESULT CANCELED")
             val returnObj = Utils.createJSONObject(true,
                 null, "취소되었습니다")
-            basicActivity.multiplePhotoDeviceAction?.promiseReturn(returnObj)
-            basicActivity.ratio = null
-            basicActivity.isWidthRatio = null
+            multiplePhotoDeviceAction?.promiseReturn(returnObj)
+            ratio = null
+            isWidthRatio = null
         }
     }
 
@@ -209,32 +294,32 @@ class Photo {
                     for(idx in 0 until clipData?.itemCount!!) {
                         val imageUri = clipData.getItemAt(idx).uri
                         val base64 = App.INSTANCE.getString(R.string.base64_url) +
-                                basicActivity.photo!!.convertUriToResizingBase64(imageUri, basicActivity.ratio, basicActivity.isWidthRatio)
+                                basicActivity.photoInstance!!.convertUriToResizingBase64(imageUri, ratio, isWidthRatio)
 
                         base64Images.add(base64)
                     }
-                    basicActivity.multiplePhotoAction?.promiseReturn(base64Images)
-                    basicActivity.ratio = null
+                    multiplePhotoAction?.promiseReturn(base64Images)
+                    ratio = null
                 } else {
-                    basicActivity.toast!!.showLongText("10장 이상의 사진을 첨부할 수 없습니다.")
+                    Toast.showLongToast("10장 이상의 사진을 첨부할 수 없습니다.")
                     val returnObj = Utils.createJSONObject(true,
                         null, "10장 이상의 사진을 첨부할 수 없습니다")
-                    basicActivity.multiplePhotoAction?.promiseReturn(returnObj)
-                    basicActivity.ratio = null
+                    multiplePhotoAction?.promiseReturn(returnObj)
+                    ratio = null
                 }
             } else {
                 Utils.LOGE("Data is null")
                 val returnObj = Utils.createJSONObject(true,
                     null, "사진을 첨부할 수 없습니다")
-                basicActivity.multiplePhotoAction?.promiseReturn(returnObj)
-                basicActivity.ratio = null
+                multiplePhotoAction?.promiseReturn(returnObj)
+                ratio = null
             }
         } else {
             Utils.LOGE("MULTI PHOTO BY RATIO RESULT CANCELED")
             val returnObj = Utils.createJSONObject(true,
                 null, "취소되었습니다")
-            basicActivity.multiplePhotoAction?.promiseReturn(returnObj)
-            basicActivity.ratio = null
+            multiplePhotoAction?.promiseReturn(returnObj)
+            ratio = null
         }
     }
 
@@ -243,7 +328,7 @@ class Photo {
         val packageManager = App.INSTANCE.packageManager
         val singlePhotoIntent = getSinglePhotoIntent()
         if(Utils.existsReceiveActivity(singlePhotoIntent, packageManager)) {
-            if(basicActivity.isWidthRatio != null) {
+            if(isWidthRatio != null) {
                 photoDeviceRatioForResult.launch(singlePhotoIntent)
             } else {
                 photoRatioForResult.launch(singlePhotoIntent)
@@ -255,15 +340,15 @@ class Photo {
                 null, App.context().getString(R.string.msg_not_load_gallery))
 
             // 디바이스 기준일 경우
-            if(basicActivity.isWidthRatio != null) {
-                basicActivity.photoDeviceAction?.promiseReturn(returnObj)
-                basicActivity.ratio = null
-                basicActivity.isWidthRatio = null
+            if(isWidthRatio != null) {
+                photoDeviceAction?.promiseReturn(returnObj)
+                ratio = null
+                isWidthRatio = null
             }
             // 이미지 기준일 경우우
            else {
-                basicActivity.photoAction?.promiseReturn(returnObj)
-                basicActivity.ratio = null
+                photoAction?.promiseReturn(returnObj)
+                ratio = null
             }
         }
     }
@@ -274,7 +359,7 @@ class Photo {
         val multiplePhotosIntent = getMultiplePhotosIntent()
 
         if(Utils.existsReceiveActivity(multiplePhotosIntent, packageManager)) {
-            if(basicActivity.isWidthRatio != null) {
+            if(isWidthRatio != null) {
                 multiPhotoDeviceRatioForResult.launch(multiplePhotosIntent)
             } else {
                 multiPhotoRatioForResult.launch(multiplePhotosIntent)
@@ -284,15 +369,15 @@ class Photo {
                 null, App.INSTANCE.getString(R.string.msg_not_load_gallery))
 
             // 디바이스 기준일 경우
-            if(basicActivity.isWidthRatio != null) {
-                basicActivity.multiplePhotoDeviceAction?.promiseReturn(returnObj)
-                basicActivity.ratio = null
-                basicActivity.isWidthRatio = null
+            if(isWidthRatio != null) {
+                multiplePhotoDeviceAction?.promiseReturn(returnObj)
+                ratio = null
+                isWidthRatio = null
             }
             // 이미지 기준일 경우
             else {
-                basicActivity.multiplePhotoAction?.promiseReturn(returnObj)
-                basicActivity.ratio = null
+                multiplePhotoAction?.promiseReturn(returnObj)
+                ratio = null
             }
         }
     }

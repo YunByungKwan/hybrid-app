@@ -5,8 +5,13 @@ import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.os.Build
 import androidx.annotation.RequiresApi
+import app.dvkyun.flexhybridand.FlexLambda
+import com.example.hybridapp.App
+import com.example.hybridapp.R
 import com.example.hybridapp.util.Constants
 import com.example.hybridapp.util.Utils
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 /**
  * activeNetworkInfo is deprecated in API level 29(Q)
@@ -17,6 +22,32 @@ import com.example.hybridapp.util.Utils
  */
 
 object Network {
+
+    /**======================================= Action ============================================*/
+
+    val getStatusAction = FlexLambda.map {
+        withContext(Dispatchers.Main) {
+            val returnMap = HashMap<String, Any>()
+            when(getStatus(App.activity)) {
+                Constants.NET_STAT_CELLULAR -> {
+                    returnMap[App.INSTANCE.getString(R.string.obj_key_data)] = Constants.NET_STAT_CELLULAR
+                    returnMap[App.INSTANCE.getString(R.string.obj_key_msg)] = App.INSTANCE.getString(
+                        R.string.msg_cellular)
+                }
+                Constants.NET_STAT_WIFI -> {
+                    returnMap[App.INSTANCE.getString(R.string.obj_key_data)] = Constants.NET_STAT_WIFI
+                    returnMap[App.INSTANCE.getString(R.string.obj_key_msg)] = App.INSTANCE.getString(
+                        R.string.msg_wifi)
+                }
+                else -> {
+                    returnMap[App.INSTANCE.getString(R.string.obj_key_data)] = Constants.NET_STAT_DISCONNECTED
+                    returnMap[App.INSTANCE.getString(R.string.obj_key_msg)] = App.INSTANCE.getString(
+                        R.string.msg_disconnected)
+                }
+            }
+            returnMap
+        }
+    }
 
     /**
      * 네트워크 상태를 확인
@@ -71,7 +102,6 @@ object Network {
     }
 
     /** ConnectivityManager 생성 */
-    private fun getConnectivityManager(context: Context): ConnectivityManager {
-        return context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-    }
+    private fun getConnectivityManager(context: Context): ConnectivityManager
+        = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
 }

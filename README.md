@@ -74,10 +74,10 @@ startActivityAndFinish(env, context, "com.example.hybridapp.MainActivity");
 ## Toast Module
 
 #### 함수 >
-- fun showShortText(message: String)<br>
+- fun showShortToast(message: String)<br>
 : 짧은 토스트 메시지 출력
 
-- fun showLongText(message: String)<br>
+- fun showLongToast(message: String)<br>
 : 긴 토스트 메시지 출력
 
 #### 사용법 >
@@ -86,8 +86,8 @@ startActivityAndFinish(env, context, "com.example.hybridapp.MainActivity");
 ...
 val message = "Toast message"
 
-Toast.showShortText(message)
-Toast.showLongText(message)
+Toast.showShortToast(message)
+Toast.showLongToast(message)
 ...
 ```
 
@@ -95,10 +95,10 @@ Toast.showLongText(message)
 ## Snackbar Module
 
 #### 함수 >
-- fun showShortText(view: View, message: String)<br>
+- fun showShortToast(view: View, message: String)<br>
 : 짧은 스낵바 메시지 출력
 
-- fun showLongText(view: View, message: String)<br>
+- fun showLongToast(view: View, message: String)<br>
 : 긴 스낵바 메시지 출력
 
 #### 사용법 >
@@ -106,8 +106,8 @@ Toast.showLongText(message)
 ...
 val message = "Snackbar message"
 
-Snackbar.showShortText(App.activity.findViewById(R.id.constraintLayout), message)
-Snackbar.showLongText(App.activity.findViewById(R.id.constraintLayout), message)
+Snackbar.showShortToast(App.activity.findViewById(R.id.constraintLayout), message)
+Snackbar.showLongToast(App.activity.findViewById(R.id.constraintLayout), message)
 ...
 ```
 

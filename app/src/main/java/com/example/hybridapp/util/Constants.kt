@@ -12,6 +12,7 @@ import com.google.zxing.integration.android.IntentIntegrator
 class Constants {
 
    companion object {
+
        /** Permission Name */
        const val PERM_CAMERA = Manifest.permission.CAMERA
        const val PERM_WRITE_EXTERNAL_STORAGE = Manifest.permission.WRITE_EXTERNAL_STORAGE
@@ -19,12 +20,6 @@ class Constants {
        const val PERM_ACCESS_FINE_LOCATION = Manifest.permission.ACCESS_FINE_LOCATION
        const val PERM_ACCESS_COARSE_LOCATION = Manifest.permission.ACCESS_COARSE_LOCATION
        const val PERM_SEND_SMS = Manifest.permission.SEND_SMS
-
-       /** Permission Code */
-       const val PERM_FILE_REQ_CODE = 1002
-
-       /** Intent Request Code */
-       const val FILE_UPLOAD_REQ_CODE = 10007
 
        /** Notification Text */
        const val NOTIFICATION_ID = 101
@@ -40,6 +35,7 @@ class Constants {
        const val PUT_DATA_CODE = 0
        const val GET_DATA_CODE = 1
        const val DEL_DATA_CODE = 2
+
    }
 
 }

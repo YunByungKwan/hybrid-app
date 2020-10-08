@@ -45,7 +45,7 @@ class FCM: FirebaseMessagingService() {
             val pendingIntent = PendingIntent.getActivity(
                 this, 0, intent, PendingIntent.FLAG_ONE_SHOT)
 
-            Notification.create(channelId, Constants.NOTIFICATION_ID, title!!, message!!,
+            Notification.createNotification(channelId, Constants.NOTIFICATION_ID, title!!, message!!,
                 importance, pendingIntent)
 
             Utils.LOGD("Notification Title: $title, message: $message")

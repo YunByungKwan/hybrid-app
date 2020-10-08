@@ -1,17 +1,26 @@
 package com.example.hybridapp.module
 
 import android.Manifest
+import android.app.Activity
 import android.content.Intent
 import android.content.IntentFilter
 import android.net.Uri
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.result.launch
 import androidx.activity.result.registerForActivityResult
+import app.dvkyun.flexhybridand.FlexAction
+import app.dvkyun.flexhybridand.FlexData
+import app.dvkyun.flexhybridand.FlexFuncInterface
+import app.dvkyun.flexhybridand.FlexLambda
 import com.example.hybridapp.App
 import com.example.hybridapp.R
 import com.example.hybridapp.basic.BasicActivity
+import com.example.hybridapp.util.Constants
 import com.example.hybridapp.util.Utils
 import com.google.android.gms.auth.api.phone.SmsRetriever
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import org.json.JSONObject
 
 /**
@@ -26,34 +35,51 @@ import org.json.JSONObject
  * amvosl3kf/u
  */
 
-class SMS {
+class SMS(private val basicActivity: BasicActivity) {
 
-    private val basicActivity = App.activity as BasicActivity
-    private val deniedObj = Utils.createJSONObject(false, null,
-        basicActivity.getString(R.string.msg_denied_perm))
+    /** SEND SMS */
+    var phoneNumber: String? = null
+    var smsMessage: String? = null
+    var sendSmsAction: FlexAction? = null
+
+    /**====================================== Action =============================================*/
+    val sendAction
+            = FlexLambda.action { action, array ->
+        withContext(Dispatchers.Main) {
+            sendSmsAction = action
+            phoneNumber = array[0].reified()
+            smsMessage = array[1].reified()
+
+            if(Utils.existAllPermission(arrayOf(Constants.PERM_SEND_SMS))) {
+                sendMessage()
+            } else {
+                requestPermissionResult.launch()
+            }
+        }
+    }
 
     /** onRequestPermissionResult */
-    val requestPermissionResult = basicActivity.registerForActivityResult(
+    private val requestPermissionResult = basicActivity.registerForActivityResult(
         ActivityResultContracts.RequestPermission(), Manifest.permission.READ_EXTERNAL_STORAGE) { isGranted ->
         if(isGranted) {
             sendMessage()
         } else {
-            basicActivity.sendSmsAction!!.promiseReturn(deniedObj)
-            basicActivity.phoneNumber = null
-            basicActivity.smsMessage = null
+            val deniedObj = Utils.createJSONObject(false, null,
+                basicActivity.getString(R.string.msg_denied_perm))
+            sendSmsAction!!.promiseReturn(deniedObj)
+            phoneNumber = null
+            smsMessage = null
         }
     }
 
-    /** onActivityResult */
-    private val activityResult = basicActivity.registerForActivityResult(
-        ActivityResultContracts.StartActivityForResult()) { result: ActivityResult ->
-        // Intent.ACTION_SEND는 return값이 없음
-        val returnObj = JSONObject()
-        returnObj.put(App.INSTANCE.getString(R.string.obj_key_data), true)
-        basicActivity.sendSmsAction!!.promiseReturn(returnObj)
-        basicActivity.phoneNumber = null
-        basicActivity.smsMessage = null
+    /**======================================= Interface =========================================*/
+
+    @FlexFuncInterface
+    fun ReceiveSMS(array: Array<FlexData>) {
+        receiveMessage()
     }
+
+    /**======================================== Function =========================================*/
 
     /** SMS Receiver 등록 */
     fun registerReceiver(receiver: SMSReceiver?) {
@@ -72,27 +98,37 @@ class SMS {
     }
 
     /** 문자 메시지를 보냄  */
-    fun sendMessage() {
+    private fun sendMessage() {
         val packageManager = App.INSTANCE.packageManager
 
         val sendIntent = Intent(Intent.ACTION_SEND).apply {
-            data = Uri.parse("smsto:${basicActivity.phoneNumber}")
-            putExtra("sms_body", basicActivity.smsMessage)
+            data = Uri.parse("smsto:${phoneNumber}")
+            putExtra("sms_body", smsMessage)
         }
 
         if(Utils.existsReceiveActivity(sendIntent, packageManager)) {
             activityResult.launch(sendIntent)
         } else {
             var returnObj = Utils.createJSONObject(null, false, "메시지를 보낼 수 없습니다")
-            basicActivity.sendSmsAction?.promiseReturn(returnObj)
-            basicActivity.phoneNumber = null
-            basicActivity.smsMessage = null
+            sendSmsAction?.promiseReturn(returnObj)
+            phoneNumber = null
+            smsMessage = null
         }
     }
 
+    /** onActivityResult */
+    private val activityResult = basicActivity.registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()) { result: ActivityResult ->
+        // Intent.ACTION_SEND는 return값이 없음
+        val returnObj = JSONObject()
+        returnObj.put(App.INSTANCE.getString(R.string.obj_key_data), true)
+        sendSmsAction!!.promiseReturn(returnObj)
+        phoneNumber = null
+        smsMessage = null
+    }
 
     /** 문자 메시지를 받음 */
-    fun receiveMessage() {
+    private fun receiveMessage() {
         val client = SmsRetriever.getClient(App.activity)
         val task = client.startSmsRetriever()
         task.addOnCompleteListener {

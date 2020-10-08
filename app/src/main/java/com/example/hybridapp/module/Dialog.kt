@@ -11,12 +11,174 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
+import app.dvkyun.flexhybridand.FlexAction
+import app.dvkyun.flexhybridand.FlexData
+import app.dvkyun.flexhybridand.FlexLambda
 import com.example.hybridapp.App
 import com.example.hybridapp.R
+import com.example.hybridapp.basic.BasicActivity
 import com.example.hybridapp.util.Utils
 import com.google.android.material.bottomsheet.BottomSheetDialog
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import org.json.JSONObject
 
 object Dialog {
+
+    /**================================= 동작 lambda =========================================*/
+    /**
+     * $flex.dialog 동작 lambda
+     * */
+    val action: suspend CoroutineScope.(action: FlexAction, arguments: Array<FlexData>) -> Unit
+
+
+    /**================================= lambda 동작 선언 =========================================*/
+    init {
+        action = FlexLambda.action { dialogAction, array ->
+            launch(Dispatchers.Main) {
+                val title = array[0].asString()
+                val contents = array[1].asString()
+                val mapData = array[2].asMap()
+                val isDialog = array[3].asBoolean()
+
+                mapData?.let {
+                    val dialogKeys = arrayOf("basic", "destructive", "cancel")
+                    val basic: String? = it[dialogKeys[0]]?.asString()
+                    val destructive: String? = it[dialogKeys[1]]?.asString()
+                    val cancel: String? = it[dialogKeys[2]]?.asString()
+                    val returnObj = JSONObject()
+
+
+                    if (isDialog!!) {
+                        val posListener = DialogInterface.OnClickListener { _, _ ->
+                            basic?.let {
+                                returnObj.put(
+                                    App.INSTANCE.getString(R.string.obj_key_msg),
+                                    dialogKeys[0]
+                                )
+                                Utils.LOGD(
+                                    "returnObj['msg'] = " +
+                                            returnObj.getString(App.INSTANCE.getString(R.string.obj_key_msg))
+                                )
+                                dialogAction.promiseReturn(returnObj)
+                            }
+                        }
+                        val neutralListener = DialogInterface.OnClickListener { _, _ ->
+                            destructive?.let {
+                                returnObj.put(
+                                    App.INSTANCE.getString(R.string.obj_key_msg),
+                                    dialogKeys[1]
+                                )
+                                Utils.LOGD(
+                                    "returnObj['msg'] = " +
+                                            returnObj.getString(App.INSTANCE.getString(R.string.obj_key_msg))
+                                )
+                                dialogAction.promiseReturn(returnObj)
+                            }
+                        }
+                        val negListener = DialogInterface.OnClickListener { _, _ ->
+                            cancel?.let {
+                                returnObj.put(
+                                    App.INSTANCE.getString(R.string.obj_key_msg),
+                                    dialogKeys[2]
+                                )
+                                Utils.LOGD(
+                                    "returnObj['msg'] = " +
+                                            returnObj.getString(App.INSTANCE.getString(R.string.obj_key_msg))
+                                )
+                                dialogAction.promiseReturn(returnObj)
+                            }
+                        }
+                        val exitListener = {
+                            returnObj.put(
+                                App.INSTANCE.getString(R.string.obj_key_msg),
+                                dialogKeys[2]
+                            )
+                            Utils.LOGD(
+                                "returnObj['msg'] = " +
+                                        returnObj.getString(App.INSTANCE.getString(R.string.obj_key_msg))
+                            )
+                            dialogAction.promiseReturn(returnObj)
+                        }
+
+                        Dialog.show(
+                            title, contents, basic, destructive, cancel,
+                            posListener, neutralListener, negListener, exitListener
+                        )
+                    } else {  // Bottom Dialog (Bottom Sheet Dialog)
+                        val dialog = BottomSheetDialog(App.activity)
+
+                        var posBtn = Dialog.getBtnView(basic)
+                        posBtn?.let { btn ->
+                            btn.setOnClickListener {
+                                returnObj.put(
+                                    App.INSTANCE.getString(R.string.obj_key_msg),
+                                    dialogKeys[0]
+                                )
+                                Utils.LOGD(
+                                    "returnObj['msg'] = " +
+                                            "${returnObj.getString(App.INSTANCE.getString(R.string.obj_key_msg))}"
+                                )
+                                dialogAction?.promiseReturn(returnObj)
+                                dialog.dismiss()
+                            }
+                        }
+
+                        var neutralBtn = Dialog.getBtnView(destructive)
+                        neutralBtn?.let { btn ->
+                            btn.setOnClickListener {
+                                returnObj.put(
+                                    App.INSTANCE.getString(R.string.obj_key_msg),
+                                    dialogKeys[1]
+                                )
+                                Utils.LOGD(
+                                    "returnObj['msg'] = " +
+                                            "${returnObj.getString(App.INSTANCE.getString(R.string.obj_key_msg))}"
+                                )
+                                dialogAction?.promiseReturn(returnObj)
+                                dialog.dismiss()
+                            }
+                        }
+
+                        var negBtn = Dialog.getBtnView(cancel)
+                        negBtn?.let { btn ->
+                            btn.setOnClickListener {
+                                returnObj.put(
+                                    App.INSTANCE.getString(R.string.obj_key_msg),
+                                    dialogKeys[2]
+                                )
+                                Utils.LOGD(
+                                    "returnObj['msg'] = " +
+                                            "${returnObj.getString(App.INSTANCE.getString(R.string.obj_key_msg))}"
+                                )
+                                dialogAction?.promiseReturn(returnObj)
+                                dialog.dismiss()
+                            }
+                        }
+
+                        val exitListener = {
+                            returnObj.put(
+                                App.INSTANCE.getString(R.string.obj_key_msg),
+                                dialogKeys[2]
+                            )
+                            Utils.LOGD(
+                                "returnObj['msg'] = " +
+                                        "${returnObj.getString(App.INSTANCE.getString(R.string.obj_key_msg))}"
+                            )
+                            dialogAction?.promiseReturn(returnObj)
+                        }
+
+                        val btnList = arrayListOf(posBtn, neutralBtn, negBtn)
+                        val dialogLayout = Dialog.getBottomSheetDialogView(title, contents, btnList)
+                        Dialog.bottomSheetshow(dialog, dialogLayout, exitListener)
+                    }
+                }
+            }
+        }
+    }
+
+    /**================================= 모듈 기능 =========================================*/
 
     fun show(title: String?,
              message: String?,

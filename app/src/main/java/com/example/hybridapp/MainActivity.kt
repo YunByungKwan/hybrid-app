@@ -80,7 +80,7 @@ class MainActivity : BasicActivity() {
 
     /** FlexWebView Action 설정 */
     private fun setActions() {
-        flex_web_view.setAction(getString(R.string.type_dialog), Action.dialog)
+        flex_web_view.setAction(getString(R.string.type_dialog), Dialog.action)
         flex_web_view.mapInterface(getString(R.string.type_network), Action.network)
         flex_web_view.setAction(getString(R.string.type_camera_device_ratio), Action.cameraByDeviceRatio)
         flex_web_view.setAction(getString(R.string.type_camera_ratio), Action.cameraByRatio)

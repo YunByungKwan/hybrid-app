@@ -19,12 +19,9 @@ class BasicWebViewClient: FlexWebViewClient() {
             val currentDateTime = Utils.getCurrentDateAndTime()
 
             if(url != null) {
-                Utils.LOGD("($currentDateTime)접속 URL: $url")
-
                 val logUrlDao = LogUrlRoomDatabase.getDatabase(App.INSTANCE).logUrlDao()
                 val repository = LogUrlRepository(logUrlDao)
                 val logUrl = LogUrl(0, currentDateTime, url)
-
                 repository.insert(logUrl)
             }
         }

@@ -21,33 +21,7 @@ import kotlinx.coroutines.withContext
  * hasTransport() is added in API level 21(L)
  */
 
-object Network {
-
-    /**======================================= Action ============================================*/
-
-    val getStatusAction = FlexLambda.map {
-        withContext(Dispatchers.Main) {
-            val returnMap = HashMap<String, Any>()
-            when(getStatus(App.activity)) {
-                Constants.NET_STAT_CELLULAR -> {
-                    returnMap[App.INSTANCE.getString(R.string.obj_key_data)] = Constants.NET_STAT_CELLULAR
-                    returnMap[App.INSTANCE.getString(R.string.obj_key_msg)] = App.INSTANCE.getString(
-                        R.string.msg_cellular)
-                }
-                Constants.NET_STAT_WIFI -> {
-                    returnMap[App.INSTANCE.getString(R.string.obj_key_data)] = Constants.NET_STAT_WIFI
-                    returnMap[App.INSTANCE.getString(R.string.obj_key_msg)] = App.INSTANCE.getString(
-                        R.string.msg_wifi)
-                }
-                else -> {
-                    returnMap[App.INSTANCE.getString(R.string.obj_key_data)] = Constants.NET_STAT_DISCONNECTED
-                    returnMap[App.INSTANCE.getString(R.string.obj_key_msg)] = App.INSTANCE.getString(
-                        R.string.msg_disconnected)
-                }
-            }
-            returnMap
-        }
-    }
+object NetworkCompat {
 
     /**
      * 네트워크 상태를 확인
@@ -57,12 +31,12 @@ object Network {
      * 1 : 데이터 연결됨
      * 2 : 와이파이 연결됨
      */
-    fun getStatus(context: Context): Int {
-        val manager = getConnectivityManager(context)
+    fun getNetworkStatus(context: Context): Int {
+        val cm = getConnectivityManager(context)
         return if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            getNetworkStatusMorMore(manager)
+            getNetworkStatusMorMore(cm)
         } else {
-            getNetworkStatusLessThanM(manager)
+            getNetworkStatusLessThanM(cm)
         }
     }
 
@@ -103,5 +77,31 @@ object Network {
 
     /** ConnectivityManager 생성 */
     private fun getConnectivityManager(context: Context): ConnectivityManager
-        = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+            = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+
+    /**======================================= Action ============================================*/
+
+    val getNetworkStatusAction = FlexLambda.map {
+        withContext(Dispatchers.Main) {
+            val returnMap = HashMap<String, Any>()
+            when(getNetworkStatus(App.activity)) {
+                Constants.NET_STAT_CELLULAR -> {
+                    returnMap[App.INSTANCE.getString(R.string.obj_key_data)] = Constants.NET_STAT_CELLULAR
+                    returnMap[App.INSTANCE.getString(R.string.obj_key_msg)] = App.INSTANCE.getString(
+                        R.string.msg_cellular)
+                }
+                Constants.NET_STAT_WIFI -> {
+                    returnMap[App.INSTANCE.getString(R.string.obj_key_data)] = Constants.NET_STAT_WIFI
+                    returnMap[App.INSTANCE.getString(R.string.obj_key_msg)] = App.INSTANCE.getString(
+                        R.string.msg_wifi)
+                }
+                else -> {
+                    returnMap[App.INSTANCE.getString(R.string.obj_key_data)] = Constants.NET_STAT_DISCONNECTED
+                    returnMap[App.INSTANCE.getString(R.string.obj_key_msg)] = App.INSTANCE.getString(
+                        R.string.msg_disconnected)
+                }
+            }
+            returnMap
+        }
+    }
 }

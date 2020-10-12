@@ -20,6 +20,7 @@ class Constants {
        const val PERM_ACCESS_FINE_LOCATION = Manifest.permission.ACCESS_FINE_LOCATION
        const val PERM_ACCESS_COARSE_LOCATION = Manifest.permission.ACCESS_COARSE_LOCATION
        const val PERM_SEND_SMS = Manifest.permission.SEND_SMS
+       const val PERM_READ_CONTACTS = Manifest.permission.READ_CONTACTS
 
        /** Notification Text */
        const val NOTIFICATION_ID = 101

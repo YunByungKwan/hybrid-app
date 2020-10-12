@@ -23,8 +23,6 @@ class FCM: FirebaseMessagingService() {
     }
 
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
-        Utils.LOGD("Call onMessageReceived() in FCM class.")
-
         if(remoteMessage.notification != null) {
             val channelId = getString(R.string.noti_channel_id)
             val channelName = getString(R.string.noti_channel_name)
@@ -32,10 +30,8 @@ class FCM: FirebaseMessagingService() {
             val importance = Constants.NOTI_DEFAULT
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                Notification.createChannel(channelId, channelName, description,
+                NotiCompat.createChannel(channelId, channelName, description,
                     importance, true)
-            } else {
-                Utils.LOGE(getString(R.string.log_msg_not_channel))
             }
 
             val title = remoteMessage.notification!!.title
@@ -45,10 +41,8 @@ class FCM: FirebaseMessagingService() {
             val pendingIntent = PendingIntent.getActivity(
                 this, 0, intent, PendingIntent.FLAG_ONE_SHOT)
 
-            Notification.createNotification(channelId, Constants.NOTIFICATION_ID, title!!, message!!,
+            NotiCompat.createNotification(channelId, Constants.NOTIFICATION_ID, title!!, message!!,
                 importance, pendingIntent)
-
-            Utils.LOGD("Notification Title: $title, message: $message")
         }
     }
 }

@@ -3,7 +3,6 @@ package com.example.hybridapp.basic
 import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.View
-import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
 import com.example.hybridapp.data.LogUrlRepository
 import com.example.hybridapp.module.*
@@ -24,19 +23,22 @@ open class BasicActivity: AppCompatActivity() {
     var isPressedTwice: Boolean = false
 
     /** Module Instance */
-    var qrInstance: QRCode? = null
+    var qrCodeCompat: QRCodeCompat? = null
     var cameraInstance: Camera? = null
     var photoInstance: Photo? = null
-    var locInstance: Location? = null
-    var smsInstance: SMS? = null
+    var locationCompat: LocationCompat? = null
+    var smsCompat: SmsCompat? = null
+    var contactsCompat: ContactsCompat? = null
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        qrInstance = QRCode(this)
+        qrCodeCompat = QRCodeCompat(this)
         cameraInstance = Camera(this)
         photoInstance = Photo(this)
-        locInstance = Location(this)
-        smsInstance = SMS(this)
+        locationCompat = LocationCompat(this)
+        smsCompat = SmsCompat(this)
+        contactsCompat = ContactsCompat(this)
     }
 }

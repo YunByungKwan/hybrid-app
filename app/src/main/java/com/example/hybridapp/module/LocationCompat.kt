@@ -27,63 +27,30 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
 
-class Location(private val basicActivity: BasicActivity) {
+class LocationCompat(private val basicActivity: BasicActivity) {
 
-    var locationAction: FlexAction? = null
-
-    /**=================================== Location Action =======================================*/
-    val findAction = FlexLambda.action { action, _->
-        withContext(Dispatchers.Main) {
-            locationAction = action
-
-            if(Utils.existAllPermission(arrayOf(
-                    Constants.PERM_ACCESS_FINE_LOCATION,
-                    Constants.PERM_ACCESS_COARSE_LOCATION))) {
-                basicActivity.locInstance!!.getCurrentLatAndLot()
-            } else {
-                basicActivity.locInstance!!.requestPermissionResult.launch()
-            }
-        }
-    }
-
-
-    private val requestPermissionResult = basicActivity.registerForActivityResult(
-        ActivityResultContracts.RequestPermission(), Manifest.permission.READ_EXTERNAL_STORAGE
-    ) { isGranted ->
-        if(isGranted) {
-            getCurrentLatAndLot()
-        } else {
-            val deniedObj = Utils.createJSONObject(false, null,
-                basicActivity.getString(R.string.msg_denied_perm))
-            locationAction!!.promiseReturn(deniedObj)
-        }
-    }
-
+    var flexAction: FlexAction? = null
 
     /** 현재 위치의 위도,경도 가져오기 */
     @SuppressLint("MissingPermission")
-    fun getCurrentLatAndLot() {
+    fun getCurrentLatitudeAndLongitude() {
         // GPS 사용이 가능한 경우
-        if(isLocationEnabled(basicActivity)) {
+        if(isLocationProviderEnabled(basicActivity)) {
             // 뒷배경 뷰 생성
-            val mInflater = Utils.getLayoutInflater(App.activity)
-            basicActivity.backgroundView = mInflater.inflate(R.layout.background_popup, null)
-            App.activity.constraintLayout.addView(basicActivity.backgroundView)
+            //val mInflater = Utils.getLayoutInflater(App.activity)
+            //basicActivity.backgroundView = mInflater.inflate(R.layout.background_popup, App.activity.constraintLayout, true)
+            //App.activity.constraintLayout.addView(basicActivity.backgroundView)
             Utils.visibleProgressBar()
 
             val mLocationRequest = getLocationRequest()
-            val mFusedLocationClient = LocationServices
-                .getFusedLocationProviderClient(basicActivity)
+            val mFusedLocationClient = LocationServices.getFusedLocationProviderClient(basicActivity)
             mFusedLocationClient!!.requestLocationUpdates(mLocationRequest, mLocationCallback, null)
-
             return
-        }
-        // GPS 사용이 불가능한 경우
-        else {
+        } else {
             val posListener = DialogInterface.OnClickListener { _, _ ->
                 val returnObj = Utils.createJSONObject(true,
                     null, App.INSTANCE.getString(R.string.msg_not_load_lat_lot))
-                locationAction?.promiseReturn(returnObj)
+                flexAction?.promiseReturn(returnObj)
             }
 
             Dialog.show("위치 권한", "GPS를 켜야 합니다", "확인",
@@ -91,58 +58,71 @@ class Location(private val basicActivity: BasicActivity) {
                 null, null,
                 { val returnObj = Utils.createJSONObject(true,
                     null, App.INSTANCE.getString(R.string.msg_not_load_lat_lot))
-                    locationAction?.promiseReturn(returnObj)  })
+                    flexAction?.promiseReturn(returnObj)  })
         }
     }
 
     /** GPS를 사용 가능 여부 판별 */
-    private fun isLocationEnabled(context: Context): Boolean {
-        var locationManager = context.getSystemService(Context.LOCATION_SERVICE)
-                as LocationManager
+    private fun isLocationProviderEnabled(context: Context): Boolean {
+        val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
         return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
                 || locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER
         )
     }
 
     /** LocationRequest 생성 후 반환 */
-    private fun getLocationRequest(): LocationRequest {
-        Utils.LOGD("Call getLocationRequest() in Location object.")
-
-        val mLocationRequest = LocationRequest()
-        mLocationRequest.priority = LocationRequest.PRIORITY_HIGH_ACCURACY
-        mLocationRequest.interval = 0
-        mLocationRequest.fastestInterval = 0
-        mLocationRequest.numUpdates = 1
-
-        return mLocationRequest
+    private fun getLocationRequest(): LocationRequest = LocationRequest().apply {
+        priority = LocationRequest.PRIORITY_HIGH_ACCURACY
+        interval = 0
+        fastestInterval = 0
+        numUpdates = 1
     }
 
     /** Location Callback */
     private val mLocationCallback = object : LocationCallback() {
         override fun onLocationResult(locationResult: LocationResult) {
             CoroutineScope(Dispatchers.Main).launch {
-                Utils.LOGD("Call onLocationResult() in LocationCallback object.")
-
                 var mLastLocation: Location = locationResult.lastLocation
                 val latitude = mLastLocation.latitude.toString()
                 val longitude = mLastLocation.longitude.toString()
-                Utils.LOGD("Latitude: $latitude, Longitude: $longitude")
 
-                // 위도, 경도에 대한 JSONObject 생성
                 val locObj = JSONObject()
                 locObj.put("lat", latitude)
                 locObj.put("lot", longitude)
 
-                // promiseReturn할 JSONObject 생성
-                val returnObj = Utils.createJSONObject(true,
-                    locObj, null)
-
-                val basicActivity = App.activity as BasicActivity
-                basicActivity.constraintLayout.removeView(basicActivity.backgroundView)
+                val returnObj = Utils.createJSONObject(true, locObj, null)
+                //basicActivity.constraintLayout.removeView(basicActivity.backgroundView)
                 Utils.invisibleProgressBar()
-
-                locationAction?.promiseReturn(returnObj)
+                flexAction?.promiseReturn(returnObj)
             }
+        }
+    }
+
+    /**=================================== Location Action =======================================*/
+    val getLocationAction = FlexLambda.action { action, _->
+        withContext(Dispatchers.Main) {
+            flexAction = action
+            val permissions = arrayOf(Constants.PERM_ACCESS_FINE_LOCATION,
+                Constants.PERM_ACCESS_COARSE_LOCATION)
+            if(Utils.existAllPermission(permissions)) {
+                getCurrentLatitudeAndLongitude()
+            } else {
+                permissionsResult.launch(permissions)
+            }
+        }
+    }
+
+    /** onRequestPermissionResult */
+    private val permissionsResult = basicActivity.registerForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
+        if(Utils.existAllPermission(permissions)) {
+            getCurrentLatitudeAndLongitude()
+        } else {
+            val deniedObj = Utils.createJSONObject(
+                false,
+                null,
+                basicActivity.getString(R.string.msg_denied_perm))
+            flexAction!!.promiseReturn(deniedObj)
         }
     }
 }

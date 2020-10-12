@@ -14,7 +14,7 @@ class BasicWebChromeClient(activity: BasicActivity): FlexWebChromeClient(activit
     private var mFilePatCallback: ValueCallback<Array<Uri>>? = null
 
     /** onActivityResult */
-    private val activityResultForFileDownload = activity.registerForActivityResult(
+    private val activityResult = activity.registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()) { result: ActivityResult ->
 
     }
@@ -28,7 +28,7 @@ class BasicWebChromeClient(activity: BasicActivity): FlexWebChromeClient(activit
         intent.addCategory(Intent.CATEGORY_OPENABLE)
         intent.type = "image/*"
 
-        activityResultForFileDownload.launch(intent)
+        activityResult.launch(intent)
         return true
     }
 }

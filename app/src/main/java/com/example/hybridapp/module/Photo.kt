@@ -254,7 +254,7 @@ class Photo(private val basicActivity: BasicActivity) {
                     ratio = null
                     isWidthRatio = null
                 } else {
-                    Toast.showLongToast("10장 이상의 사진을 첨부할 수 없습니다")
+                    ToastCompat.showLongToast("10장 이상의 사진을 첨부할 수 없습니다")
                     val returnObj = Utils.createJSONObject(true,
                         null, "10장 이상의 사진을 첨부할 수 없습니다")
                     multiplePhotoDeviceAction?.promiseReturn(returnObj)
@@ -301,7 +301,7 @@ class Photo(private val basicActivity: BasicActivity) {
                     multiplePhotoAction?.promiseReturn(base64Images)
                     ratio = null
                 } else {
-                    Toast.showLongToast("10장 이상의 사진을 첨부할 수 없습니다.")
+                    ToastCompat.showLongToast("10장 이상의 사진을 첨부할 수 없습니다.")
                     val returnObj = Utils.createJSONObject(true,
                         null, "10장 이상의 사진을 첨부할 수 없습니다")
                     multiplePhotoAction?.promiseReturn(returnObj)

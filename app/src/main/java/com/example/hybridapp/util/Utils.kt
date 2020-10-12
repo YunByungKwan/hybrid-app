@@ -35,7 +35,7 @@ import com.example.hybridapp.R
 import com.example.hybridapp.basic.BasicActivity
 import com.example.hybridapp.data.LogUrlRepository
 import com.example.hybridapp.data.LogUrlRoomDatabase
-import com.example.hybridapp.module.Network
+import com.example.hybridapp.module.NetworkCompat
 import com.example.hybridapp.module.SharedPreferences
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.CoroutineScope
@@ -145,7 +145,7 @@ object Utils {
         val w = (ratio?.times(screenSize.getValue("width")))?.toInt()
         val h = (ratio?.times(screenSize.getValue("height")))?.toInt()
 
-        if(Network.getStatus(App.activity) == Constants.NET_STAT_DISCONNECTED) {
+        if(NetworkCompat.getNetworkStatus(App.activity) == Constants.NET_STAT_DISCONNECTED) {
             val returnObj = JSONObject()
             returnObj.put(App.INSTANCE.getString(R.string.obj_key_data), false)
             returnObj.put(App.INSTANCE.getString(R.string.obj_key_msg), "연결된 네트워크가 없습니다")
@@ -169,6 +169,13 @@ object Utils {
             if(!existsPermission(permissionName)) {
                 return false
             }
+        }
+        return true
+    }
+
+    fun existAllPermission(permissions: Map<String,Boolean>): Boolean {
+        for(isGranted in permissions.values) {
+            if(!isGranted) return false
         }
         return true
     }
@@ -494,6 +501,9 @@ object Utils {
 
         return params
     }
+
+
+    fun resultOk(resultCode: Int): Boolean = resultCode == AppCompatActivity.RESULT_OK
 
     /**================================== JSONObject 관련 ========================================*/
 

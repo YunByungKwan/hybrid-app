@@ -1,6 +1,5 @@
 package com.example.hybridapp
 
-import android.content.pm.PackageManager
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -27,11 +26,11 @@ class MainActivity : BasicActivity() {
         if(smsReceiver == null) {
             smsReceiver = SMSReceiver()
         }
-        smsInstance!!.registerReceiver(smsReceiver)
+        smsCompat!!.registerReceiver(smsReceiver)
     }
 
     override fun onPause() {
-        smsInstance!!.unregisterReceiver(smsReceiver)
+        smsCompat!!.unregisterReceiver(smsReceiver)
         super.onPause()
     }
 
@@ -42,6 +41,11 @@ class MainActivity : BasicActivity() {
         App.INSTANCE.setTheme(R.style.SplashTheme)
         init()
         App.INSTANCE.setTheme(R.style.AppTheme)
+
+        // 연락처 가져오기
+        fab.setOnClickListener {
+            contactsCompat!!.getNameAndNumberFromContacts()
+        }
     }
 
     /** 시작 시 기본 초기화 함수 */
@@ -65,25 +69,25 @@ class MainActivity : BasicActivity() {
         WebView.setWebContentsDebuggingEnabled(true)
         flex_web_view.webChromeClient = BasicWebChromeClient(this)
         flex_web_view.webViewClient = BasicWebViewClient()
-        flex_web_view.addFlexInterface(Toast)
-        flex_web_view.addFlexInterface(Notification)
+        flex_web_view.addFlexInterface(ToastCompat)
+        flex_web_view.addFlexInterface(NotiCompat)
         flex_web_view.addFlexInterface(Utils)
-        flex_web_view.addFlexInterface(smsInstance!!)
+        flex_web_view.addFlexInterface(smsCompat!!)
         flex_web_view.isVerticalScrollBarEnabled = false
         flex_web_view.isHorizontalScrollBarEnabled = false
 
         /** FlexWebView Action 설정 */
         flex_web_view.setAction(getString(R.string.type_dialog), Dialog.showAction)
-        flex_web_view.mapInterface(getString(R.string.type_network), Network.getStatusAction)
+        flex_web_view.mapInterface(getString(R.string.type_network), NetworkCompat.getNetworkStatusAction)
         flex_web_view.setAction(getString(R.string.type_camera_device_ratio), cameraInstance!!.actionByDeviceRatio)
         flex_web_view.setAction(getString(R.string.type_camera_ratio), cameraInstance!!.actionByRatio)
         flex_web_view.setAction(getString(R.string.type_photo_device_ratio), photoInstance!!.actionByDeviceRatioSingle)
         flex_web_view.setAction(getString(R.string.type_photo_ratio), photoInstance!!.actionByRatioSingle)
         flex_web_view.setAction(getString(R.string.type_multi_photo_device_ratio), photoInstance!!.actionByDeviceRatioMulti)
         flex_web_view.setAction(getString(R.string.type_multi_photo_ratio), photoInstance!!.actionByRatioMulti)
-        flex_web_view.setAction(getString(R.string.type_qr_code_scan), qrInstance!!.scanAction)
-        flex_web_view.setAction(getString(R.string.type_location), locInstance!!.findAction)
-        flex_web_view.setAction(getString(R.string.type_send_sms), smsInstance!!.sendAction)
+        flex_web_view.setAction(getString(R.string.type_qr_code_scan), qrCodeCompat!!.scanQrCodeAction)
+        flex_web_view.setAction(getString(R.string.type_location), locationCompat!!.getLocationAction)
+        flex_web_view.setAction(getString(R.string.type_send_sms), smsCompat!!.sendSmsAction)
         flex_web_view.setAction(getString(R.string.type_auth), Authentication.authentication)
         flex_web_view.setAction(getString(R.string.type_local_repo), Utils.localRepository)
         flex_web_view.setAction(getString(R.string.type_web_pop_up), Utils.webPopUp)
@@ -119,7 +123,7 @@ class MainActivity : BasicActivity() {
             super.onBackPressed()
         } else {
             isPressedTwice = true
-            Toast.showShortToast(getString(R.string.back_pressed))
+            ToastCompat.showShortToast(getString(R.string.back_pressed))
             Handler(Looper.getMainLooper()).postDelayed({
                 isPressedTwice = false
             }, 2000)

@@ -35,7 +35,7 @@ import org.json.JSONObject
  * amvosl3kf/u
  */
 
-class SmsCompat(private val basicActivity: BasicActivity) {
+class SmsCompat(private val basicAct: BasicActivity) {
 
     private var phoneNumber: String? = null
     private var message: String? = null
@@ -45,13 +45,13 @@ class SmsCompat(private val basicActivity: BasicActivity) {
     fun registerReceiver(receiver: SMSReceiver?) {
         val filter = IntentFilter()
         filter.addAction(receiver!!.smsRetrievedAction)
-        basicActivity.registerReceiver(receiver, filter)
+        basicAct.registerReceiver(receiver, filter)
     }
 
     /** SMS Receiver를 해제한다. */
     fun unregisterReceiver(receiver: SMSReceiver?) {
         if(receiver != null) {
-            basicActivity.unregisterReceiver(receiver)
+            basicAct.unregisterReceiver(receiver)
         } else {
             Utils.LOGD("SMS Receiver is null.")
         }
@@ -69,7 +69,7 @@ class SmsCompat(private val basicActivity: BasicActivity) {
         if(Utils.existsReceiveActivity(intent, packageManager)) {
             activityResult.launch(intent)
         } else {
-            var returnObj = Utils.createJSONObject(null, false, "메시지를 보낼 수 없습니다")
+            var returnObj = Utils.returnJson(null, false, "메시지를 보낼 수 없습니다")
             flexAction?.promiseReturn(returnObj)
             phoneNumber = null
             message = null
@@ -78,7 +78,7 @@ class SmsCompat(private val basicActivity: BasicActivity) {
 
     /** 문자 메시지를 받음 */
     private fun receiveSMS() {
-        val client = SmsRetriever.getClient(basicActivity)
+        val client = SmsRetriever.getClient(basicAct)
         val task = client.startSmsRetriever()
         task.addOnCompleteListener {
             Utils.LOGD("Call addOnCompleteListener in SMS object.")
@@ -95,7 +95,7 @@ class SmsCompat(private val basicActivity: BasicActivity) {
     }
 
     /** onActivityResult */
-    private val activityResult = basicActivity.registerForActivityResult(
+    private val activityResult = basicAct.registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()) {
         val returnObj = JSONObject()
         returnObj.put(App.INSTANCE.getString(R.string.obj_key_data), true)
@@ -121,12 +121,12 @@ class SmsCompat(private val basicActivity: BasicActivity) {
     }
 
     /** onRequestPermissionResult */
-    private val permissionResult = basicActivity.registerForActivityResult(
+    private val permissionResult = basicAct.registerForActivityResult(
         ActivityResultContracts.RequestPermission(), Manifest.permission.READ_EXTERNAL_STORAGE) { isGranted ->
         if(isGranted) {
             sendSMS()
         } else {
-            val deniedObj = Utils.createJSONObject(false, null, basicActivity.getString(R.string.msg_denied_perm))
+            val deniedObj = Utils.returnJson(false, null, basicAct.getString(R.string.msg_denied_perm))
             flexAction!!.promiseReturn(deniedObj)
             phoneNumber = null
             message = null

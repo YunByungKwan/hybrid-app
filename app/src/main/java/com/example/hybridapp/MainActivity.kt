@@ -22,34 +22,23 @@ class MainActivity : BasicActivity() {
 
     override fun onResume() {
         super.onResume()
-
-        if(smsReceiver == null) {
-            smsReceiver = SMSReceiver()
-        }
-        smsCompat!!.registerReceiver(smsReceiver)
+        registerSmsReceiver()
     }
 
     override fun onPause() {
-        smsCompat!!.unregisterReceiver(smsReceiver)
+        unregisterSmsReceiver()
         super.onPause()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-
-        App.INSTANCE.setTheme(R.style.SplashTheme)
         init()
-        App.INSTANCE.setTheme(R.style.AppTheme)
-
-        // 연락처 가져오기
-        fab.setOnClickListener {
-            contactsCompat!!.getNameAndNumberFromContacts()
-        }
     }
 
     /** 시작 시 기본 초기화 함수 */
     private fun init() {
+        setTheme(R.style.SplashTheme)
         CoroutineScope(Dispatchers.Default).launch {
             val logUrlDao = LogUrlRoomDatabase.getDatabase(this@MainActivity).logUrlDao()
             repository = LogUrlRepository(logUrlDao)
@@ -57,34 +46,43 @@ class MainActivity : BasicActivity() {
         // Android KeyStore init
         AndroidKeyStoreUtil.init(App.context())
         setFlexWebView()
+        setFlexInterface()
+        setFlexAction()
         window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
+        setTheme(R.style.AppTheme)
     }
 
     /** 기본, 팝업 FlexView 설정 */
     private fun setFlexWebView() {
-        flex_pop_up_web_view.baseUrl = App.INSTANCE.getString(R.string.base_url)
-        flex_web_view.baseUrl = App.INSTANCE.getString(R.string.base_url)
-        flex_web_view.loadUrl(App.INSTANCE.getString(R.string.url))
-        flex_web_view.settings.setSupportMultipleWindows(true)
         WebView.setWebContentsDebuggingEnabled(true)
-        flex_web_view.webChromeClient = BasicWebChromeClient(this)
-        flex_web_view.webViewClient = BasicWebViewClient()
+        flex_pop_up_web_view.baseUrl = App.INSTANCE.getString(R.string.base_url)
+        flex_web_view.apply {
+            baseUrl = getString(R.string.base_url)
+            loadUrl(getString(R.string.url))
+            settings.setSupportMultipleWindows(true)
+            webChromeClient = BasicWebChromeClient(this@MainActivity)
+            webViewClient = BasicWebViewClient()
+            isVerticalScrollBarEnabled = false
+            isHorizontalScrollBarEnabled = false
+        }
+    }
+
+    private fun setFlexInterface() {
         flex_web_view.addFlexInterface(ToastCompat)
         flex_web_view.addFlexInterface(NotiCompat)
         flex_web_view.addFlexInterface(Utils)
         flex_web_view.addFlexInterface(smsCompat!!)
-        flex_web_view.isVerticalScrollBarEnabled = false
-        flex_web_view.isHorizontalScrollBarEnabled = false
-
-        /** FlexWebView Action 설정 */
-        flex_web_view.setAction(getString(R.string.type_dialog), Dialog.showAction)
         flex_web_view.mapInterface(getString(R.string.type_network), NetworkCompat.getNetworkStatusAction)
-        flex_web_view.setAction(getString(R.string.type_camera_device_ratio), cameraInstance!!.actionByDeviceRatio)
-        flex_web_view.setAction(getString(R.string.type_camera_ratio), cameraInstance!!.actionByRatio)
-        flex_web_view.setAction(getString(R.string.type_photo_device_ratio), photoInstance!!.actionByDeviceRatioSingle)
-        flex_web_view.setAction(getString(R.string.type_photo_ratio), photoInstance!!.actionByRatioSingle)
-        flex_web_view.setAction(getString(R.string.type_multi_photo_device_ratio), photoInstance!!.actionByDeviceRatioMulti)
-        flex_web_view.setAction(getString(R.string.type_multi_photo_ratio), photoInstance!!.actionByRatioMulti)
+    }
+
+    private fun setFlexAction() {
+        flex_web_view.setAction(getString(R.string.type_dialog), DialogCompat.showDialogAction)
+        flex_web_view.setAction(getString(R.string.type_camera_device_ratio), cameraCompat!!.actionByDeviceRatio)
+        flex_web_view.setAction(getString(R.string.type_camera_ratio), cameraCompat!!.actionByRatio)
+        flex_web_view.setAction(getString(R.string.type_photo_device_ratio), photoCompat!!.actionByDeviceRatioSingle)
+        flex_web_view.setAction(getString(R.string.type_photo_ratio), photoCompat!!.actionByRatioSingle)
+        flex_web_view.setAction(getString(R.string.type_multi_photo_device_ratio), photoCompat!!.actionByDeviceRatioMulti)
+        flex_web_view.setAction(getString(R.string.type_multi_photo_ratio), photoCompat!!.actionByRatioMulti)
         flex_web_view.setAction(getString(R.string.type_qr_code_scan), qrCodeCompat!!.scanQrCodeAction)
         flex_web_view.setAction(getString(R.string.type_location), locationCompat!!.getLocationAction)
         flex_web_view.setAction(getString(R.string.type_send_sms), smsCompat!!.sendSmsAction)
@@ -94,12 +92,28 @@ class MainActivity : BasicActivity() {
         flex_web_view.setAction(getString(R.string.type_download), Utils.downloadAction)
     }
 
+    /** sms리시버를 등록한다. */
+    private fun registerSmsReceiver() {
+        if(smsReceiver == null) {
+            smsReceiver = SMSReceiver()
+        }
+        smsCompat!!.registerReceiver(smsReceiver)
+    }
+
+    /** sms리시버를 해제한다. */
+    private fun unregisterSmsReceiver() {
+        smsCompat!!.unregisterReceiver(smsReceiver)
+    }
+
+    /** FloatingActionButton 클릭시 이벤트 */
+    fun onClickFab(v: View?) {
+        contactsCompat!!.getNameAndNumberFromContacts()
+    }
+
     /** 뒤로 가기 버튼 클릭 이벤트 */
     override fun onBackPressed() {
         if(isPopupOpen()) {
-            Utils.removeBackgroundViewFrom(App.activity.constraintLayout)
-            Utils.removeCloseButtonFrom(App.activity.constraintLayout)
-            Utils.hidePopUpView(this@MainActivity, flex_pop_up_web_view)
+            closePopUp()
         } else {
             backPressed()
         }
@@ -107,6 +121,13 @@ class MainActivity : BasicActivity() {
 
     /** 팝업창을 띄웠는지 여부 */
     private fun isPopupOpen(): Boolean = flex_pop_up_web_view.visibility == View.VISIBLE
+
+    /** 팝업을 닫는다. */
+    private fun closePopUp() {
+        Utils.removeBackgroundViewFrom(App.activity.constraintLayout)
+        Utils.removeCloseButtonFrom(App.activity.constraintLayout)
+        Utils.hidePopUpView(this@MainActivity, flex_pop_up_web_view)
+    }
 
     /** 팝업창이 없을 때 뒤로 가기 버튼 클릭 이벤트  */
     private fun backPressed() {

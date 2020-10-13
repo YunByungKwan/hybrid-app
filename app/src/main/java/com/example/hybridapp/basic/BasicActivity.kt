@@ -24,8 +24,8 @@ open class BasicActivity: AppCompatActivity() {
 
     /** Module Instance */
     var qrCodeCompat: QRCodeCompat? = null
-    var cameraInstance: Camera? = null
-    var photoInstance: Photo? = null
+    var cameraCompat: CameraCompat? = null
+    var photoCompat: PhotoCompat? = null
     var locationCompat: LocationCompat? = null
     var smsCompat: SmsCompat? = null
     var contactsCompat: ContactsCompat? = null
@@ -35,8 +35,8 @@ open class BasicActivity: AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         qrCodeCompat = QRCodeCompat(this)
-        cameraInstance = Camera(this)
-        photoInstance = Photo(this)
+        cameraCompat = CameraCompat(this)
+        photoCompat = PhotoCompat(this)
         locationCompat = LocationCompat(this)
         smsCompat = SmsCompat(this)
         contactsCompat = ContactsCompat(this)

@@ -190,8 +190,7 @@ object Utils {
         // 거절한 권한이 하나라도 존재할 경우
         if (existsDenialPermission(permissions)) {
             LOGD("거절한 권한이 하나라도 존재함")
-            val returnObj = createJSONObject(false,
-                null, "설정 > 앱에서 필수 권한들을 승인해 주세요")
+            val returnObj = returnJson(false, null, "설정 > 앱에서 필수 권한들을 승인해 주세요")
             action?.promiseReturn(returnObj)
         }
         // 승인이 필요한 권한들을 요청
@@ -511,11 +510,20 @@ object Utils {
      * Parameter:
      * Boolean, String
      */
-    fun createJSONObject(authValue: Boolean?, dataValue: Any?, msgValue: String?): JSONObject {
+    fun returnJson(authValue: Boolean?, dataValue: Any?, msgValue: String?): JSONObject {
         val obj = JSONObject()
         obj.put(App.INSTANCE.getString(R.string.obj_key_auth), authValue)
         obj.put(App.INSTANCE.getString(R.string.obj_key_data), createJsonOfDataValue(dataValue))
         obj.put(App.INSTANCE.getString(R.string.obj_key_msg), msgValue)
+
+        return obj
+    }
+
+    fun deniedJson(): JSONObject {
+        val obj = JSONObject()
+        obj.put(App.INSTANCE.getString(R.string.obj_key_auth), false)
+        obj.put(App.INSTANCE.getString(R.string.obj_key_data), createJsonOfDataValue(null))
+        obj.put(App.INSTANCE.getString(R.string.obj_key_msg), App.INSTANCE.getString(R.string.msg_denied_perm))
 
         return obj
     }

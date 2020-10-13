@@ -9,7 +9,7 @@ import com.example.hybridapp.basic.BasicActivity
 import com.example.hybridapp.util.Constants
 import com.example.hybridapp.util.Utils
 
-class ContactsCompat(private val basicActivity: BasicActivity) {
+class ContactsCompat(private val basicAct: BasicActivity) {
 
     /** 연락처에서 선택한 사람의 이름 및 핸드폰 번호를 불러옴 */
     fun getNameAndNumberFromContacts() {
@@ -26,7 +26,7 @@ class ContactsCompat(private val basicActivity: BasicActivity) {
         val intent = Intent(Intent.ACTION_PICK)
         intent.data = ContactsContract.CommonDataKinds.Phone.CONTENT_URI
 
-        if(Utils.existsReceiveActivity(intent, basicActivity.packageManager)) {
+        if(Utils.existsReceiveActivity(intent, basicAct.packageManager)) {
             activityResult.launch(intent)
         } else {
             // 수신받을 앱 없음
@@ -34,7 +34,7 @@ class ContactsCompat(private val basicActivity: BasicActivity) {
     }
 
     /** onActivityResult */
-    private val activityResult = basicActivity.registerForActivityResult(
+    private val activityResult = basicAct.registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()) { result: ActivityResult ->
         val resultCode = result.resultCode
         val data = result.data
@@ -43,7 +43,7 @@ class ContactsCompat(private val basicActivity: BasicActivity) {
             var cursor: Cursor?
 
             data.let {
-                cursor = basicActivity.contentResolver.query(
+                cursor = basicAct.contentResolver.query(
                     it!!.data!!,
                     arrayOf(
                         ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME,
@@ -65,7 +65,7 @@ class ContactsCompat(private val basicActivity: BasicActivity) {
     }
 
     /** onRequestPermissionResult */
-    private val permissionResult = basicActivity.registerForActivityResult(
+    private val permissionResult = basicAct.registerForActivityResult(
         ActivityResultContracts.RequestPermission()) { isGranted ->
         if(isGranted) {
             getNameAndNumberFromContacts()

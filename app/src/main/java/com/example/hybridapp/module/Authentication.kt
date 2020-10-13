@@ -33,11 +33,7 @@ object Authentication {
             if(canAuthenticate()) {
                 showPrompt(fragmentActivity)
             } else {
-                Utils.LOGE("You can't call biometric prompt.")
-                val returnObj = Utils.createJSONObject(
-                    authValue = true,
-                    dataValue = false, msgValue = "인증을 진행할 수 없습니다"
-                )
+                val returnObj = Utils.returnJson(true, false, "인증을 진행할 수 없습니다")
                 authAction?.promiseReturn(returnObj)
             }
         }
@@ -76,7 +72,7 @@ object Authentication {
                 App.INSTANCE.mainExecutor, getAuthenticationCallback())
             biometricPrompt.authenticate(promptInfo)
         } else {
-            val returnObj = Utils.createJSONObject(
+            val returnObj = Utils.returnJson(
                 authValue = true,
                 dataValue = false, msgValue = "인증을 진행할 수 없습니다"
             )
@@ -99,8 +95,7 @@ object Authentication {
         // 인증 성공시
         override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
             super.onAuthenticationSucceeded(result)
-            Utils.LOGD("Call onAuthenticationSucceeded() in AuthenticationCallback()")
-            val returnObj = Utils.createJSONObject(
+            val returnObj = Utils.returnJson(
                 authValue = true,
                 dataValue = true, msgValue = null
             )
@@ -110,8 +105,7 @@ object Authentication {
         // 인증 취소 버튼 클릭시, 인증에 실패시
         override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
             super.onAuthenticationError(errorCode, errString)
-            Utils.LOGE("Call onAuthenticationError() in AuthenticationCallback()")
-            val returnObj = Utils.createJSONObject(
+            val returnObj = Utils.returnJson(
                 authValue = true,
                 dataValue = false, msgValue = "인증에 실패했습니다"
             )
@@ -121,7 +115,6 @@ object Authentication {
         // 인증이 일치하지 않을 경우, 여러번 틀렸을 경우
         override fun onAuthenticationFailed() {
             super.onAuthenticationFailed()
-            Utils.LOGE("Call onAuthenticationFailed() in AuthenticationCallback()")
         }
     }
 }

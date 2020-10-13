@@ -14,20 +14,20 @@ import com.google.zxing.integration.android.IntentResult
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
-class QRCodeCompat(private val basicActivity: BasicActivity) {
+class QRCodeCompat(private val basicAct: BasicActivity) {
 
     private var flexAction: FlexAction? = null
     
     /** QRCode 스캔 */
     private fun scanQrCode() {
-        val intentIntegrator = IntentIntegrator(basicActivity)
+        val intentIntegrator = IntentIntegrator(basicAct)
         intentIntegrator.setBeepEnabled(false)
         intentIntegrator.initiateScan()
         activityResult.launch(intentIntegrator.createScanIntent())
     }
 
     /** onActivityResult */
-    private val activityResult = basicActivity.registerForActivityResult(
+    private val activityResult = basicAct.registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()) { result ->
         val resultCode = result.resultCode
         val data = result.data
@@ -39,19 +39,19 @@ class QRCodeCompat(private val basicActivity: BasicActivity) {
         if(intentResult != null) {
             // QR Code 값이 있는 경우
             if(intentResult.contents != null) {
-                val returnObj = Utils.createJSONObject(true, intentResult.contents, null)
+                val returnObj = Utils.returnJson(true, intentResult.contents, null)
                 flexAction?.promiseReturn(returnObj)
             }
             // QR Code 값이 없는 경우
             else {
-                val returnObj = Utils.createJSONObject(true,
+                val returnObj = Utils.returnJson(true,
                     null, App.INSTANCE.getString(R.string.msg_no_qr))
                 flexAction?.promiseReturn(returnObj)
             }
         }
         // QR Code 실패
         else {
-            val returnObj = Utils.createJSONObject(
+            val returnObj = Utils.returnJson(
                 true, null, App.INSTANCE.getString(R.string.msg_not_load_qr))
             flexAction?.promiseReturn(returnObj)
         }
@@ -73,13 +73,13 @@ class QRCodeCompat(private val basicActivity: BasicActivity) {
     }
 
     /** onRequestPermissionResult */
-    private val permissionResult = basicActivity.registerForActivityResult(
+    private val permissionResult = basicAct.registerForActivityResult(
         ActivityResultContracts.RequestPermission()) { isGranted ->
         if (isGranted) {
             scanQrCode()
         } else {
-            val deniedObj = Utils.createJSONObject(false,
-                null, basicActivity.getString(R.string.msg_denied_perm))
+            val deniedObj = Utils.returnJson(false,
+                null, basicAct.getString(R.string.msg_denied_perm))
             flexAction?.promiseReturn(deniedObj)
         }
     }

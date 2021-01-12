@@ -1,2 +1,0 @@
-set solib-search-path ./obj/local/x86
-directory C:/Users/ybk/AppData/Local/Android/Sdk/ndk-bundle/build//../toolchains/llvm/prebuilt/windows-x86_64/sysroot C:/Users/ybk/AppData/Local/Android/Sdk/ndk-bundle/build//../sources/android/native_app_glue jni jni/curl/include

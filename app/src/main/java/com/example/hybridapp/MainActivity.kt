@@ -38,7 +38,6 @@ class MainActivity : BasicActivity() {
 
     /** 시작 시 기본 초기화 함수 */
     private fun init() {
-        setTheme(R.style.SplashTheme)
         CoroutineScope(Dispatchers.Default).launch {
             val logUrlDao = LogUrlRoomDatabase.getDatabase(this@MainActivity).logUrlDao()
             repository = LogUrlRepository(logUrlDao)

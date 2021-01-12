@@ -46,13 +46,15 @@ class App : Application() {
         }
 
         override fun onActivityResumed(_activity: Activity) {
-
+            activity = _activity
         }
     }
 
     companion object {
         lateinit var INSTANCE: App
+        private set
         lateinit var activity: Activity
+        private set
 
         fun context(): Context =  INSTANCE.applicationContext
     }

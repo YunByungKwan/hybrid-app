@@ -24,7 +24,7 @@ extern "C" {
     bool canRunSuCommand();
     bool existSuspectedRootingFiles();
     char* getSignature(JNIEnv*, jobject);
-    void startActivityAndFinish(JNIEnv*, jobject, const char*);
+    void startActivityInNative(JNIEnv*, jobject, const char*);
 
     /** NativeActivity 진입점 */
     void android_main(struct android_app *state) {
@@ -32,18 +32,10 @@ extern "C" {
 
         jobject context = state->activity->clazz;
         JNIEnv *env;
-
-        if(canRunSuCommand() || existSuspectedRootingFiles()) {
-            jclass activityClass = env->GetObjectClass(context);
-            jmethodID finish = env->GetMethodID(activityClass, "finish", "()V");
-            env->CallVoidMethod(context, finish);
-            exit(0);
-        }
-
         state->activity->vm->AttachCurrentThread(&env, NULL);
+        jclass activityClass = env->GetObjectClass(context);
 
         const char* hash = getSignature(env, context);
-        LOGD(TAG, "HASH : %s", hash);
 
         // F8mG1nqvFV4MmQQBuGd2v1NnKYc=
         //if(!isCorrectKeyHash("F8mG1nqvFV4MmQQBuGd2v1NnKYc=")) {
@@ -51,12 +43,17 @@ extern "C" {
         //    jclass activityClass = env->GetObjectClass(context);
         //    jmethodID finish = env->GetMethodID(activityClass, "finish", "()V");
         //    env->CallVoidMethod(context, finish);
-        //    exit(0);
         //}
 
-        startActivityAndFinish(env, context, "com.example.hybridapp.MainActivity");
-        state->activity->vm->DetachCurrentThread();
+        if(!canRunSuCommand() && !existSuspectedRootingFiles()) {
+            startActivityInNative(env, context, "com.example.hybridapp.SplashActivity");
+        }
+        jmethodID finish = env->GetMethodID(activityClass, "finish", "()V");
+        env->CallVoidMethod(context, finish);
+
         exit(0);
+
+        state->activity->vm->DetachCurrentThread();
     }
 
     /** su 명령어가 되는지 판별 */
@@ -179,7 +176,6 @@ extern "C" {
         return false;
     }
 
-    /** Context 를 인자값을 받아서 Signature 의 값을 얻는다. */
     char* getSignature(JNIEnv *env, jobject context) {
         jstring packageName;
         jobject packageManagerObj;
@@ -231,7 +227,7 @@ extern "C" {
     }
 
     /** NativeActivity --> SplashActivity using intent */
-    void startActivityAndFinish(JNIEnv *env, jobject context, const char *destination) {
+    void startActivityInNative(JNIEnv *env, jobject context, const char *destination) {
         // Get instance of Intent
         jclass intentClass = env->FindClass("android/content/Intent");
         jmethodID newIntent = env->GetMethodID(intentClass, "<init>", "()V");
@@ -247,18 +243,14 @@ extern "C" {
                 componentNameClass, newComponentName, context, className);
 
         // Set component in intent
-            jmethodID setComponent = env->GetMethodID(
-                intentClass, "setComponent",
-                "(Landroid/content/ComponentName;)Landroid/content/Intent;");
+        jmethodID setComponent = env->GetMethodID(
+            intentClass, "setComponent",
+            "(Landroid/content/ComponentName;)Landroid/content/Intent;");
         env->CallObjectMethod(intentObject, setComponent, componentNameObject);
 
         // Start activity using intent
         jclass activityClass = env->GetObjectClass(context);
-        jmethodID startActivity = env->GetMethodID(activityClass, "startActivity",
-                                                       "(Landroid/content/Intent;)V");
-        env->CallVoidMethod(context, startActivity, intentObject);
-
-        jmethodID finish = env->GetMethodID(activityClass, "finish", "()V");
-        env->CallVoidMethod(context, finish);
+        jmethodID startCommand = env->GetMethodID(activityClass, "startActivity", "(Landroid/content/Intent;)V");
+        env->CallVoidMethod(context, startCommand, intentObject);
     }
 }

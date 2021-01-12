@@ -107,7 +107,7 @@ dependencies {
     implementation 'com.android.support:multidex:1.0.3'
 
     // FlexInterface
-    implementation 'com.github.Kyun-J:FlexHybridApp-Android:0.5.9'
+    implementation 'com.github.Kyun-J:FlexHybridApp-Android:0.6.3.2'
     implementation 'com.google.android.material:material:1.3.0-alpha03'
 
     // Coroutines

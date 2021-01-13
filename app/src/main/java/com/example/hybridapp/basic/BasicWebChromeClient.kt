@@ -6,10 +6,11 @@ import android.webkit.ValueCallback
 import android.webkit.WebView
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AppCompatActivity
 import app.dvkyun.flexhybridand.FlexWebChromeClient
 import com.example.hybridapp.App
 
-class BasicWebChromeClient(activity: BasicActivity): FlexWebChromeClient(activity) {
+class BasicWebChromeClient(activity: AppCompatActivity): FlexWebChromeClient(activity) {
 
     private var mFilePatCallback: ValueCallback<Array<Uri>>? = null
 

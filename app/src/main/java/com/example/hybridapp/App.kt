@@ -52,10 +52,12 @@ class App : Application() {
 
     companion object {
         lateinit var INSTANCE: App
-        private set
+            private set
         lateinit var activity: Activity
-        private set
+            private set
+        var context : Context
+            get() = INSTANCE.applicationContext
+            private set(_) {}
 
-        fun context(): Context =  INSTANCE.applicationContext
     }
 }

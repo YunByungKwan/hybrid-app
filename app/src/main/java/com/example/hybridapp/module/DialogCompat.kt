@@ -67,12 +67,12 @@ object DialogCompat {
 
     /** BottomSheetDialog 의 Layout 생 */
     fun getBottomSheetDialogView(title: String?, message: String?, btnList : List<Button?>?) : LinearLayout {
-        var layout = LinearLayout(App.context())
+        val layout = LinearLayout(App.context)
         layout.orientation = LinearLayout.VERTICAL
         layout.gravity = Gravity.CENTER_VERTICAL
 
         // TITLE TEXTVIEW 생성
-        var titleTextView = TextView(App.context())
+        val titleTextView = TextView(App.context)
         title?.let {
             titleTextView.text = title
             titleTextView.textSize = 15F
@@ -83,7 +83,7 @@ object DialogCompat {
         }
 
         // CONTEXT TEXTVIEW 생성
-        var msgTextView = TextView(App.context())
+        val msgTextView = TextView(App.context)
         message?.let {
             msgTextView.text = message
             msgTextView.textSize = 15F
@@ -96,7 +96,7 @@ object DialogCompat {
         btnList?.let {
             for(btn in btnList) {
                 btn?.let {
-                    var border = View(App.context())
+                    var border = View(App.context)
                     var params = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 2)
                     params.setMargins(0, 25, 0, 25)
                     border.layoutParams = params
@@ -113,7 +113,7 @@ object DialogCompat {
 
     /** 커스텀 Button View 객체 생성하는 함 */
     fun getBtnView(text: String?) : Button? {
-        var btn = Button(App.context(), null, R.style.Widget_AppCompat_Button_Borderless)
+        var btn = Button(App.context, null, R.style.Widget_AppCompat_Button_Borderless)
         btn.layoutParams = getMatchHorizonLinearLayoutParams()
         text?.let { btn.text = text } ?: run { return null }
         btn.textSize = 15F

@@ -5,11 +5,11 @@ import android.database.Cursor
 import android.provider.ContactsContract
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import com.example.hybridapp.basic.BasicActivity
+import com.example.hybridapp.MainActivity
 import com.example.hybridapp.util.Constants
 import com.example.hybridapp.util.Utils
 
-class ContactsCompat(private val basicAct: BasicActivity) {
+class ContactsCompat(private val basicAct: MainActivity) {
 
     /** 연락처에서 선택한 사람의 이름 및 핸드폰 번호를 불러옴 */
     fun getNameAndNumberFromContacts() {

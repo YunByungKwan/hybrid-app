@@ -16,8 +16,8 @@ import androidx.activity.result.contract.ActivityResultContracts
 import app.dvkyun.flexhybridand.FlexAction
 import app.dvkyun.flexhybridand.FlexLambda
 import com.example.hybridapp.App
+import com.example.hybridapp.MainActivity
 import com.example.hybridapp.R
-import com.example.hybridapp.basic.BasicActivity
 import com.example.hybridapp.util.Constants
 import com.example.hybridapp.util.Utils
 import kotlinx.coroutines.Dispatchers
@@ -27,7 +27,7 @@ import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileInputStream
 
-class PhotoCompat(private val basicAct: BasicActivity) {
+class PhotoCompat(private val basicAct: MainActivity) {
 
     var photoDeviceAction: FlexAction? = null
     var photoAction: FlexAction? = null

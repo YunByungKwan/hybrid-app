@@ -15,13 +15,9 @@ import android.util.Base64
 import android.util.DisplayMetrics
 import android.util.Log
 import android.view.LayoutInflater
-import android.view.View
-import android.view.animation.AnimationUtils
 import android.webkit.MimeTypeMap
-import android.webkit.WebResourceError
-import android.webkit.WebResourceRequest
-import android.webkit.WebView
 import android.widget.Button
+import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.result.launch
 import androidx.activity.result.registerForActivityResult
@@ -31,13 +27,12 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import app.dvkyun.flexhybridand.*
 import com.example.hybridapp.App
+import com.example.hybridapp.MainActivity
 import com.example.hybridapp.R
-import com.example.hybridapp.basic.BasicActivity
 import com.example.hybridapp.data.LogUrlRepository
 import com.example.hybridapp.data.LogUrlRoomDatabase
 import com.example.hybridapp.module.NetworkCompat
 import com.example.hybridapp.module.SharedPreferences
-import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -56,7 +51,6 @@ object Utils {
     var fileAction: FlexAction? = null
     var popUpAction: FlexAction? = null
     var fileUrl: String? = null
-    var closeBtn: Button? = null
 
     /**================================ FlexFuncInterface ========================================*/
 
@@ -96,17 +90,18 @@ object Utils {
         if(existAllPermission(arrayOf(Constants.PERM_WRITE_EXTERNAL_STORAGE))) {
             downloadFileFromUrl(fileUrl)
         }  else {
-            requestPermissionResultForFileDownload.launch()
+            requestPermissionResultForFileDownload()?.launch()
         }
     }
 
     /** onRequestPermissionResult For File Download */
-    private val requestPermissionResultForFileDownload
-            = (App.activity as BasicActivity).registerForActivityResult(
-        ActivityResultContracts.RequestPermission(), Manifest.permission.WRITE_EXTERNAL_STORAGE)
-    { isGranted ->
-        if(isGranted) {
-            downloadFileFromUrl(fileUrl)
+    private fun requestPermissionResultForFileDownload(): ActivityResultLauncher<Unit>? {
+        return (App.activity as? AppCompatActivity)?.registerForActivityResult(
+            ActivityResultContracts.RequestPermission(), Manifest.permission.WRITE_EXTERNAL_STORAGE)
+        { isGranted ->
+            if(isGranted) {
+                downloadFileFromUrl(fileUrl)
+            }
         }
     }
 
@@ -122,7 +117,7 @@ object Utils {
             }
             Constants.GET_DATA_CODE -> {
                 val key = array[1].asString()!!
-                var value = SharedPreferences.get(App.INSTANCE.getString(R.string.shared_file_name),
+                val value = SharedPreferences.get(App.INSTANCE.getString(R.string.shared_file_name),
                     key, App.INSTANCE.getString(R.string.shared_default_string))
 
                 localRepoAction.promiseReturn(value)
@@ -137,13 +132,14 @@ object Utils {
 
     val webPopUp
             = FlexLambda.action { action, array ->
+        val activity = getMainActivity() ?: return@action
         val url = array[0].asString()!!
-        val ratio = array[1].asDouble()
+        val ratio = array[1].asDouble()!!
         popUpAction = action
 
         val screenSize = getScreenSize()
-        val w = (ratio?.times(screenSize.getValue("width")))?.toInt()
-        val h = (ratio?.times(screenSize.getValue("height")))?.toInt()
+        val w = (ratio.times(screenSize.getValue("width"))).toInt()
+        val h = (ratio.times(screenSize.getValue("height"))).toInt()
 
         if(NetworkCompat.getNetworkStatus(App.activity) == Constants.NET_STAT_DISCONNECTED) {
             val returnObj = JSONObject()
@@ -153,13 +149,21 @@ object Utils {
         }
 
         CoroutineScope(Dispatchers.Main).launch {
-            addBackgroundViewTo(App.activity.constraintLayout)
-            addCloseButton(App.activity, App.activity.constraintLayout)
-            showPopUpView(App.activity.flex_pop_up_web_view, url, w!!, h!!)
+            activity.showPopUpView(url, w, h)
         }
     }
 
     /**======================================== Function =========================================*/
+
+    /** 화면 크기 정보 가져오기 */
+    fun getScreenSize(): Map<String, Int> {
+        val displayMetrics = DisplayMetrics()
+        App.activity.windowManager.defaultDisplay.getMetrics(displayMetrics)
+        val width = displayMetrics.widthPixels
+        val height = displayMetrics.heightPixels
+
+        return mapOf("width" to width, "height" to height)
+    }
 
     /** 필요 권한들이 모두 있는지 확인
      *  하나라도 없으면 false
@@ -244,7 +248,6 @@ object Utils {
 
     /** url로부터 파일을 다운받음 */
     fun downloadFileFromUrl(url: String?) {
-        val basicActivity = App.activity as BasicActivity
         val mimeTypeMap = MimeTypeMap.getSingleton()
         val extension = MimeTypeMap.getFileExtensionFromUrl(url)
         LOGD("extension: $extension")
@@ -313,7 +316,7 @@ object Utils {
 
             hashSignature = hashSignature.copyOfRange(0, 9)
 
-            var base64Hash = encode11DigitsBase64String(hashSignature)
+            val base64Hash = encode11DigitsBase64String(hashSignature)
 
             LOGD(String.format("\nPackage : %s\nHash : %s", packageName, base64Hash))
 
@@ -349,94 +352,6 @@ object Utils {
         }
     }
 
-    /** 백그라운드 뷰 생성 */
-    private fun addBackgroundViewTo(targetLayout: ConstraintLayout) {
-        val basicActivity = App.activity as BasicActivity
-        val mInflater = getLayoutInflater(App.activity)
-        basicActivity.backgroundView = mInflater.inflate(R.layout.background_popup, null)
-        targetLayout.addView(basicActivity.backgroundView)
-    }
-
-    /** 백그라운드 뷰 제거 */
-    fun removeBackgroundViewFrom(targetLayout: ConstraintLayout) {
-        val basicActivity = App.activity as BasicActivity
-        targetLayout.removeView(basicActivity.backgroundView)
-    }
-
-    /** 닫기 버튼 생성 */
-    private fun addCloseButton(context: Context, targetLayout: ConstraintLayout) {
-        closeBtn = Button(context)
-        val params = ConstraintLayout.LayoutParams(90, 90).apply {
-            topToTop = targetLayout.id
-            endToEnd = targetLayout.id
-            startToStart = targetLayout.id
-            topMargin = 10
-        }
-
-        closeBtn!!.text = "X"
-        closeBtn!!.textSize = 12F
-        closeBtn!!.background = ContextCompat.getDrawable(context, R.drawable.circle)
-        closeBtn!!.textAlignment = View.TEXT_ALIGNMENT_CENTER
-        closeBtn!!.layoutParams = params
-
-        targetLayout.addView(closeBtn)
-
-        closeBtn!!.setOnClickListener {
-            removeBackgroundViewFrom(App.activity.constraintLayout)
-            removeCloseButtonFrom(App.activity.constraintLayout)
-            hidePopUpView(App.activity, App.activity.flex_pop_up_web_view)
-        }
-    }
-
-    /** 닫기 버튼 제거 */
-    fun removeCloseButtonFrom(targetLayout: ConstraintLayout) {
-        targetLayout.removeView(closeBtn)
-    }
-
-    /** 화면 크기 정보 가져오기 */
-    fun getScreenSize(): Map<String, Int> {
-        val displayMetrics = DisplayMetrics()
-        App.activity.windowManager.defaultDisplay.getMetrics(displayMetrics)
-        val width = displayMetrics.widthPixels
-        val height = displayMetrics.heightPixels
-
-        return mapOf("width" to width, "height" to height)
-    }
-
-    /** 팝업창을 닫는다 */
-    fun hidePopUpView(context: Context, popupView: View) {
-        popupView.startAnimation(AnimationUtils.loadAnimation(context, R.anim.close))
-        popupView.visibility = View.GONE
-    }
-
-    /** 팝업창을 띄운다 */
-    private fun showPopUpView(popUpView: FlexWebView, url: String, width: Int, height: Int) {
-        App.activity.flex_pop_up_web_view.loadUrl(url)
-        popUpView.visibility = View.VISIBLE
-        popUpView.layoutParams = getParamsAlignCenterInConstraintLayout(width, height, R.id.constraintLayout)
-        popUpView.startAnimation(AnimationUtils.loadAnimation(App.activity, R.anim.open))
-        popUpView.bringToFront()
-
-        App.activity.flex_pop_up_web_view.webViewClient = object: FlexWebViewClient() {
-            override fun onReceivedError(view: WebView?, request: WebResourceRequest?,
-                                         error: WebResourceError?) {
-                super.onReceivedError(view, request, error)
-                val returnObj = JSONObject()
-                returnObj.put(App.INSTANCE.getString(R.string.obj_key_data), false)
-                returnObj.put(App.INSTANCE.getString(R.string.obj_key_msg), "해당 URL을 불러올 수 없습니다")
-                popUpAction?.promiseReturn(returnObj)
-                popUpAction = null
-            }
-
-            override fun onPageFinished(view: WebView?, url: String?) {
-                super.onPageFinished(view, url)
-                val returnObj = JSONObject()
-                returnObj.put(App.INSTANCE.getString(R.string.obj_key_data), true)
-                popUpAction?.promiseReturn(returnObj)
-            }
-        }
-    }
-
     /** 디바이스 id 가져오기 */
     @SuppressLint("HardwareIds")
     fun getDeviceId(context: Context): String {
@@ -457,7 +372,7 @@ object Utils {
     /** 카메라 촬영 시 앱 내부에 임시 파일 생성 */
     fun getOutputMediaFile(): File? {
         val mediaStorageDir = File(
-            App.context().filesDir,
+            App.context.filesDir,
             "test"
         )
 
@@ -477,12 +392,12 @@ object Utils {
 
     /** ProgressBar를 보이게 함 */
     fun visibleProgressBar() {
-        App.activity.progressBar.visibility = View.VISIBLE
+//        App.activity.progressBar.visibility = View.VISIBLE
     }
 
     /** ProgressBar를 숨김 */
     fun invisibleProgressBar() {
-        App.activity.progressBar.visibility = View.GONE
+//        App.activity.progressBar.visibility = View.GONE
     }
 
     /** jsonObject 내 key 파악해서 value 가져오기 */
@@ -543,4 +458,9 @@ object Utils {
     fun LOGD(message: String) = Log.d(App.INSTANCE.getString(R.string.tag), message)
 
     fun LOGE(message: String) = Log.e(App.INSTANCE.getString(R.string.tag), message)
+
+    fun getMainActivity(): MainActivity? {
+        return if(App.activity is MainActivity) App.activity as MainActivity
+        else null
+    }
 }

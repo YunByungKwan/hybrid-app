@@ -1,6 +1,5 @@
 package com.example.hybridapp.module
 
-import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
@@ -10,22 +9,16 @@ import android.net.Uri
 import android.os.Build
 import android.os.Environment
 import android.provider.MediaStore
-import android.util.Log
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.activity.result.launch
-import androidx.activity.result.registerForActivityResult
-import androidx.core.content.FileProvider
 import androidx.core.content.FileProvider.getUriForFile
 import app.dvkyun.flexhybridand.FlexAction
 import app.dvkyun.flexhybridand.FlexLambda
 import com.example.hybridapp.App
+import com.example.hybridapp.MainActivity
 import com.example.hybridapp.R
-import com.example.hybridapp.basic.BasicActivity
 import com.example.hybridapp.util.Constants
 import com.example.hybridapp.util.Utils
-import com.google.firebase.BuildConfig
-import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -34,7 +27,7 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 
-class CameraCompat(private val basicAct: BasicActivity) {
+class CameraCompat(private val basicAct: MainActivity) {
 
     var cameraDeviceAction: FlexAction? = null
     var cameraAction: FlexAction? = null
@@ -66,7 +59,7 @@ class CameraCompat(private val basicAct: BasicActivity) {
                 }
             } else {
                 val returnObj = Utils.returnJson(true,
-                    null, App.context().getString(R.string.msg_not_load_camera))
+                    null, App.context.getString(R.string.msg_not_load_camera))
 
                 if(isWidthRatio != null) {
                     cameraDeviceAction?.promiseReturn(returnObj)
@@ -83,7 +76,7 @@ class CameraCompat(private val basicAct: BasicActivity) {
     @SuppressLint("SimpleDateFormat")
     private fun createImageFile(): File {
         val timeStamp: String = SimpleDateFormat("yyyyMMdd_HHmmss").format(Date())
-        val storageDir: File? = App.context().getExternalFilesDir(Environment.DIRECTORY_PICTURES)
+        val storageDir: File? = App.context.getExternalFilesDir(Environment.DIRECTORY_PICTURES)
         return File.createTempFile("JPEG_${timeStamp}_", ".jpg", storageDir).apply {
             currentPhotoPath = absolutePath
         }

@@ -6,16 +6,11 @@ import androidx.biometric.BiometricManager
 import androidx.biometric.BiometricPrompt
 import androidx.fragment.app.FragmentActivity
 import app.dvkyun.flexhybridand.FlexAction
-import app.dvkyun.flexhybridand.FlexData
 import app.dvkyun.flexhybridand.FlexLambda
 import com.example.hybridapp.App
 import com.example.hybridapp.R
-import com.example.hybridapp.basic.BasicActivity
 import com.example.hybridapp.util.Utils
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Dispatchers.Main
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 object Authentication {
@@ -44,19 +39,19 @@ object Authentication {
         val biometricManager = BiometricManager.from(App.INSTANCE)
         when (biometricManager.canAuthenticate()) {
             BiometricManager.BIOMETRIC_SUCCESS -> {
-                Utils.LOGD(App.context().getString(R.string.biometric_success))
+                Utils.LOGD(App.context.getString(R.string.biometric_success))
                 return true
             }
             BiometricManager.BIOMETRIC_ERROR_NO_HARDWARE -> {
-                Utils.LOGD(App.context().getString(R.string.biometric_error_no_hardware))
+                Utils.LOGD(App.context.getString(R.string.biometric_error_no_hardware))
                 return false
             }
             BiometricManager.BIOMETRIC_ERROR_HW_UNAVAILABLE -> {
-                Utils.LOGD(App.context().getString(R.string.biometric_error_hw_unavailable))
+                Utils.LOGD(App.context.getString(R.string.biometric_error_hw_unavailable))
                 return false
             }
             BiometricManager.BIOMETRIC_ERROR_NONE_ENROLLED -> {
-                Utils.LOGD(App.context().getString(R.string.biometric_error_none_enrolled))
+                Utils.LOGD(App.context.getString(R.string.biometric_error_none_enrolled))
                 return false
             }
         }
@@ -82,10 +77,10 @@ object Authentication {
 
     private fun getBiometricPromptInfo(): BiometricPrompt.PromptInfo {
         return BiometricPrompt.PromptInfo.Builder()
-        .setTitle(App.context().getString(R.string.bio_prompt_title))
-        .setDescription(App.context().getString(R.string.bio_prompt_description))
-        .setSubtitle(App.context().getString(R.string.bio_prompt_sub_title))
-        .setNegativeButtonText(App.context().getString(R.string.bio_prompt_negative_button))
+        .setTitle(App.context.getString(R.string.bio_prompt_title))
+        .setDescription(App.context.getString(R.string.bio_prompt_description))
+        .setSubtitle(App.context.getString(R.string.bio_prompt_sub_title))
+        .setNegativeButtonText(App.context.getString(R.string.bio_prompt_negative_button))
         .build()
     }
 

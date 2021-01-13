@@ -28,13 +28,9 @@ object SharedPreferences {
 
         try {
             editor.run {
-                if(value == null) {
-                    remove(key)
-                } else {
-                    val secureValue = AndroidKeyStoreUtil.encrypt(value.toString())
-                    putString(key, secureValue)
-                    Log.d("dlgodnjs", "$value changed : $secureValue is putValue")
-                }
+                val secureValue = AndroidKeyStoreUtil.encrypt(value.toString())
+                putString(key, secureValue)
+                Log.d("dlgodnjs", "$value changed : $secureValue is putValue")
 
                 apply()
             }
@@ -42,6 +38,7 @@ object SharedPreferences {
         catch (e: Throwable) {
             Utils.LOGD("[SharedPreferences] Data put 진행 중 오류 발생.")
             e.printStackTrace()
+            editor.apply()
         }
     }
 

@@ -1,11 +1,9 @@
 package com.example.hybridapp.module
 
 import android.Manifest
-import android.app.Activity
 import android.content.Intent
 import android.content.IntentFilter
 import android.net.Uri
-import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.result.launch
 import androidx.activity.result.registerForActivityResult
@@ -14,8 +12,8 @@ import app.dvkyun.flexhybridand.FlexData
 import app.dvkyun.flexhybridand.FlexFuncInterface
 import app.dvkyun.flexhybridand.FlexLambda
 import com.example.hybridapp.App
+import com.example.hybridapp.MainActivity
 import com.example.hybridapp.R
-import com.example.hybridapp.basic.BasicActivity
 import com.example.hybridapp.util.Constants
 import com.example.hybridapp.util.Utils
 import com.google.android.gms.auth.api.phone.SmsRetriever
@@ -35,7 +33,7 @@ import org.json.JSONObject
  * amvosl3kf/u
  */
 
-class SmsCompat(private val basicAct: BasicActivity) {
+class SmsCompat(private val basicAct: MainActivity) {
 
     private var phoneNumber: String? = null
     private var message: String? = null

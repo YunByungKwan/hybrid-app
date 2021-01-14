@@ -74,6 +74,11 @@ class MainActivity : AppCompatActivity() {
     /** 시작 시 기본 초기화 함수 */
     private fun init() {
         qrCodeCompat = QRCodeCompat(this)
+        cameraCompat = CameraCompat(this)
+        photoCompat = PhotoCompat(this)
+        locationCompat = LocationCompat(this)
+        smsCompat = SmsCompat(this)
+        contactsCompat = ContactsCompat(this)
         CoroutineScope(Dispatchers.Default).launch {
             val logUrlDao = LogUrlRoomDatabase.getDatabase(this@MainActivity).logUrlDao()
             repository = LogUrlRepository(logUrlDao)
@@ -182,12 +187,12 @@ class MainActivity : AppCompatActivity() {
     /** 백그라운드 뷰 생성 */
     private fun addBackgroundViewTo() {
         backgroundView = layoutInflater.inflate(R.layout.background_popup, binding.root)
-        binding.root.addView(backgroundView)
     }
 
     /** 백그라운드 뷰 제거 */
     private fun removeBackgroundViewFrom() {
         binding.root.removeView(backgroundView)
+        backgroundView = null
     }
 
     /** 닫기 버튼 생성 */

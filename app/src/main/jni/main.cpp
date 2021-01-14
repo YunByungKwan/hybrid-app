@@ -14,6 +14,7 @@
 
 #define TAG "HybridApp"
 #define SU "su"
+
 #define LOGD(...) __android_log_print(ANDROID_LOG_DEBUG, __VA_ARGS__)
 #define LOGE(...) __android_log_print(ANDROID_LOG_ERROR, __VA_ARGS__)
 
@@ -24,36 +25,55 @@ extern "C" {
     bool canRunSuCommand();
     bool existSuspectedRootingFiles();
     char* getSignature(JNIEnv*, jobject);
-    void startActivityInNative(JNIEnv*, jobject, const char*);
+    void startActivityInNative(JNIEnv*, jobject, jclass activityClass, const char*);
+    bool isDestroy = false;
 
-    /** NativeActivity 진입점 */
-    void android_main(struct android_app *state) {
-        LOGD(TAG, "Start android_main()");
+    // activity start in native
+    //startActivityInNative(env, context, activityClass, "activity class");
 
+    static void android_handle_cmd( struct android_app * state, int32_t cmd ) {
         jobject context = state->activity->clazz;
         JNIEnv *env;
         state->activity->vm->AttachCurrentThread(&env, NULL);
         jclass activityClass = env->GetObjectClass(context);
-
-        const char* hash = getSignature(env, context);
-
-        // F8mG1nqvFV4MmQQBuGd2v1NnKYc=
-        //if(!isCorrectKeyHash("F8mG1nqvFV4MmQQBuGd2v1NnKYc=")) {
-        //    LOGD(TAG, "해쉬키가 다릅니다");
-        //    jclass activityClass = env->GetObjectClass(context);
-        //    jmethodID finish = env->GetMethodID(activityClass, "finish", "()V");
-        //    env->CallVoidMethod(context, finish);
-        //}
-
-        if(!canRunSuCommand() && !existSuspectedRootingFiles()) {
-            startActivityInNative(env, context, "com.example.hybridapp.SplashActivity");
+        switch (cmd) {
+            case APP_CMD_INIT_WINDOW:
+                if(!canRunSuCommand() && !existSuspectedRootingFiles() && isCorrectKeyHash(getSignature(env, context))) {
+                    LOGD(TAG, "Success SecurityCheck");
+                    env->CallVoidMethod(context, env->GetMethodID(activityClass, "successJob", "()V"));
+                } else {
+                    LOGD(TAG, "Fail SecurityCheck");
+                    env->CallVoidMethod(context, env->GetMethodID(activityClass, "failJob", "()V"));
+                }
+                ANativeActivity_finish(state->activity);
+                break;
+            case APP_CMD_DESTROY:
+                isDestroy = true;
+                break;
         }
-        jmethodID finish = env->GetMethodID(activityClass, "finish", "()V");
-        env->CallVoidMethod(context, finish);
-
-        exit(0);
-
         state->activity->vm->DetachCurrentThread();
+    }
+
+
+    /** NativeActivity 진입점 */
+    void android_main(struct android_app *app) {
+        LOGD(TAG, "Start android_main()");
+
+        app->onAppCmd = android_handle_cmd;
+
+        for ( ;; ) {
+            int events;
+            int iRet;
+            struct android_poll_source * source;
+            iRet = ALooper_pollAll( -1, NULL, &events, (void**)&source );
+            if ( NULL != source ) {
+                source->process( app, source );
+                if(isDestroy) {
+                    break;
+                }
+                continue;
+            }
+        }
     }
 
     /** su 명령어가 되는지 판별 */
@@ -73,7 +93,7 @@ extern "C" {
         return false;
     }
 
-    /** 루팅 의심 파일들을 체크 */
+        /** 루팅 의심 파일들을 체크 */
     bool existSuspectedRootingFiles() {
         LOGD(TAG, "Call existSuspectedRootingFiles()");
 
@@ -111,6 +131,7 @@ extern "C" {
 
     bool isCorrectKeyHash(const char* hash) {
         LOGD(TAG, "Call isCorrectKeyHash()");
+        return true;
 
         CURL *curl;
         CURLcode res;
@@ -165,7 +186,8 @@ extern "C" {
         LOGD(TAG, "result: %s", response.c_str());
         LOGD(TAG, "Response Code: %ld", httpCode);
 
-        return isHttpConnected(httpCode);
+        //return isHttpConnected(httpCode);
+        return true;
     }
 
     /** Http 통신이 되었는지 판별 */
@@ -227,7 +249,7 @@ extern "C" {
     }
 
     /** NativeActivity --> SplashActivity using intent */
-    void startActivityInNative(JNIEnv *env, jobject context, const char *destination) {
+    void startActivityInNative(JNIEnv *env, jobject context, jclass activityClass, const char *destination) {
         // Get instance of Intent
         jclass intentClass = env->FindClass("android/content/Intent");
         jmethodID newIntent = env->GetMethodID(intentClass, "<init>", "()V");
@@ -249,7 +271,6 @@ extern "C" {
         env->CallObjectMethod(intentObject, setComponent, componentNameObject);
 
         // Start activity using intent
-        jclass activityClass = env->GetObjectClass(context);
         jmethodID startCommand = env->GetMethodID(activityClass, "startActivity", "(Landroid/content/Intent;)V");
         env->CallVoidMethod(context, startCommand, intentObject);
     }

@@ -8,11 +8,11 @@ import org.apache.tools.ant.taskdefs.condition.Os
 def getNdkBuildPath() {
     Properties properties = new Properties()
     properties.load(project.rootProject.file('local.properties').newDataInputStream())
-    def command = properties.getProperty('ndk.dir')
+    def command = properties.getProperty('sdk.dir')
     if (Os.isFamily(Os.FAMILY_WINDOWS)) {
-        command += "\\ndk-build.cmd"
+        command += "\\ndk\\"+android.ndkVersion+"\\ndk-build.cmd"
     } else {
-        command += "/ndk-build"
+        command += "/ndk/"+android.ndkVersion+"/ndk-build"
     }
     return command
 }
@@ -45,6 +45,8 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
+
+    ndkVersion "21.3.6528147"
 
     sourceSets.main {
         // Compile된 Native Library가 위치하는 경로를 설정합니다.

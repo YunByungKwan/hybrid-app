@@ -31,6 +31,7 @@
         android:allowBackup="true"
         android:hardwareAccelerated="true"
         android:icon="@mipmap/ic_launcher"
+        android:hasCode="true"
         android:label="@string/app_name"
         android:requestLegacyExternalStorage="true"
         android:roundIcon="@mipmap/ic_launcher_round"
@@ -39,7 +40,7 @@
         android:usesCleartextTraffic="true">
 
         <activity
-            android:name="android.app.NativeActivity"
+            android:name=".SecureActivity"
             android:theme="@style/introTheme">
             <meta-data
                 android:name="android.app.lib_name"
